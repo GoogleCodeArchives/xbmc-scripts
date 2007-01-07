@@ -1,0 +1,62 @@
+#summary One-sentence summary of this page.
+#labels Featured,Phase-Requirements
+
+= Introduction =
+
+F2XTV est un script qui permet de regarder la télévision freebox sur la console de jeux xbox munie du programme XBMC (XBox Media Center).
+
+
+= Fonctionnement =
+
+
+== Ressources initiales ==
+
+Vous pouvez commencer par consulter [[F2XTV | la version actuelle de F2XTV]] pour en savoir plus.
+
+Le topic officiel pour en discuter sera le topic sur le forum python pour XBMC sur gx-mod.com : [http://gueux-forum.net/index.php?showtopic=105465  "Enregistrement Numérique Freeboxtv Sur Xbox"]
+
+
+== Intérêts majeurs de la V2 ==
+
+GUI indépendante du moteur d'enregistrement
+
+Programmation des enregistrements
+
+
+== Constitution prévisionnelle du script ==
+
+*F2XTVgui* : interface utilisateur : programmation des enregistrement, suppression/visualisation des vidéos enregistrées, arrêt des enregistrements en cours, gestion des chaines favorites...
+
+*F2XTVmoteur* : gestion d'une liste d'enregistrements programmés, gestions du/des enregistrement(s) en cours
+
+et toujours le module *rtsp2http* pour traiter les flux rtsp en http
+
+
+== Dialogues gui-moteur ==
+
+Lorsqu'un utilisateur programera un enregistrement, la partie GUI vérifiera d'abord que le moteur est  en fonctionnement. Pour cela le moteur disposera d'un serveur type web ou simple socket, sur lequel la GUI pourra lancer une requête.
+
+Il faudra convenir d'un format pour lancer une requête d'enregistrement sur le moteur. Par exemple : si le moteur a une interface http, on lance une requete type POST avec en paramètres les infos "debut" (timestamp) , id_chaine (int) , duree (int) ...
+
+Le moteur, lors de la réception d'une requête enregistrement, vérifieras :
+
+1- l'expiration de la date de début (date_debut < maintenant)
+
+2- l'expiration de la période d'enregistrement (date_debut+duree > maintenant)
+
+3- l'expiration de la fin d'enregistrement (date_debut+duree < maintenant)
+
+4- la disponibilité du proxy rtsp2http pour diffusion d'un flux
+
+5- la disponibilité de l'id_chaine demandé sur le proxy
+
+6- la disponibilité d'espace disque
+
+
+La partie enregistrement sera sous forme de thread, de manière à permettre l'enregistrement simultané de plusieurs chaines (ATTENTION : rete à voir dans quelles mesures cela est possible et fiable en terme de qualité d'enregistrement.)
+
+
+Le module GUI sera démarré à la demande. Il interrogera le moteur sous forme de requêtes pour pouvoir afficher les enregistrements en cours ou les différentes disponibilités (espace disque, enregistrements en cours, flux supplémentaires disponibles pour le proxy)
+
+
+
