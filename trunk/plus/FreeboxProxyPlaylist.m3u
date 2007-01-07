@@ -1,0 +1,419 @@
+#EXTM3U
+#EXTINF:-1,2 - France 2
+http://127.0.0.1:8083/freeboxtv/201
+#EXTINF:-1,3 - France 3 national
+http://127.0.0.1:8083/freeboxtv/202
+#EXTINF:-1,5 - France 5
+http://127.0.0.1:8083/freeboxtv/203
+#EXTINF:-1,6 - Euronews
+http://127.0.0.1:8083/freeboxtv/205
+#EXTINF:-1,7 - Arte
+http://127.0.0.1:8083/freeboxtv/204
+#EXTINF:-1,8 - Direct 8
+http://127.0.0.1:8083/freeboxtv/372
+#EXTINF:-1,9 - W9
+http://127.0.0.1:8083/freeboxtv/373
+#EXTINF:-1,11 - NT1
+http://127.0.0.1:8083/freeboxtv/374
+#EXTINF:-1,12 - NRJ 12 5.1
+http://127.0.0.1:8083/freeboxtv/381
+#EXTINF:-1,12 - NRJ 12 Stéréo
+http://127.0.0.1:8083/freeboxtv/382
+#EXTINF:-1,13 - La Chaîne Parlementaire
+http://127.0.0.1:8083/freeboxtv/226
+#EXTINF:-1,14 - France 4
+http://127.0.0.1:8083/freeboxtv/376
+#EXTINF:-1,15 - BFM TV
+http://127.0.0.1:8083/freeboxtv/418
+#EXTINF:-1,16 - i>TELE
+http://127.0.0.1:8083/freeboxtv/417
+#EXTINF:-1,17 - Europe 2 TV
+http://127.0.0.1:8083/freeboxtv/416
+#EXTINF:-1,18 - Gulli
+http://127.0.0.1:8083/freeboxtv/419
+#EXTINF:-1,19 - Paris Première VF VF
+http://127.0.0.1:8083/freeboxtv/351
+#EXTINF:-1,19 - Paris Première VO VO
+http://127.0.0.1:8083/freeboxtv/305
+#EXTINF:-1,20 - TEVA
+http://127.0.0.1:8083/freeboxtv/404
+#EXTINF:-1,21 - RTL9
+http://127.0.0.1:8083/freeboxtv/210
+#EXTINF:-1,22 - AB 1
+http://127.0.0.1:8083/freeboxtv/211
+#EXTINF:-1,23 - TV5
+http://127.0.0.1:8083/freeboxtv/206
+#EXTINF:-1,24 - France ô
+http://127.0.0.1:8083/freeboxtv/238
+#EXTINF:-1,25 - RTBF Sat
+http://127.0.0.1:8083/freeboxtv/448
+#EXTINF:-1,26 - France Télévisions HD
+http://127.0.0.1:8083/freeboxtv/491
+#EXTINF:-1,36 - Mangas
+http://127.0.0.1:8083/freeboxtv/253
+#EXTINF:-1,37 - Game One
+http://127.0.0.1:8083/freeboxtv/220
+#EXTINF:-1,40 - M6 Music Hits
+http://127.0.0.1:8083/freeboxtv/430
+#EXTINF:-1,41 - M6 Music Rock
+http://127.0.0.1:8083/freeboxtv/431
+#EXTINF:-1,42 - M6 Music Black
+http://127.0.0.1:8083/freeboxtv/432
+#EXTINF:-1,43 - Fun TV
+http://127.0.0.1:8083/freeboxtv/433
+#EXTINF:-1,44 - MTV
+http://127.0.0.1:8083/freeboxtv/219
+#EXTINF:-1,45 - MTV 2
+http://127.0.0.1:8083/freeboxtv/229
+#EXTINF:-1,46 - MTV Base
+http://127.0.0.1:8083/freeboxtv/230
+#EXTINF:-1,47 - MTV Hits
+http://127.0.0.1:8083/freeboxtv/231
+#EXTINF:-1,48 - VH1
+http://127.0.0.1:8083/freeboxtv/233
+#EXTINF:-1,49 - VH1 Classic
+http://127.0.0.1:8083/freeboxtv/232
+#EXTINF:-1,50 - Télé Mélody
+http://127.0.0.1:8083/freeboxtv/237
+#EXTINF:-1,51 - Trace TV
+http://127.0.0.1:8083/freeboxtv/228
+#EXTINF:-1,52 - ZIK
+http://127.0.0.1:8083/freeboxtv/218
+#EXTINF:-1,53 - Mezzo
+http://127.0.0.1:8083/freeboxtv/265
+#EXTINF:-1,54 - Musique Classique
+http://127.0.0.1:8083/freeboxtv/254
+#EXTINF:-1,57 - Mizik Tropical
+http://127.0.0.1:8083/freeboxtv/468
+#EXTINF:-1,58 - Star Academy 6
+http://127.0.0.1:8083/freeboxtv/406
+#EXTINF:-1,61 - Equidia
+http://127.0.0.1:8083/freeboxtv/212
+#EXTINF:-1,62 - ESPN Classic Sport
+http://127.0.0.1:8083/freeboxtv/264
+#EXTINF:-1,63 - AB Moteurs
+http://127.0.0.1:8083/freeboxtv/222
+#EXTINF:-1,64 - Motors TV
+http://127.0.0.1:8083/freeboxtv/216
+#EXTINF:-1,70 - Bloomberg TV
+http://127.0.0.1:8083/freeboxtv/207
+#EXTINF:-1,73 - BBC World
+http://127.0.0.1:8083/freeboxtv/240
+#EXTINF:-1,74 - Sky News International
+http://127.0.0.1:8083/freeboxtv/355
+#EXTINF:-1,78 - TNA
+http://127.0.0.1:8083/freeboxtv/482
+#EXTINF:-1,79 - Zalea TV
+http://127.0.0.1:8083/freeboxtv/483
+#EXTINF:-1,80 - KTO
+http://127.0.0.1:8083/freeboxtv/223
+#EXTINF:-1,81 - TFJ
+http://127.0.0.1:8083/freeboxtv/224
+#EXTINF:-1,82 - Beur TV
+http://127.0.0.1:8083/freeboxtv/225
+#EXTINF:-1,83 - Demain !
+http://127.0.0.1:8083/freeboxtv/227
+#EXTINF:-1,84 - Fashion TV
+http://127.0.0.1:8083/freeboxtv/221
+#EXTINF:-1,85 - F Men
+http://127.0.0.1:8083/freeboxtv/454
+#EXTINF:-1,86 - Sailing Channel
+http://127.0.0.1:8083/freeboxtv/255
+#EXTINF:-1,87 - Liberty TV
+http://127.0.0.1:8083/freeboxtv/215
+#EXTINF:-1,88 - Animaux
+http://127.0.0.1:8083/freeboxtv/248
+#EXTINF:-1,89 - Chasse et pêche
+http://127.0.0.1:8083/freeboxtv/249
+#EXTINF:-1,90 - Encyclopédia
+http://127.0.0.1:8083/freeboxtv/251
+#EXTINF:-1,91 - Escales
+http://127.0.0.1:8083/freeboxtv/252
+#EXTINF:-1,92 - Toute l'Histoire
+http://127.0.0.1:8083/freeboxtv/250
+#EXTINF:-1,93 - Histoire
+http://127.0.0.1:8083/freeboxtv/235
+#EXTINF:-1,94 - Berbère TV
+http://127.0.0.1:8083/freeboxtv/256
+#EXTINF:-1,95 - 3A Telesud
+http://127.0.0.1:8083/freeboxtv/356
+#EXTINF:-1,96 - Teleplaisance.org
+http://127.0.0.1:8083/freeboxtv/320
+#EXTINF:-1,97 - Luxe.TV
+http://127.0.0.1:8083/freeboxtv/460
+#EXTINF:-1,98 - Freenews TV
+http://127.0.0.1:8083/freeboxtv/428
+#EXTINF:-1,110 - Action
+http://127.0.0.1:8083/freeboxtv/242
+#EXTINF:-1,111 - Ciné Polar
+http://127.0.0.1:8083/freeboxtv/244
+#EXTINF:-1,112 - Ciné FX
+http://127.0.0.1:8083/freeboxtv/243
+#EXTINF:-1,130 - Best of Shopping
+http://127.0.0.1:8083/freeboxtv/358
+#EXTINF:-1,131 - M6 Boutique
+http://127.0.0.1:8083/freeboxtv/359
+#EXTINF:-1,132 - Ark-TV
+http://127.0.0.1:8083/freeboxtv/492
+#EXTINF:-1,133 - Astro Center TV
+http://127.0.0.1:8083/freeboxtv/415
+#EXTINF:-1,150 - TLM
+http://127.0.0.1:8083/freeboxtv/267
+#EXTINF:-1,151 - TLT
+http://127.0.0.1:8083/freeboxtv/281
+#EXTINF:-1,152 - TV7 Bordeaux
+http://127.0.0.1:8083/freeboxtv/268
+#EXTINF:-1,153 - TV8 Mont-Blanc
+http://127.0.0.1:8083/freeboxtv/319
+#EXTINF:-1,154 - TéléGrenoble
+http://127.0.0.1:8083/freeboxtv/423
+#EXTINF:-1,155 - Telif
+http://127.0.0.1:8083/freeboxtv/360
+#EXTINF:-1,156 - La Locale
+http://127.0.0.1:8083/freeboxtv/363
+#EXTINF:-1,157 - Normandie TV
+http://127.0.0.1:8083/freeboxtv/383
+#EXTINF:-1,158 - Télénantes/Nantes 7
+http://127.0.0.1:8083/freeboxtv/389
+#EXTINF:-1,159 - La Chaîne Marseille
+http://127.0.0.1:8083/freeboxtv/414
+#EXTINF:-1,160 - Clermont Première
+http://127.0.0.1:8083/freeboxtv/438
+#EXTINF:-1,161 - TV Tours
+http://127.0.0.1:8083/freeboxtv/493
+#EXTINF:-1,180 - CCTV4
+http://127.0.0.1:8083/freeboxtv/469
+#EXTINF:-1,181 - CCTV 9
+http://127.0.0.1:8083/freeboxtv/479
+#EXTINF:-1,182 - CCTV E&F
+http://127.0.0.1:8083/freeboxtv/480
+#EXTINF:-1,183 - CCTV Divertissement
+http://127.0.0.1:8083/freeboxtv/470
+#EXTINF:-1,185 - Beijing TV
+http://127.0.0.1:8083/freeboxtv/472
+#EXTINF:-1,186 - Shangai Dragon TV
+http://127.0.0.1:8083/freeboxtv/473
+#EXTINF:-1,187 - La chaîne internationale de Jiangsu
+http://127.0.0.1:8083/freeboxtv/474
+#EXTINF:-1,188 - Hunan Satellite TV
+http://127.0.0.1:8083/freeboxtv/475
+#EXTINF:-1,189 - Xiamen Star TV
+http://127.0.0.1:8083/freeboxtv/476
+#EXTINF:-1,190 - Zhejiang Star TV
+http://127.0.0.1:8083/freeboxtv/477
+#EXTINF:-1,191 - Guangdong Southern TV
+http://127.0.0.1:8083/freeboxtv/478
+#EXTINF:-1,192 - Phoenix Infonews
+http://127.0.0.1:8083/freeboxtv/481
+#EXTINF:-1,193 - Phoenix Chinese News and Entertainment
+http://127.0.0.1:8083/freeboxtv/266
+#EXTINF:-1,195 - Zee TV
+http://127.0.0.1:8083/freeboxtv/420
+#EXTINF:-1,196 - Zee Cinema
+http://127.0.0.1:8083/freeboxtv/421
+#EXTINF:-1,197 - Alpha ETC Punjabi
+http://127.0.0.1:8083/freeboxtv/422
+#EXTINF:-1,200 - Euronews English
+http://127.0.0.1:8083/freeboxtv/259
+#EXTINF:-1,201 - Euronews Deutsch
+http://127.0.0.1:8083/freeboxtv/260
+#EXTINF:-1,202 - Euronews Portugais
+http://127.0.0.1:8083/freeboxtv/261
+#EXTINF:-1,203 - Euronews Russe
+http://127.0.0.1:8083/freeboxtv/262
+#EXTINF:-1,204 - Euronews Espagnol
+http://127.0.0.1:8083/freeboxtv/263
+#EXTINF:-1,205 - Euronews Italien
+http://127.0.0.1:8083/freeboxtv/269
+#EXTINF:-1,209 - T.TV
+http://127.0.0.1:8083/freeboxtv/385
+#EXTINF:-1,212 - BBC Prime Europe
+http://127.0.0.1:8083/freeboxtv/413
+#EXTINF:-1,219 - God TV
+http://127.0.0.1:8083/freeboxtv/386
+#EXTINF:-1,220 - Arte Allemand
+http://127.0.0.1:8083/freeboxtv/270
+#EXTINF:-1,224 - DW-TV
+http://127.0.0.1:8083/freeboxtv/312
+#EXTINF:-1,225 - Ritmoson Latino
+http://127.0.0.1:8083/freeboxtv/407
+#EXTINF:-1,226 - De pelicula
+http://127.0.0.1:8083/freeboxtv/408
+#EXTINF:-1,227 - TL Novelas
+http://127.0.0.1:8083/freeboxtv/409
+#EXTINF:-1,228 - Canal de las Estrellas
+http://127.0.0.1:8083/freeboxtv/410
+#EXTINF:-1,229 - Telehit
+http://127.0.0.1:8083/freeboxtv/411
+#EXTINF:-1,230 - TVE I
+http://127.0.0.1:8083/freeboxtv/306
+#EXTINF:-1,231 - Canal 24 Horas
+http://127.0.0.1:8083/freeboxtv/307
+#EXTINF:-1,232 - ETB Sat
+http://127.0.0.1:8083/freeboxtv/371
+#EXTINF:-1,233 - Real Madrid TV
+http://127.0.0.1:8083/freeboxtv/387
+#EXTINF:-1,234 - TVCi
+http://127.0.0.1:8083/freeboxtv/461
+#EXTINF:-1,238 - SIC
+http://127.0.0.1:8083/freeboxtv/484
+#EXTINF:-1,239 - RTPi
+http://127.0.0.1:8083/freeboxtv/388
+#EXTINF:-1,240 - Rai Uno
+http://127.0.0.1:8083/freeboxtv/309
+#EXTINF:-1,241 - Rai Due
+http://127.0.0.1:8083/freeboxtv/314
+#EXTINF:-1,242 - Rai Tre
+http://127.0.0.1:8083/freeboxtv/315
+#EXTINF:-1,244 - RTR Planeta
+http://127.0.0.1:8083/freeboxtv/317
+#EXTINF:-1,245 - ORTi
+http://127.0.0.1:8083/freeboxtv/357
+#EXTINF:-1,246 - Nashe Kino
+http://127.0.0.1:8083/freeboxtv/441
+#EXTINF:-1,247 - Detski Mir/Teleclub
+http://127.0.0.1:8083/freeboxtv/442
+#EXTINF:-1,248 - RTVI
+http://127.0.0.1:8083/freeboxtv/443
+#EXTINF:-1,249 - RTVI-M
+http://127.0.0.1:8083/freeboxtv/444
+#EXTINF:-1,250 - TV Romania
+http://127.0.0.1:8083/freeboxtv/318
+#EXTINF:-1,251 - Bulgaria TV
+http://127.0.0.1:8083/freeboxtv/321
+#EXTINF:-1,252 - Georgian TV
+http://127.0.0.1:8083/freeboxtv/487
+#EXTINF:-1,254 - Adjara TV
+http://127.0.0.1:8083/freeboxtv/316
+#EXTINF:-1,255 - Imedi TV
+http://127.0.0.1:8083/freeboxtv/488
+#EXTINF:-1,256 - NTV Hayat
+http://127.0.0.1:8083/freeboxtv/429
+#EXTINF:-1,257 - RTV Pink Plus
+http://127.0.0.1:8083/freeboxtv/439
+#EXTINF:-1,258 - RTV Pink Extra
+http://127.0.0.1:8083/freeboxtv/440
+#EXTINF:-1,259 - TV Biznes
+http://127.0.0.1:8083/freeboxtv/450
+#EXTINF:-1,260 - TV Polonia
+http://127.0.0.1:8083/freeboxtv/278
+#EXTINF:-1,261 - TVP Kultura
+http://127.0.0.1:8083/freeboxtv/485
+#EXTINF:-1,262 - TVP 3
+http://127.0.0.1:8083/freeboxtv/486
+#EXTINF:-1,265 - Armenia Public TV
+http://127.0.0.1:8083/freeboxtv/380
+#EXTINF:-1,266 - 2M Maroc
+http://127.0.0.1:8083/freeboxtv/272
+#EXTINF:-1,267 - RTM Maroc
+http://127.0.0.1:8083/freeboxtv/273
+#EXTINF:-1,268 - Canal Algérie
+http://127.0.0.1:8083/freeboxtv/274
+#EXTINF:-1,269 - TV7 Tunisia
+http://127.0.0.1:8083/freeboxtv/277
+#EXTINF:-1,270 - Al Masriya
+http://127.0.0.1:8083/freeboxtv/275
+#EXTINF:-1,271 - Al Jazeera
+http://127.0.0.1:8083/freeboxtv/276
+#EXTINF:-1,272 - Al Jazeera Children
+http://127.0.0.1:8083/freeboxtv/412
+#EXTINF:-1,273 - ART Variety Europe
+http://127.0.0.1:8083/freeboxtv/326
+#EXTINF:-1,274 - ART Teenz/Tarab
+http://127.0.0.1:8083/freeboxtv/327
+#EXTINF:-1,275 - ART Movies
+http://127.0.0.1:8083/freeboxtv/328
+#EXTINF:-1,277 - Al Hekayat
+http://127.0.0.1:8083/freeboxtv/330
+#EXTINF:-1,278 - Iqra
+http://127.0.0.1:8083/freeboxtv/331
+#EXTINF:-1,279 - ART Aflam 2
+http://127.0.0.1:8083/freeboxtv/332
+#EXTINF:-1,280 - Future TV
+http://127.0.0.1:8083/freeboxtv/333
+#EXTINF:-1,281 - MBC
+http://127.0.0.1:8083/freeboxtv/334
+#EXTINF:-1,282 - LBC Europe
+http://127.0.0.1:8083/freeboxtv/335
+#EXTINF:-1,283 - Nile Drama
+http://127.0.0.1:8083/freeboxtv/336
+#EXTINF:-1,284 - The Israeli Network
+http://127.0.0.1:8083/freeboxtv/462
+#EXTINF:-1,286 - Powertürk TV
+http://127.0.0.1:8083/freeboxtv/489
+#EXTINF:-1,287 - TRT1
+http://127.0.0.1:8083/freeboxtv/490
+#EXTINF:-1,288 - Kanal D
+http://127.0.0.1:8083/freeboxtv/463
+#EXTINF:-1,289 - Star TV
+http://127.0.0.1:8083/freeboxtv/464
+#EXTINF:-1,290 - TGRT
+http://127.0.0.1:8083/freeboxtv/465
+#EXTINF:-1,291 - NTV Avrupa
+http://127.0.0.1:8083/freeboxtv/466
+#EXTINF:-1,292 - ATV Avrupa
+http://127.0.0.1:8083/freeboxtv/467
+#EXTINF:-1,293 - TD1
+http://127.0.0.1:8083/freeboxtv/435
+#EXTINF:-1,294 - TRT INT
+http://127.0.0.1:8083/freeboxtv/369
+#EXTINF:-1,295 - Kanal 7 INT
+http://127.0.0.1:8083/freeboxtv/370
+#EXTINF:-1,296 - Samanyolu TV
+http://127.0.0.1:8083/freeboxtv/391
+#EXTINF:-1,297 - TVT
+http://127.0.0.1:8083/freeboxtv/436
+#EXTINF:-1,298 - TV5
+http://127.0.0.1:8083/freeboxtv/446
+#EXTINF:-1,299 - Kanal Avrupa
+http://127.0.0.1:8083/freeboxtv/447
+#EXTINF:-1,300 - France 3 national
+http://127.0.0.1:8083/freeboxtv/258
+#EXTINF:-1,301 - France 3 Alsace
+http://127.0.0.1:8083/freeboxtv/280
+#EXTINF:-1,302 - France 3 Alpes
+http://127.0.0.1:8083/freeboxtv/283
+#EXTINF:-1,303 - France 3 Aquitaine
+http://127.0.0.1:8083/freeboxtv/284
+#EXTINF:-1,304 - France 3 Auvergne
+http://127.0.0.1:8083/freeboxtv/285
+#EXTINF:-1,305 - France 3 Bourgogne
+http://127.0.0.1:8083/freeboxtv/279
+#EXTINF:-1,306 - France 3 Bretagne
+http://127.0.0.1:8083/freeboxtv/286
+#EXTINF:-1,307 - France 3 Centre
+http://127.0.0.1:8083/freeboxtv/287
+#EXTINF:-1,308 - France 3 Champagne-Ardenne
+http://127.0.0.1:8083/freeboxtv/288
+#EXTINF:-1,310 - France 3 Côte-d'Azur
+http://127.0.0.1:8083/freeboxtv/290
+#EXTINF:-1,311 - France 3 Franche-Comté
+http://127.0.0.1:8083/freeboxtv/291
+#EXTINF:-1,312 - France 3 Languedoc-Roussillon
+http://127.0.0.1:8083/freeboxtv/292
+#EXTINF:-1,313 - France 3 Limousin
+http://127.0.0.1:8083/freeboxtv/293
+#EXTINF:-1,314 - France 3 Lorraine
+http://127.0.0.1:8083/freeboxtv/294
+#EXTINF:-1,315 - France 3 Midi Pyrénées
+http://127.0.0.1:8083/freeboxtv/295
+#EXTINF:-1,316 - France 3 Nord Pas-de-Calais
+http://127.0.0.1:8083/freeboxtv/296
+#EXTINF:-1,317 - France 3 Haute-Normandie
+http://127.0.0.1:8083/freeboxtv/297
+#EXTINF:-1,318 - France 3 Basse-Normandie
+http://127.0.0.1:8083/freeboxtv/298
+#EXTINF:-1,319 - France 3 Paris Ile-de-France
+http://127.0.0.1:8083/freeboxtv/257
+#EXTINF:-1,320 - France 3 Pays de Loire
+http://127.0.0.1:8083/freeboxtv/299
+#EXTINF:-1,321 - France 3 Picardie
+http://127.0.0.1:8083/freeboxtv/300
+#EXTINF:-1,322 - France 3 Poitou-Charentes
+http://127.0.0.1:8083/freeboxtv/301
+#EXTINF:-1,323 - France 3 Provence-Alpes
+http://127.0.0.1:8083/freeboxtv/302
+#EXTINF:-1,324 - France 3 Rhône-Alpes
+http://127.0.0.1:8083/freeboxtv/303
+#EXTINF:-1,999 - Mire FREEBOX
+http://127.0.0.1:8083/freeboxtv/308

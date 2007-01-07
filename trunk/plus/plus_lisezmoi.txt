@@ -1,0 +1,49 @@
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+* F2XTV : le script pour enregistrer la TV Freebox sur votre xbox !!          *
+*   Codé par                :    Alexsolex                                    *
+*   idée original du proxy  :    Puyb                                         *
+*                                                                             *
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*            Outils et accessoires pour la TV freebox sur la xbox             *
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+Contenu supplémentaire pour exploiter les flux FreeboxTV sur la xbox
+
+Pour faire fonctionner un .strm (fichier stream contenant un lien vers le flux)
+ou la playliste m3u, ou encore les fichiers m3u des chaines, vous devez 
+préalablement faire tourner le script proxy qui va s'occuper de négocier les 
+échanges avec le serveur (la freebox) et renvoyer à qui le demande -le strm ou
+l'élément de(s) playliste(s) m3u- le flux sur un transport http
+
+Les fichiers strm ou m3u (dans les zip) :
+- Contiennent l'url du flux pour lire la chaine correspondante sur la xbox
+- Ils sont accompagné d'un fichier .tbn qui est une miniature du logo de la
+    chaine et qui sera affiché en regard du .strm dans XBMC
+- La totalité des raccourcis a été généré à un instant T. Ils peuvent ne pas
+    correspondre à l'état actuel de la playlist proposée par la freebox étant
+    donné que cette dernière est mise à jour par Free selon les chaines
+    autorisées en multiposte. De plus, selon vos abonnements aux chaines 
+    payantes, la playliste change.
+
+La playliste m3u :
+- elle n'est que la playliste freebox, récupérée à un instant T et modifiée de
+    manière à pointer sur le proxy plutôt que sur la freebox. Vous pouvez la 
+    mettre à jour en éxécutant le script "maj de playliste.py" qui va la 
+    mettre par défaut dans le dossier Q:\userdata\playlists\video\
+
+La playliste peut être chargée depuis la section video de XBMC. Dans la
+playliste, vous pouvez utiliser les fonctions de piste suivante et précédente
+pour 'zapper' entre les chaines. (depuis l'osd ou sur la télécommande xbox)
+Les .strm ou les m3u peuvent être extraits dans le dossier de votre choix puis
+lancé depuis la section Video de XBMC.
+
+Vous pouvez utiliser à votre convenance les .m3u ou .strm. L'avantage majeur
+(et sans doute unique) d'utiliser les m3u au détriment des .strm, c'est que
+les m3u inclus le nom de la chaine dans des informations. Par conséquent, si
+vous réduisez la vidéo (mode preview de XBMC) vous ne voyez pas l'URL mais le
+nom de la chaine.
+
+Pour vos questions, rendez-vous sur les forums de XBMC :
+    http://gueux-forum.net/index.php?showforum=19
+ou plus précisément dans le forum python :
+    http://gueux-forum.net/index.php?showforum=78

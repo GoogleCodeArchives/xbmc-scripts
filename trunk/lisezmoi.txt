@@ -1,0 +1,34 @@
+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + 
+ +                                                                             +
+ +  Script :             Freebox To Xbox TV (F2XTV)                            +
+ +  Autheur :            alexsolex                                             +
+ +  plateforme :         XBMC (version compilée antérieure au 13 Mars 2006)    +
+ +  version :            0.0.1                                                 +
+ +                                                                             +
+ +  script original :    rtsp2http-0.0.3.py                                    +
+ +  autheur :            puyb                                                  +
+ +  modifications :      rtsp2http-0.0.4.py et rtsp2http-0.0.5.py              +
+ +  autheur :            alexsolex                                             +
+ +  modifications :      rtsp2http-0.0.7.py                                    +
+ +  autheur :            nioc bertheloneum                                     +
+ +                                                                             +
+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+INTRODUCTION :
+Le script F2XTV.py est un script permettant d'enregistrer instantanément le flux
+ TV de la freebox sur le disque dur de la xbox.
+Ce script fait donc office de MAGNETOSCOPE NUMERIQUE sur xbox pour la freeboxTV
+
+
+Explications, installation, plus d'infos sur : 
+	http://manuel.xbmc.org/index.php?title=F2XTV
+
+Vos questions :
+	http://gueux-forum.net/index.php?showtopic=105465
+
+
+
+Alexsolex®
+
+    
+    
