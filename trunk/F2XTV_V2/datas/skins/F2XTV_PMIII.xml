@@ -1,0 +1,350 @@
+<window>
+
+ <id>1156</id>
+ <allowoverlay>no</allowoverlay>
+ <defaultcontrol always="false">30</defaultcontrol>
+ <resolution>PAL</resolution>
+ 
+ <controls>
+
+  <control>
+   <description>background image</description>
+   <type>image</type>
+   <id>1</id>
+   <posx>0</posx>
+   <posy>0</posy>
+   <width>720</width>
+   <height>576</height>
+   <texture>background.png</texture>
+  </control>
+
+  <control>
+   <description>xbox media center label</description>
+   <type>label</type>
+   <id>1</id>
+   <posx>200</posx>
+   <posy>50</posy>
+   <width>250</width>
+   <height>35</height>
+   <align>right</align>
+   <label>xbox media center</label>
+   <font>special12</font>
+  </control>
+
+  <control>
+   <description>description label</description>
+   <type>label</type>
+   <id>1</id>
+   <posx>207</posx>
+   <posy>50</posy>
+   <width>250</width>
+   <height>35</height>
+   <align>left</align>
+   <label>GUI Builder</label>
+   <font>special13</font>
+  </control>
+
+  <control>
+   <description>description label</description>
+   <type>label</type>
+   <id>1</id>
+   <posx>660</posx>
+   <posy>50</posy>
+   <width>250</width>
+   <align>right</align>
+   <info>system.profilename</info>
+   <font>special13</font>
+  </control>
+
+
+  <control>
+   <description>background image</description>
+   <type>image</type>
+   <id>500</id>
+   <posx>25</posx>
+   <posy>425</posy>
+   <width>150</width>
+   <height>150</height>
+   <aspectratio>keep</aspectratio>
+   <texture>\Jimmy-Neutron-Planet.png</texture>
+   <visible>!player.muted</visible>
+  </control>
+  
+  <control>
+   <description>background image</description>
+   <type>image</type>
+   <id>501</id>
+   <posx>25</posx>
+   <posy>425</posy>
+   <width>150</width>
+   <height>150</height>
+   <aspectratio>keep</aspectratio>
+   <texture>\Jimmy-Neutron-Planet-off.png</texture>
+   <visible>player.muted</visible>
+  </control>
+
+		<control>
+			<description>RSS Feeds</description>
+			<type>fadelabel</type>
+			<id>20</id>
+			<posx>15</posx>
+			<posy>18</posy>
+			<width>690</width>
+			<height>33</height>
+			<font>special13</font>
+			<scroll>true</scroll>
+			<label>This control is a fadelabel. It can have multiple &lt;label&gt; tags. This is where an RSS feed could be displayed.</label>
+			<include>controldefaults</include>
+			<!--shadowcolor>FFFFFFFF</shadowcolor-->
+			<!--visible>!Skin.HasSetting(rss-feeds)</visible-->
+		</control>
+
+		<control>
+			<description>Category Button</description>
+			<type>button</type>
+			<id>10</id>
+			<posx>15</posx>
+			<posy>119</posy>
+			<width>150</width>
+			<height>33</height>
+			<texturefocus>button-focus.png</texturefocus>
+			<texturenofocus>button-nofocus.png</texturenofocus>
+			<textxoffset>0</textxoffset>
+			<textyoffset>0</textyoffset>
+			<label>Category</label>
+			<onleft>30</onleft>
+			<onright>30</onright>
+			<onup>4</onup>
+			<ondown>11</ondown>
+			<align>center</align>
+			<aligny>center</aligny>
+			<include>controldefaults</include>
+			<disabledcolor>60000000</disabledcolor>
+			<pulseonselect>no</pulseonselect>
+		</control>
+
+		<control>
+			<description>Level Button</description>
+			<type>button</type>
+			<id>11</id>
+			<posx>15</posx>
+			<posy>152</posy>
+			<width>150</width>
+			<height>33</height>
+			<texturefocus>button-focus.png</texturefocus>
+			<texturenofocus>button-nofocus.png</texturenofocus>
+			<textxoffset>0</textxoffset>
+			<textyoffset>0</textyoffset>
+			<label>Level</label>
+			<onleft>30</onleft>
+			<onright>30</onright>
+			<onup>10</onup>
+			<ondown>12</ondown>
+			<align>center</align>
+			<aligny>center</aligny>
+			<include>controldefaults</include>
+			<disabledcolor>60000000</disabledcolor>
+			<pulseonselect>no</pulseonselect>
+		</control>
+
+		<control>
+			<description>Type Button</description>
+			<type>button</type>
+			<id>12</id>
+			<posx>15</posx>
+			<posy>185</posy>
+			<width>150</width>
+			<height>33</height>
+			<texturefocus>button-focus.png</texturefocus>
+			<texturenofocus>button-nofocus.png</texturenofocus>
+			<textxoffset>0</textxoffset>
+			<textyoffset>0</textyoffset>
+			<label>Type</label>
+			<onleft>30</onleft>
+			<onright>30</onright>
+			<onup>11</onup>
+			<ondown>13</ondown>
+			<align>center</align>
+			<aligny>center</aligny>
+			<include>controldefaults</include>
+			<disabledcolor>60000000</disabledcolor>
+			<pulseonselect>no</pulseonselect>
+		</control>
+
+		<control>
+			<description>Loop Button</description>
+			<type>button</type>
+			<id>13</id>
+			<posx>15</posx>
+			<posy>251</posy>
+			<width>150</width>
+			<height>33</height>
+			<texturefocus>button-focus.png</texturefocus>
+			<texturenofocus>button-nofocus.png</texturenofocus>
+			<textxoffset>0</textxoffset>
+			<textyoffset>0</textyoffset>
+			<label>Loop</label>
+			<onleft>30</onleft>
+			<onright>30</onright>
+			<onup>12</onup>
+			<ondown>14</ondown>
+			<align>center</align>
+			<aligny>center</aligny>
+			<include>controldefaults</include>
+			<disabledcolor>60000000</disabledcolor>
+			<pulseonselect>no</pulseonselect>
+		</control>
+
+		<control>
+			<description>Frame Button</description>
+			<type>button</type>
+			<id>14</id>
+			<posx>15</posx>
+			<posy>284</posy>
+			<width>150</width>
+			<height>33</height>
+			<texturefocus>button-focus.png</texturefocus>
+			<texturenofocus>button-nofocus.png</texturenofocus>
+			<textxoffset>0</textxoffset>
+			<textyoffset>0</textyoffset>
+			<label>Frame</label>
+			<onleft>30</onleft>
+			<onright>30</onright>
+			<onup>13</onup>
+			<ondown>15</ondown>
+			<align>center</align>
+			<aligny>center</aligny>
+			<include>controldefaults</include>
+			<disabledcolor>60000000</disabledcolor>
+			<pulseonselect>no</pulseonselect>
+		</control>
+
+		<control>
+			<description>set as default Button</description>
+			<type>button</type>
+			<id>15</id>
+			<posx>15</posx>
+			<posy>350</posy>
+			<width>150</width>
+			<height>33</height>
+			<texturefocus>button-focus.png</texturefocus>
+			<texturenofocus>button-nofocus.png</texturenofocus>
+			<textxoffset>0</textxoffset>
+			<textyoffset>0</textyoffset>
+			<label>Set as Default Map</label>
+			<onleft>30</onleft>
+			<onright>30</onright>
+			<onup>14</onup>
+			<ondown>4</ondown>
+			<align>center</align>
+			<aligny>center</aligny>
+			<include>controldefaults</include>
+			<disabledcolor>60000000</disabledcolor>
+			<pulseonselect>no</pulseonselect>
+		</control>
+
+		<control>
+			<type>listcontrol</type>
+			<id>30</id>
+			<label>This was from the xml file</label>
+			<label>This was from the xml file</label>
+			<label>This was from the xml file</label>
+			<label>This was from the xml file</label>
+			<label2>1 of 4</label2>
+			<label2>2 of 4</label2>
+			<label2>3 of 4</label2>
+			<label2>4 of 4</label2>
+			<image>defaultAlbumCover.png</image>
+			<image>\Jimmy-Neutron-Planet.png</image>
+			<image>\Jimmy-Neutron-Planet-off.png</image>
+			<image>defaultAlbumCover.png</image>
+			<posx>250</posx>
+			<posy>115</posy>
+			<width>420</width>
+			<height>400</height>
+			<spinwidth>18</spinwidth>
+			<spinheight>16</spinheight>
+			<spinposx>343</spinposx>
+			<spinposy>397</spinposy>
+			<spincolor>FFFFFFFF</spincolor>
+			<spinfont>font12</spinfont>
+			<textcolor>FFFFFFFF</textcolor>
+  <!--textureup>scroll-up.png</textureup>
+  <texturedown>scroll-down.png</texturedown>
+  <textureupfocus>scroll-up-focus.png</textureupfocus>
+  <texturedownfocus>scroll-down-focus.png</texturedownfocus>
+  <texturefocus>list-focus.png</texturefocus>
+  <texturenofocus>list-nofocus.png</texturenofocus-->
+			<textureheight>26</textureheight>
+			<itemwidth>20</itemwidth>
+			<itemheight>20</itemheight>
+			<font>font13</font>
+			<font2>font12</font2>
+			<selectedcolor>FFffffff</selectedcolor>
+			<textcolor2>FFFFFFFF</textcolor2>
+			<textcolor>FFFFFFFF</textcolor>
+			<colordiffuse>d0ffffff</colordiffuse>
+			<shadowcolor>a0dadada</shadowcolor>
+			<font>font13</font>
+			<suffix> |</suffix>
+			<textxoff>3</textxoff>
+			<textxoff2>0</textxoff2>
+			<aligny>center</aligny>
+			<onup>30</onup>
+			<ondown>30</ondown>
+			<onleft>10</onleft>
+			<onright>10</onright>
+		</control>
+
+	<control>
+		<description>default checkmark</description>
+		<id>4</id>
+		<type>checkmark</type>
+		<width>200</width>
+		<height>33</height>
+		<posx>50</posx>
+		<posy>400</posy>
+		<textcolor>FFFFFFFF</textcolor>
+		<disabledcolor>60FFFFFF</disabledcolor>
+		<font>font13</font>
+		<label>mute speakers</label>
+		<!--texturecheckmark>check-box.png</texturecheckmark>
+		<texturecheckmarknofocus>check-boxNF.png</texturecheckmarknofocus-->
+		<markwidth>20</markwidth>
+		<markheight>20</markheight>
+		<align>right</align>
+		<shadow>no</shadow>
+		<onup>15</onup>
+		<ondown>10</ondown>
+		<onleft>30</onleft>
+		<onright>30</onright>
+	</control>
+
+	<control>
+		<description>default textarea</description>
+		<id>1</id>
+		<type>textbox</type>
+		<posx>220</posx>
+		<posy>520</posy>
+		<width>300</width>
+		<label> This is a textbox that you can use for information purposes. The text should wrap to the next line.</label>
+		<height>75</height>
+		<spinwidth>18</spinwidth>
+		<spinheight>16</spinheight>
+		<spinposx>410</spinposx>
+		<spinposy>305</spinposy>
+		<spincolor>d0ffffff</spincolor>
+		<!--textureup>scroll-up.png</textureup>
+		<texturedown>scroll-down.png</texturedown>
+		<textureupfocus>scroll-up-focus.png</textureupfocus>
+		<texturedownfocus>scroll-down-focus.png</texturedownfocus-->
+		<image>icon-folder.png</image>
+		<font>font13</font>
+		<colordiffuse>ffffffff</colordiffuse>
+	</control>
+
+
+ </controls>
+
+</window>
+
