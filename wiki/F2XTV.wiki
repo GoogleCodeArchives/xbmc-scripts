@@ -59,4 +59,3 @@ La partie enregistrement sera sous forme de thread, de manière à permettre l'e
 Le module GUI sera démarré à la demande. Il interrogera le moteur sous forme de requêtes pour pouvoir afficher les enregistrements en cours ou les différentes disponibilités (espace disque, enregistrements en cours, flux supplémentaires disponibles pour le proxy)
 
 
-
