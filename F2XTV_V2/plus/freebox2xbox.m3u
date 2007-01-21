@@ -1,0 +1,221 @@
+#EXTM3U
+#EXTINF:0,2 - France 2
+http://127.0.0.1:8083/201
+#EXTINF:0,3 - France 3 national
+http://127.0.0.1:8083/202
+#EXTINF:0,5 - France 5
+http://127.0.0.1:8083/203
+#EXTINF:0,6 - Euronews
+http://127.0.0.1:8083/205
+#EXTINF:0,7 - Arte
+http://127.0.0.1:8083/204
+#EXTINF:0,8 - Direct 8
+http://127.0.0.1:8083/372
+#EXTINF:0,9 - W9
+http://127.0.0.1:8083/373
+#EXTINF:0,11 - NT1
+http://127.0.0.1:8083/374
+#EXTINF:0,12 - NRJ 12 5.1
+http://127.0.0.1:8083/381
+#EXTINF:0,12 - NRJ 12 Stéréo
+http://127.0.0.1:8083/382
+#EXTINF:0,13 - La Chaîne Parlementaire
+http://127.0.0.1:8083/226
+#EXTINF:0,14 - France 4
+http://127.0.0.1:8083/376
+#EXTINF:0,15 - BFM TV
+http://127.0.0.1:8083/418
+#EXTINF:0,16 - i>TELE
+http://127.0.0.1:8083/417
+#EXTINF:0,17 - Europe 2 TV
+http://127.0.0.1:8083/416
+#EXTINF:0,18 - Gulli
+http://127.0.0.1:8083/419
+#EXTINF:0,21 - RTL9
+http://127.0.0.1:8083/210
+#EXTINF:0,22 - AB 1
+http://127.0.0.1:8083/211
+#EXTINF:0,23 - TV5
+http://127.0.0.1:8083/206
+#EXTINF:0,24 - France ô
+http://127.0.0.1:8083/238
+#EXTINF:0,37 - Game One
+http://127.0.0.1:8083/220
+#EXTINF:0,40 - M6 Music Hits
+http://127.0.0.1:8083/430
+#EXTINF:0,41 - M6 Music Rock
+http://127.0.0.1:8083/431
+#EXTINF:0,42 - M6 Music Black
+http://127.0.0.1:8083/432
+#EXTINF:0,43 - Fun TV
+http://127.0.0.1:8083/433
+#EXTINF:0,44 - MTV
+http://127.0.0.1:8083/219
+#EXTINF:0,52 - ZIK
+http://127.0.0.1:8083/218
+#EXTINF:0,63 - AB Moteurs
+http://127.0.0.1:8083/222
+#EXTINF:0,75 - Bloomberg TV
+http://127.0.0.1:8083/207
+#EXTINF:0,77 - CNBC
+http://127.0.0.1:8083/208
+#EXTINF:0,79 - Sky News International
+http://127.0.0.1:8083/355
+#EXTINF:0,80 - KTO
+http://127.0.0.1:8083/223
+#EXTINF:0,81 - TFJ
+http://127.0.0.1:8083/224
+#EXTINF:0,82 - Beur TV
+http://127.0.0.1:8083/225
+#EXTINF:0,83 - Demain !
+http://127.0.0.1:8083/227
+#EXTINF:0,84 - Fashion TV
+http://127.0.0.1:8083/221
+#EXTINF:0,85 - Teleplaisance.org
+http://127.0.0.1:8083/320
+#EXTINF:0,87 - Liberty TV.com
+http://127.0.0.1:8083/215
+#EXTINF:0,98 - Freenews TV
+http://127.0.0.1:8083/428
+#EXTINF:0,130 - Best of Shopping
+http://127.0.0.1:8083/358
+#EXTINF:0,131 - M6 Boutique
+http://127.0.0.1:8083/359
+#EXTINF:0,133 - Astro Center TV
+http://127.0.0.1:8083/415
+#EXTINF:0,150 - TLM
+http://127.0.0.1:8083/267
+#EXTINF:0,151 - TLT
+http://127.0.0.1:8083/281
+#EXTINF:0,152 - TV7 Bordeaux
+http://127.0.0.1:8083/268
+#EXTINF:0,153 - TV8 Mont-Blanc
+http://127.0.0.1:8083/319
+#EXTINF:0,154 - TéléGrenoble
+http://127.0.0.1:8083/423
+#EXTINF:0,155 - Telif
+http://127.0.0.1:8083/360
+#EXTINF:0,156 - La Locale
+http://127.0.0.1:8083/363
+#EXTINF:0,157 - Normandie TV
+http://127.0.0.1:8083/383
+#EXTINF:0,158 - Télénantes/Nantes 7
+http://127.0.0.1:8083/389
+#EXTINF:0,159 - La Chaîne Marseille
+http://127.0.0.1:8083/414
+#EXTINF:0,160 - Clermont Première
+http://127.0.0.1:8083/438
+#EXTINF:0,209 - T.TV
+http://127.0.0.1:8083/385
+#EXTINF:0,219 - God TV
+http://127.0.0.1:8083/386
+#EXTINF:0,220 - Arte Allemand
+http://127.0.0.1:8083/270
+#EXTINF:0,224 - DW-TV
+http://127.0.0.1:8083/312
+#EXTINF:0,232 - ETB Sat
+http://127.0.0.1:8083/371
+#EXTINF:0,233 - Real Madrid TV
+http://127.0.0.1:8083/387
+#EXTINF:0,239 - RTPi
+http://127.0.0.1:8083/388
+#EXTINF:0,240 - Rai Uno
+http://127.0.0.1:8083/309
+#EXTINF:0,241 - Rai Due
+http://127.0.0.1:8083/314
+#EXTINF:0,242 - Rai Tre
+http://127.0.0.1:8083/315
+#EXTINF:0,250 - TV Polonia
+http://127.0.0.1:8083/278
+#EXTINF:0,251 - Bulgaria TV
+http://127.0.0.1:8083/321
+#EXTINF:0,252 - TV Romania
+http://127.0.0.1:8083/318
+#EXTINF:0,253 - RTR Planeta
+http://127.0.0.1:8083/317
+#EXTINF:0,254 - Adjara TV
+http://127.0.0.1:8083/316
+#EXTINF:0,259 - TV biznes
+http://127.0.0.1:8083/450
+#EXTINF:0,260 - 2M Maroc
+http://127.0.0.1:8083/272
+#EXTINF:0,261 - RTM Maroc
+http://127.0.0.1:8083/273
+#EXTINF:0,262 - Canal Algérie
+http://127.0.0.1:8083/274
+#EXTINF:0,263 - TV7 Tunisia
+http://127.0.0.1:8083/277
+#EXTINF:0,269 - Armenia TV
+http://127.0.0.1:8083/380
+#EXTINF:0,270 - Al Masriya
+http://127.0.0.1:8083/275
+#EXTINF:0,271 - Al jazeera
+http://127.0.0.1:8083/276
+#EXTINF:0,272 - Al Jazeera Children
+http://127.0.0.1:8083/412
+#EXTINF:0,288 - Phoenix Chinese News and Entertainment
+http://127.0.0.1:8083/266
+#EXTINF:0,289 - CCTV 4
+http://127.0.0.1:8083/271
+#EXTINF:0,293 - TD1
+http://127.0.0.1:8083/435
+#EXTINF:0,294 - TRT INT
+http://127.0.0.1:8083/369
+#EXTINF:0,295 - Kanal 7 INT
+http://127.0.0.1:8083/370
+#EXTINF:0,296 - Samanyolu TV
+http://127.0.0.1:8083/391
+#EXTINF:0,297 - TVT
+http://127.0.0.1:8083/436
+#EXTINF:0,298 - TV5
+http://127.0.0.1:8083/446
+#EXTINF:0,299 - Kanal Avrupa
+http://127.0.0.1:8083/447
+#EXTINF:0,300 - France 3 national
+http://127.0.0.1:8083/258
+#EXTINF:0,301 - France 3 Alsace
+http://127.0.0.1:8083/280
+#EXTINF:0,302 - France 3 Alpes
+http://127.0.0.1:8083/283
+#EXTINF:0,303 - France 3 Aquitaine
+http://127.0.0.1:8083/284
+#EXTINF:0,304 - France 3 Auvergne
+http://127.0.0.1:8083/285
+#EXTINF:0,305 - France 3 Bourgogne
+http://127.0.0.1:8083/279
+#EXTINF:0,306 - France 3 Bretagne
+http://127.0.0.1:8083/286
+#EXTINF:0,307 - France 3 Centre
+http://127.0.0.1:8083/287
+#EXTINF:0,308 - France 3 Champagne-Ardenne
+http://127.0.0.1:8083/288
+#EXTINF:0,310 - France 3 Côte-d'Azur
+http://127.0.0.1:8083/290
+#EXTINF:0,311 - France 3 Franche-Comté
+http://127.0.0.1:8083/291
+#EXTINF:0,312 - France 3 Languedoc-Roussillon
+http://127.0.0.1:8083/292
+#EXTINF:0,314 - France 3 Lorraine
+http://127.0.0.1:8083/294
+#EXTINF:0,315 - France 3 Midi Pyrénées
+http://127.0.0.1:8083/295
+#EXTINF:0,316 - France 3 Nord Pas-de-Calais
+http://127.0.0.1:8083/296
+#EXTINF:0,317 - France 3 Haute-Normandie
+http://127.0.0.1:8083/297
+#EXTINF:0,318 - France 3 Basse-Normandie
+http://127.0.0.1:8083/298
+#EXTINF:0,319 - France 3 Paris Ile-de-France
+http://127.0.0.1:8083/257
+#EXTINF:0,320 - France 3 Pays de Loire
+http://127.0.0.1:8083/299
+#EXTINF:0,321 - France 3 Picardie
+http://127.0.0.1:8083/300
+#EXTINF:0,322 - France 3 Poitou-Charentes
+http://127.0.0.1:8083/301
+#EXTINF:0,323 - France 3 Provence-Alpes
+http://127.0.0.1:8083/302
+#EXTINF:0,324 - France 3 Rhône-Alpes
+http://127.0.0.1:8083/303
+#EXTINF:0,999 - Mire FREEBOX
+http://127.0.0.1:8083/308
