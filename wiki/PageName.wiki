@@ -1,5 +1,5 @@
-#summary One-sentence summary of this page.
 #labels Phase-Requirements
+#développement d'un script de magnétoscope numérique multiserveur
 
 = Introduction =
 
@@ -45,6 +45,8 @@ Il est en fait constitué d'un moteur qui interroge les différents serveurs vid
   * configuration : chemain des enregistrements = le client GUI doit envoyer le chemin au serveur
 
 - voir pour intégrer un système simple de programme TV (tcsh.telecable.com)
+
+= Commandes http clientGUI - moteur =
 
 
 Add your content here.  Format your content with:
