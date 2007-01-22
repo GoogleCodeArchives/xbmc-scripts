@@ -48,8 +48,13 @@ Il est en fait constitué d'un moteur qui interroge les différents serveurs vid
 
 = Commandes http clientGUI - moteur =
 
+|| commande || paramètres || retours ||
+|| record || chaineID = l'ID de la chaine pour le serveurTV  "OK" ||
+|| || datedebut = timestamp spécifiant la date et heure de début d'enregistrement ||  ||
 
 Add your content here.  Format your content with:
   * Text in *bold* or _italic_
   * Headings, paragraphs, and lists
   * Automatic links to other wiki pages
+
+
