@@ -18,6 +18,26 @@ Il est en fait constitué d'un moteur qui interroge les différents serveurs vid
 
 = notes de développement =
 
+- le format des demandes aux serveurs peuvent se faire de plusieurs manières:
+ http://moteurip:port/nom_serveurTV/nom_action?nom_param1=info1&nom_param2=info2...
+
+ ou
+
+ http://moteurip:port/nom_serveurTV?action=nom_action&nom_param1=info1&nom_param2=info2...
+
+ ou
+
+ http://moteurip:port/?server=nom_serveurTV&action=nom_action&nom_param1=info1&nom_param2=info2...
+
+Dans chacun des cas, nom_serveurTV (ou server=nom_serveurTV) et/ou nom_action (ou action=nom_action) peuvent être omis, des valeurs par défaut seront alors utilisées, ces valeurs sont:
+
+ 'all' pour nom_serveurTV, qui correspond à tous les serveurs, et donc l'action sera appliquée à chacun des serveurs
+
+ 'showInfos' pour action, qui affiche les informations sur le serveur sélectionné ou tous les serveurs.
+
+Ainsi l'adresse suivante, est valable:
+ http://moteurip:port/nom_action?nom_param1=info1&nom_param2=info2...
+
 -les playlists sont demandées au "moteur" pour un serveurTV donné
 
 -une playliste 'customisée' est locale à la GUI (le moteur n'en sais rien et s'en moque)
@@ -56,4 +76,5 @@ Add your content here.  Format your content with:
   * Text in *bold* or _italic_
   * Headings, paragraphs, and lists
   * Automatic links to other wiki pages
+
 
