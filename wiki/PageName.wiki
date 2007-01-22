@@ -14,6 +14,8 @@ Il est en fait constitué d'un moteur qui interroge les différents serveurs vid
 
 - serveurTV : un serveur de télévision (freebox TV ; belgacom TV, VLC RTSP ...)
 
+- client GUI : le 'frontend' ; l'interface qui va servir de relais entre les manipulations de l'utilisateur et le moteur de programmation.
+
 = notes de développement =
 
 -les playlists sont demandées au "moteur" pour un serveurTV donné
@@ -25,8 +27,12 @@ Il est en fait constitué d'un moteur qui interroge les différents serveurs vid
 
 -Cas d'un enregistrement immédiat : 
  http://moteurip:port/serveurTV/record?chanid=201&datedebut=0
+
  ou
+
  http://moteurip:port/serveurTV/record?chanid=201&duree=-1
+
+  ou ...
 
 -Implémenter la notion d'arrêt d'enregistrement. Mettre en place un système pour que le client demande l'arrêt d'un enregistrement (demande d'enregistrement sur la même chaine avec datedebut + duree = antérieur à maintenant ?)
 
