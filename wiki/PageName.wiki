@@ -1,0 +1,41 @@
+#summary One-sentence summary of this page.
+#labels Phase-Requirements
+
+= Introduction =
+
+F2XTV_V2 se transforme finalement en un nouveau projet mené avec Nioc pour faire un système TV multiserveur
+
+Le nom de code B2XTV...
+
+Il est en fait constitué d'un moteur qui interroge les différents serveurs videos et renvoi les flux et/ou les enregistre sur disque dur. Il fait donc office de magnétoscope numérique
+
+= définitions préalables =
+- moteur : le script qui gère les requêtes du client et qui pilote serveurs et enregistrements programmés
+
+- serveurTV : un serveur de télévision (freebox TV ; belgacom TV, VLC RTSP ...)
+
+= notes de développement =
+
+-les playlists sont demandées au "moteur" pour un serveurTV donné
+-une playliste 'customisée' est locale à la GUI (le moteur n'en sais rien et s'en moque)
+-le serveur doit retrouver le nom des chaines associées à un serveur
+ ex: http://moteurip:port/freeboxtv/getname?chanid=201 --> "France 2"
+-Cas d'un enregistrement immédiat : 
+ http://moteurip:port/serveurTV/record?chanid=201&datedebut=0
+ ou
+ http://moteurip:port/serveurTV/record?chanid=201&duree=-1
+-Implémenter la notion d'arrêt d'enregistrement. Mettre en place un système pour que le client demande l'arrêt d'un enregistrement (demande d'enregistrement sur la même chaine avec datedebut + duree = antérieur à maintenant ?)
+-Mettre en place un système de codes de retours du moteur vers le client GUI:
+  * ~~programmation incorrecte~~ : non ! géré par le client GUI
+  * chaine introuvable
+  * serveur indisponible
+  * fonction non supportée (pour éventuellement interdire une fonction qui fonctionnerait sur un serveurTV mais pas un autre
+  * gestion des espaces disque (disk full ; chemin erroné ...)
+  * configuration : chemain des enregistrements = le client GUI doit envoyer le chemin au serveur
+- voir pour intégrer un système simple de programme TV (tcsh.telecable.com)
+
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
