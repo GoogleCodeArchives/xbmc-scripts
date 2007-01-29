@@ -1,0 +1,104 @@
+#summary Développement d'un script de magnétoscope numérique multiserveur
+
+= Introduction =
+
+F2XTV_V2 se transforme finalement en un nouveau projet mené avec Nioc pour faire un système TV multiserveur
+
+Le nom de code B2XTV...
+
+Il est en fait constitué d'un moteur qui interroge les différents serveurs videos et renvoi les flux et/ou les enregistre sur disque dur. Il fait donc office de magnétoscope numérique
+
+= définitions préalables =
+- moteur : le script qui gère les requêtes du client et qui pilote serveurs et enregistrements programmés
+
+- serveurTV : un serveur de télévision (freebox TV ; belgacom TV, VLC RTSP ...)
+
+- client GUI : le 'frontend' ; l'interface qui va servir de relais entre les manipulations de l'utilisateur et le moteur de programmation.
+
+= notes de développement =
+
+- le format des demandes aux serveurs peuvent se faire de plusieurs manières:
+ http://moteurip:port/nom_serveurTV/nom_action?nom_param1=info1&nom_param2=info2...
+
+ ou
+
+ http://moteurip:port/nom_serveurTV?action=nom_action&nom_param1=info1&nom_param2=info2...
+
+ ou
+
+ http://moteurip:port/?server=nom_serveurTV&action=nom_action&nom_param1=info1&nom_param2=info2...
+
+Dans chacun des cas, nom_serveurTV (ou server=nom_serveurTV) et/ou nom_action (ou action=nom_action) peuvent être omis, des valeurs par défaut seront alors utilisées, ces valeurs sont:
+
+ 'all' pour nom_serveurTV, qui correspond à tous les serveurs, et donc l'action sera appliquée à chacun des serveurs
+
+ 'showInfos' pour action, qui affiche les informations sur le serveur sélectionné ou tous les serveurs.
+
+Ainsi l'adresse suivante, est valable:
+ http://moteurip:port/nom_action?nom_param1=info1&nom_param2=info2...
+
+-les playlists sont demandées au "moteur" pour un serveurTV donné :FAIT
+
+-une playliste 'customisée' est locale à la GUI (le moteur n'en sais rien et s'en moque)
+
+-le serveur doit retrouver le nom des chaines associées à un serveur
+ ex: http://moteurip:port/freeboxtv/getname?chanid=201 --> "France 2"
+  :NON : ceci est fait dans la playliste envoyée au client
+
+-Cas d'un enregistrement immédiat : 
+ http://moteurip:port/serveurTV/record?chanid=201&datedebut=0
+
+ ou
+
+ http://moteurip:port/serveurTV/record?chanid=201&duree=-1
+
+  ou ...
+
+-Implémenter la notion d'arrêt d'enregistrement. Mettre en place un système pour que le client demande l'arrêt d'un enregistrement (demande d'enregistrement sur la même chaine avec datedebut + duree = antérieur à maintenant ?)
+
+-Mettre en place un système de codes de retours du moteur vers le client GUI:
+  * ~~programmation incorrecte~~ : non ! géré par le client GUI
+  * chaine introuvable
+  * serveur indisponible
+  * fonction non supportée (pour éventuellement interdire une fonction qui fonctionnerait sur un serveurTV mais pas un autre
+  * gestion des espaces disque (disk full ; chemin erroné ...)
+  * configuration : chemain des enregistrements = le client GUI doit envoyer le chemin au serveur
+
+- voir pour intégrer un système simple de programme TV (tcsh.telecable.com)
+
+= Commandes http clientGUI - moteur =
+
+getTVserver
+demande la liste des serveurs configurés et fonctionnels
+/
+liste des serveursTV, leurs description, et de leurs paramètres (a voir)
+
+
+getRecords
+demande la liste des enregistrements en cours
+tvserver : le nom du serveur TV ou 'all' pour tous les serveurs
+liste : idprog,datedebut(timestamp),duree(min)
+ /!\ info redondante avec getProgs /!\ --> utilisation de getProgs avec le statut des programmations"
+
+getProgs
+demande les programmations effectuées
+tvserver :  le nom du serveur TV ou 'all' pour tous les serveurs
+idprog,datedebut(timestamp),duree(min),statut(états à définir)
+le statut pourrai prendre les états suivants :  - programmé : la programmation faite est ultérieure et non commencée  - en cours : l'enregistrement est en cours   - échoué : un problème a empêché l'enregistrement  - dépassé : script non démarré lors de la date de début  - stoppé : programmation stoppée Ou alors, on peut éventuellement lister les programmations, et c'est le client qui gèrera les dates pour définir le moment (programmé, en cours) On peut également envisagé de conserver les programmations dans le fichier des programmations pendant X heures après la fin de l'enregistrement. Mais peut être grosse charge moteur ?"
+
+stoprecord
+arrête un enregistrement donné
+tvserver :  le nom du serveur TV ou 'all' pour tous les serveurs idrec : identifiant de l'enregistrement
+0 --> l'enregistrement en cours mentionné n'existe pas '1' --> l'enregistrement en cours a été stoppé"
+
+
+record
+lance l'enregistrement d'une chaine
+
+
+
+
+prog
+programme un enregistrement
+
+
