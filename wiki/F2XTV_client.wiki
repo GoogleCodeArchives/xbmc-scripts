@@ -1,0 +1,12 @@
+#summary Un client GUI pour le moteur S2XTV
+
+= Introduction =
+
+F2XTV est un client graphique destiné à tourner sur XBMC plateforme XBox. 
+
+Il a comme rôle principal de servir de magnétoscope numérique pour Freebox (TV du fournisseur d'accès internet Free)
+
+
+= Details =
+
+Détail sur le client ici (a faire)
