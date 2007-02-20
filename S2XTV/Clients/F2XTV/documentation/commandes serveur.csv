@@ -1,0 +1,21 @@
+fonction;description;paramètres;résultat;commentaire sur la fonction
+getTVserver;demande la liste des serveurs configurés et fonctionnels;/;liste des serveursTV, leurs description, et de leurs paramètres (a voir);
+getRecords;demande la liste des enregistrements en cours;"tvserver : le nom du serveur TV
+       ou 'all' pour tous les serveurs";liste : idprog,datedebut(timestamp),duree(min);" /!\ info redondante avec getProgs /!\
+--> utilisation de getProgs avec le statut des programmations"
+getProgs;demande les programmations effectuées;"tvserver :  le nom du serveur TV
+       ou 'all' pour tous les serveurs";idprog,datedebut(timestamp),duree(min),statut(états à définir);"le statut pourrai prendre les états suivants :
+  - programmé : la programmation faite est ultérieure et non commencée
+  - en cours : l'enregistrement est en cours 
+  - échoué : un problème a empêché l'enregistrement
+  - dépassé : script non démarré lors de la date de début
+  - stoppé : programmation stoppée
+
+Ou alors, on peut éventuellement lister les programmations, et c'est le client qui gèrera les dates pour définir le moment (programmé, en cours)
+On peut également envisagé de conserver les programmations dans le fichier des programmations pendant X heures après la fin de l'enregistrement. Mais peut être grosse charge moteur ?"
+stoprecord;arrête un enregistrement donné;"tvserver :  le nom du serveur TV ou 'all' pour tous les serveurs
+
+idrec : identifiant de l'enregistrement";"0' --> l'enregistrement en cours mentionné n'existe pas
+'1' --> l'enregistrement en cours a été stoppé";
+record;lance l'enregistrement d'une chaine;;;
+prog;programme un enregistrement;;;
