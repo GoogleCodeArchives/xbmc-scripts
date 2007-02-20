@@ -1,0 +1,5 @@
+Les clients sont des interfaces pour se connecter au serveur (moteur) tout en présentant une partie grpahique à l'utilisateur.
+Moteur et clients sont indépendants pour laisser la possibilité au moteur de fonctionner en arrière plan sans bloquer l'utilisation de la plateforme du client.
+
+F2XTV : 
+- est un client GUI, destiné à la plateforme XBMC sur xbox, et orienté principalement vers le serveur TV freebox.

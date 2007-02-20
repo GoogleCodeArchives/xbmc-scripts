@@ -1,0 +1,45 @@
+<keymap>
+  <!-- This file contains the mapping of keys (gamepad, remote, remote extender and USB keyboard) to actions within XBMC Python -->
+
+  <!-- More infos about Button Codes: -->
+  <!-- url = http://www.xboxmediacenter.com/wiki/index.php?title=Building_Scripts#Button_Codes: -->
+
+  <!-- Or to obtain an updated list of Action & Button Codes, please see: Key.h and XBIRRemote.h -->
+  <!-- url = http://xbmc.svn.sourceforge.net/viewvc/xbmc/trunk/XBMC/guilib/Key.h?view=markup -->
+  <!-- url = http://xbmc.svn.sourceforge.net/viewvc/xbmc/trunk/XBMC/xbmc/XBIRRemote.h?view=markup -->
+
+  <!-- PS: For infos keyboard layout. -->
+  <!-- url = http://en.wikipedia.org/wiki/Keyboard_layout -->
+
+  <!-- You want to find button code fast and easily. -->
+  <!-- Download this script = http://scripts4xbmc.cvs.sourceforge.net/*checkout*/scripts4xbmc/Scripts/tools/ButtonCode.zip -->
+
+  <!-- THE FORMAT IS: -->
+  <!--  <description category> -->
+  <!--    <description action> -->
+  <!--      <button code="interger" type="string control">Description for button not used, but required</button> -->
+  <!--    </description action> -->
+  <!--  </description category> -->
+  <!-- INFOS BUTTON TAG: -->
+  <!-- Attribute code: This Attribute is required -->
+  <!-- Attribute type: not used reference for type of control, but required ; Controller. Remote, Extender and Keyboard -->
+  <!-- Text: description for button not used, but required -->
+
+  <!-- [OPT] SPECIAL TAG + ATTRIBUTE: but it are associated unit-->
+  <!--  <infokeyboard>interger</infokeyboard> : For more infos about list interger, look Class keyboardLayout in KeymapBuilder.py -->
+  <!-- Attribute ikb: This Attribute can be to place in all the tags -->
+  <!-- NOTE: KeymapBuilder.py has a function to change infokeyboard. -->
+  <!-- Look example at the end of KeymapBuilder.py -->
+
+  <infokeyboard>1</infokeyboard>
+
+  <general>
+    <exitscripts>
+      <button code="275" type="Controller">Back Button</button>
+      <button code="216" type="Remote">Back Button</button>
+      <button code="249" type="Extender">Clear Button</button>
+      <button code="61467" ikb="1" type="Keyboard">Escape Button</button>
+      <button code="61448" ikb="9" type="Keyboard">Backspace Button</button>
+    </exitscripts>
+  </general>
+</keymap>
