@@ -1,13 +1,26 @@
-#summary One-sentence summary of this page.
+#summary serveur de tv multiplateforme et multiserveur
 
 = Introduction =
 
 Add your content here.
 
 
-= Details =
+= Todo =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+Liste de choses à faire (validées par Nioc)
+
+#1 - Enregistrements: Enlevé les enregistrements en cours
+
+#2 - Programmation: Ajouter la durée de l'enregistrement comme info
+
+#3 - Inversion des boutons Valider et Annuler sur chaque fenêtre
+
+#4 - Status code HTTP personnalisé
+
+#5 - Information personnalisée sur le gui http pour différencier le retard et le dépassement de limite de flux
+
+#6 - Modifier le lien des flèches des chaines afin de permettre le bouclage. (précédent dans la première page, donnes la dernière page, et inversement)
+
+#7 - HTTPS au lieu de HTTP
+
+#8 - Revoir l'affichage de liste par une barre de défilement plutôt que les boutons
