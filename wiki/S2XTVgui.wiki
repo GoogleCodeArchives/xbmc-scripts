@@ -13,82 +13,81 @@ La classe S2XTVgui s'initialise comme suit :
 
 
 == Les fonctions ==
- 'def _request_treatment (self, params = {})'
+ `_request_treatment (self, params = {})`
 
- 'def get_state (self)'
+Routine interne de récupération des données
 
- def get_FreeSpace (self):
+ `get_state (self)`
 
- def get_TVservers (self):
+Retourne l'état du serveur
 
- def get_server_name (self):
+ `get_FreeSpace (self)`
 
- def get_server_version (self):
+Retourne l'espace disponible
 
- def get_python_version (self):
+ `get_TVservers (self)`
 
- def get_TVchannels (self, server):
+Retourne la liste des serveurs TV
 
- def get_channel_num (self, server, idchan):
+ `get_server_name (self)`
 
- def get_channel_name (self, server, idchan):
+ `get_server_version (self)`
 
- def get_channel_address (self, server, idchan):
+ `get_python_version (self)`
 
- def get_TVservers_rec (self):
+ `get_TVchannels (self, server)`
 
- def get_TVrecords (self, server):
+ `get_channel_num (self, server, idchan)`
 
- def get_TVrecord_id (self, server, idrec):
+ `get_channel_name (self, server, idchan)`
 
- def get_TVrecord_start (self, server, idrec):
+ `get_channel_address (self, server, idchan)`
 
- def get_TVrecord_end (self, server, idrec):
+ `get_TVservers_rec (self)`
 
- def get_TVrecord_state (self, server, idrec):
+ `get_TVrecords (self, server)`
 
- def get_records (self):
+ `get_TVrecord_id (self, server, idrec)`
 
- def get_record_server_name (self, idrec):
+ `get_TVrecord_start (self, server, idrec)`
 
- def get_record_id_channel (self, idrec):
+ `get_TVrecord_end (self, server, idrec)`
 
- def get_record_date (self, idrec):
+ `get_TVrecord_state (self, server, idrec)`
 
- def get_record_size (self, idrec):
+ `get_records (self)`
 
- def get_Playlist (self, server, idchan = None, rtsp='refuse'):
+ `get_record_server_name (self, idrec)`
 
- def program_record (self, server, idchan, infosSup = {}):
+ `get_record_id_channel (self, idrec)`
 
-		""" infosSup contient les informations de durée, de début 
+ `get_record_date (self, idrec)`
 
-		et/ou de fin d'enregistrement.
+ `get_record_size (self, idrec)`
 
-		
+ `get_Playlist (self, server, idchan = None, rtsp='refuse')`
 
-		infosSup peut contenir les informations suivantes:
+ `program_record (self, server, idchan, infosSup = {})`
 
-		\tduree en minutes (pour un démarrage immédiat) (duree)
+infosSup contient les informations de durée, de début et/ou de fin d'enregistrement.
 
-		ou
+infosSup peut contenir les informations suivantes:
 
-		\tdate et heure de début (d_year, d_month, d_day, d_hour, d_minutes)
-
-		\tdate et heure de fin (f_year, f_month, f_day, f_hour, f_minutes)
-
-		
-
-		"""
+ * duree en minutes (pour un démarrage immédiat) (duree)
+ ou
+ * date et heure de début (d_year, d_month, d_day, d_hour, d_minutes)
+ * date et heure de fin (f_year, f_month, f_day, f_hour, f_minutes)
 
 
-	def remove_record_prog (self, idrec):
+ `remove_record_prog (self, idrec)`
 
 
-	def stop_record (self, idrec):
+ `stop_record (self, idrec)`
 
 
-	def delete_record (self, idrec):
+ `delete_record (self, idrec)`
+
+
 
 
 
