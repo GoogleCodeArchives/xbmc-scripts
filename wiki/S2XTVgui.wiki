@@ -1,0 +1,95 @@
+#summary Librairie d'échange entre serveur et GUI client
+
+= Introduction =
+
+Cette librairie est destinée au développeurs d'interface graphiques (GUI) à base de python, pour appeler directement les différentes fonctions sur le serveur (s2xtv)
+
+
+= description =
+== initialisation ==
+La classe S2XTVgui s'initialise comme suit :
+
+ __init__ (self, host = '127.0.0.1', port = 8083):
+
+
+== Les fonctions ==
+ 'def _request_treatment (self, params = {})'
+
+ 'def get_state (self)'
+
+ def get_FreeSpace (self):
+
+ def get_TVservers (self):
+
+ def get_server_name (self):
+
+ def get_server_version (self):
+
+ def get_python_version (self):
+
+ def get_TVchannels (self, server):
+
+ def get_channel_num (self, server, idchan):
+
+ def get_channel_name (self, server, idchan):
+
+ def get_channel_address (self, server, idchan):
+
+ def get_TVservers_rec (self):
+
+ def get_TVrecords (self, server):
+
+ def get_TVrecord_id (self, server, idrec):
+
+ def get_TVrecord_start (self, server, idrec):
+
+ def get_TVrecord_end (self, server, idrec):
+
+ def get_TVrecord_state (self, server, idrec):
+
+ def get_records (self):
+
+ def get_record_server_name (self, idrec):
+
+ def get_record_id_channel (self, idrec):
+
+ def get_record_date (self, idrec):
+
+ def get_record_size (self, idrec):
+
+ def get_Playlist (self, server, idchan = None, rtsp='refuse'):
+
+ def program_record (self, server, idchan, infosSup = {}):
+
+		""" infosSup contient les informations de durée, de début 
+
+		et/ou de fin d'enregistrement.
+
+		
+
+		infosSup peut contenir les informations suivantes:
+
+		\tduree en minutes (pour un démarrage immédiat) (duree)
+
+		ou
+
+		\tdate et heure de début (d_year, d_month, d_day, d_hour, d_minutes)
+
+		\tdate et heure de fin (f_year, f_month, f_day, f_hour, f_minutes)
+
+		
+
+		"""
+
+
+	def remove_record_prog (self, idrec):
+
+
+	def stop_record (self, idrec):
+
+
+	def delete_record (self, idrec):
+
+
+
+
