@@ -9,6 +9,8 @@ Il a comme rôle principal de servir de magnétoscope numérique pour Freebox (T
 
 = Details =
 
+F2XTV est codé en python pour XBMC avec les librairies python fournies par XBMC
+
 == Modules spécifiques utilisés ==
  * GUIbuilder
 Cette librairie permet d'utiliser des fichiers XML afin de proposer simplement le skinning du script.
@@ -17,4 +19,3 @@ Cette librairie permet d'utiliser des fichiers XML afin de proposer simplement l
 Connexions au serveur :
 
 Utilisation d'une variable d'en-tête http pour 'réclamer' par des requêtes POST ou GET au serveur la fourniture de pages au format pickle.
-
