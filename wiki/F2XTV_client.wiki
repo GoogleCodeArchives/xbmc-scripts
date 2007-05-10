@@ -19,3 +19,11 @@ Cette librairie permet d'utiliser des fichiers XML afin de proposer simplement l
 Connexions au serveur :
 
 Utilisation d'une variable d'en-tête http pour 'réclamer' par des requêtes POST ou GET au serveur la fourniture de pages au format pickle.
+
+= TODO =
+
+#1 - informations type OSD sur la video
+s'inspirer du travail effectué sur mytheatre
+
+#2 - prog tv
+programme en cours pour chaque chaine
