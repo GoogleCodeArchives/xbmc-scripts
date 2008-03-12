@@ -2,12 +2,12 @@
 #labels F2XTV, Freebox, XBMC, XBOX
 
 Logo actuel de F2XTV (identique au logo du multiposte free):
-http://code.google.com/p/xbmc-scripts/wiki/images/logo.gif
+http://code.google.com/p/xbmc-scripts/wiki/logo.gif
 
 
 = Introduction =
 
-F2XTV est un script [http://www.python.org Python] qui permet de regarder et d'enregistrer les chaînes de télévision [http://adsl.free.fr/tv/multiposte/ multipostes] Freebox sur la console de jeux [www.xbox.com xbox] munie du programme [http://xbmc.org XBMC (XBox Media Center)].
+F2XTV est un script [http://www.python.org Python] qui permet de regarder et d'enregistrer les chaînes de télévision [http://adsl.free.fr/tv/multiposte/ multipostes] Freebox sur la console de jeux [http://www.xbox.com xbox] munie du programme [http://xbmc.org XBMC (XBox Media Center)].
 
 
 = Pré-requis =
