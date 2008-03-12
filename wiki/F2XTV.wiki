@@ -2,6 +2,7 @@
 #labels F2XTV, Freebox, XBMC, XBOX
 
 Logo actuel de F2XTV (identique au logo du multiposte free):
+
 http://xbmc-scripts.googlecode.com/svn/trunk/web/images/logo.gif
 
 
@@ -29,7 +30,8 @@ Chargez le dossier contenant le script F2XTV dans le dossier script de XBMC. Par
 Dans XBMC, aller dans scripts puis sélectionner F2XTV.
 
 Vous devriez voir apparaître la fenêtre suivante:
-http://xbmc-scripts.googlecode.com/svn/trunk/web/images/accueil.jpg
+
+[http://xbmc-scripts.googlecode.com/svn/trunk/web/images/accueil.jpg http://xbmc-scripts.googlecode.com/svn/trunk/web/images/accueil-small.jpg]
 
 En haut vous aurez les actions possibles suivant le bouton appuyé, ainsi que l'espace libre disponible dans votre dossier de sauvegarde.
 
@@ -44,14 +46,16 @@ Naviguer jusqu'à la chaine désirée et appuyez sur la touche http://xbmc-scrip
 Naviguer jusqu'à la chaîne désirée et appuyez sur la touche http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_b.png pour lancer/arrêter l'enregistrement
 
 La fenêtre suivante va apparaître pour confirmer l'enregistrement:
-http://xbmc-scripts.googlecode.com/svn/trunk/web/images/confirmRec.jpg
+
+[http://xbmc-scripts.googlecode.com/svn/trunk/web/images/confirmRec.jpg http://xbmc-scripts.googlecode.com/svn/trunk/web/images/confirmRec-small.jpg]
 
 En haut de l'écran différents label vont se modifier:
  * Le label indiquant l'espace libre donnera le nom de la chaine en cours d'enregistrement
  * Les labels des boutons changeront pour donner les actions possibles.
 
 La fenêtre suivante donne l'exemple de l'enregistrement de France 2:
-http://xbmc-scripts.googlecode.com/svn/trunk/web/images/enregistreFrance2.jpg
+
+[http://xbmc-scripts.googlecode.com/svn/trunk/web/images/enregistreFrance2.jpg http://xbmc-scripts.googlecode.com/svn/trunk/web/images/enregistreFrance2-small.jpg]
 
 Il suffira ensuite d'appuyer sur http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_b.png pour arrêter l'enregistrement
 
@@ -60,13 +64,16 @@ Il suffira ensuite d'appuyer sur http://xbmc-scripts.googlecode.com/svn/trunk/we
 Naviguer jusqu'à la chaîne désirée et appuyez sur la touche http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_x.png pour programmer un enregistrement
 
 La fenêtre suivante va apparaître pour programmer le jour de l'enregistrement:
-http://xbmc-scripts.googlecode.com/svn/trunk/web/images/dateRec.jpg
+
+[http://xbmc-scripts.googlecode.com/svn/trunk/web/images/dateRec.jpg http://xbmc-scripts.googlecode.com/svn/trunk/web/images/dateRec-small.jpg]
 
 Puis l'heure de début
-http://xbmc-scripts.googlecode.com/svn/trunk/web/images/heureDebRec.jpg
+
+[http://xbmc-scripts.googlecode.com/svn/trunk/web/images/heureDebRec.jpg http://xbmc-scripts.googlecode.com/svn/trunk/web/images/heureDebRec-small.jpg]
 
 Et l'heure de fin
-http://xbmc-scripts.googlecode.com/svn/trunk/web/images/heureFinRec.jpg
+
+[http://xbmc-scripts.googlecode.com/svn/trunk/web/images/heureFinRec.jpg http://xbmc-scripts.googlecode.com/svn/trunk/web/images/heureFinRec-small.jpg]
 
 Un message de confirmation cloturera la configuration
 
@@ -78,7 +85,7 @@ Il est alors nécessaire d'avoir le script lancé au moment du début de l'enreg
 
 En cliquant sur le bouton à gauche de l'écran nommé "Enregistrement", vous accederez à la liste des enregistrements déja effectués. Le même bouton changera de label pour retourner à la liste des chaines.
 
-http://xbmc-scripts.googlecode.com/svn/trunk/web/images/enregistrements.jpg
+[http://xbmc-scripts.googlecode.com/svn/trunk/web/images/enregistrements.jpg http://xbmc-scripts.googlecode.com/svn/trunk/web/images/enregistrements-small.jpg]
 
 === Regarder un enregistrement ===
 
@@ -89,7 +96,8 @@ Il suffit de sélectionner l'enregistrement en cliquant avec le bouton http://xb
 Naviguer jusqu'à l'enregistrement désirée et appuyez sur la touche http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_b.png pour le supprimer
 
 La fenêtre suivante va apparaître pour confirmer la suppression:
-http://xbmc-scripts.googlecode.com/svn/trunk/web/images/confirmSup.jpg
+
+[http://xbmc-scripts.googlecode.com/svn/trunk/web/images/confirmSup.jpg http://xbmc-scripts.googlecode.com/svn/trunk/web/images/confirmSup-small.jpg]
 
 
 = FAQ =
