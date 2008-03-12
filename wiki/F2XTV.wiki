@@ -11,7 +11,8 @@ http://xbmc-scripts.googlecode.com/svn/trunk/web/images/logo.gif
 F2XTV est un script [http://www.python.org Python] qui permet de regarder et d'enregistrer les chaînes de télévision [http://adsl.free.fr/tv/multiposte/ multipostes] Freebox sur la console de jeux [http://www.xbox.com xbox] munie du programme [http://xbmc.org XBMC (XBox Media Center)].
 
 Il est accessible via svn á l'addresse: http://xbmc-scripts.googlecode.com/svn/trunk/F2XTV/
-Une version stable est aussi présente à la page [http://code.google.com/p/xbmc-scripts/downloads/list download]
+
+Une version stable est aussi présente à la page des [http://code.google.com/p/xbmc-scripts/downloads/list downloads]
 
 
 = Pré-requis =
