@@ -359,7 +359,7 @@ class F2XTV (xbmcgui.WindowXML):
         
     
     def playCanal (self):
-        item = self.getSelectedPosition()
+        item = self.getCurrentListPosition()
         numchan,nomchan,idchan = self.chaines[item]
         print "play %s%s."%(self.adresseLocale,idchan)
         code = ServerStatus("%s%s"%(self.adresseLocale,idchan))
@@ -457,7 +457,7 @@ class F2XTV (xbmcgui.WindowXML):
         
     
     def progRec(self):
-        item = self.getSelectedPosition()
+        item = self.getCurrentListPosition()
         self.numchandecale, self.nomchandecale, self.idchandecale = self.chaines[item]
         self.chainesdecale = self.chaines[item]
         keyboard = xbmcgui.Dialog()
@@ -500,7 +500,7 @@ class F2XTV (xbmcgui.WindowXML):
         
     
     def quickRec(self):
-        item = self.getSelectedPosition()
+        item = self.getCurrentListPosition()
         numchan,nomchan,idchan = self.chaines[item]
         dialog = xbmcgui.Dialog()
         if dialog.yesno(unicode(nomchan,'utf8'),
