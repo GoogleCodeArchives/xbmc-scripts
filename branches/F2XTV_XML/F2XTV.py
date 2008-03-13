@@ -506,7 +506,7 @@ class F2XTV (xbmcgui.WindowXML):
         if dialog.yesno(nomchan,
             "Etes-vous sur de vouloir enregistrer cette chaine ?"):
             #vérifie si disponibilité
-            code = ServerStatus("%s%s"%(ADDRESSFTV,idchan))
+            code = ServerStatus("%s%s"%(self.adresseLocale,idchan))
 
             #interprétation de la disponibilité
             if code == 200:
