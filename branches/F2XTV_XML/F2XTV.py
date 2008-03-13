@@ -340,15 +340,22 @@ class F2XTV (xbmcgui.WindowXML):
 
     
     def onClick(self, controlID):
-        print "onClick(): controlID=%3i" % controlID
-        if controlID == 50 and self.Mode == 'TV':
-            self.playCanal()
-        elif controlID == 50 and self.Mode == 'FILE':
-            self.playFile()
-        elif controlID == 104 and self.Mode == 'TV':
-            self.toggleOnFile()
-        elif controlID == 104 and self.Mode == 'FILE':
-            self.toggleOnTV()
+        try:
+            print "onClick(): controlID=%3i" % controlID
+            if controlID == 50 and self.Mode == 'TV':
+                self.playCanal()
+            elif controlID == 50 and self.Mode == 'FILE':
+                self.playFile()
+            elif controlID == 104 and self.Mode == 'TV':
+                self.toggleOnFile()
+            elif controlID == 104 and self.Mode == 'FILE':
+                self.toggleOnTV()
+        except Exception, erreur:
+            print '__init__: erreur'
+            print erreur
+            import traceback
+            traceback.print_exc()
+            self.quit()
         
     
     def playCanal (self):
@@ -406,28 +413,41 @@ class F2XTV (xbmcgui.WindowXML):
 
     
     def onFocus (self, controlID):
-        print 'onFocus: controlID %i' % controlID
-        pass
+        try:
+            print 'onFocus: controlID %i' % controlID
+        except Exception, erreur:
+            print '__init__: erreur'
+            print erreur
+            import traceback
+            traceback.print_exc()
+            self.quit()
     
     def onAction(self, action):
-        actionID   = action.getId()
-        print "onAction(): actionID=%3i" % actionID
-        
-        if actionID == ACTION_BACK:
-            self.quit()
-        elif actionID == ACTION_X and self.MODE == "TV" and not self.decale and not self.REC:
-            self.progRec()
-        elif actionID == ACTION_B:
-            if self.MODE == "TV" and self.getFocusID() == 50:
-                if self.decale:
-                    self.cancelProg()
-                else:
-                    if self.REC:
-                        self.stopRec()
+        try:
+            actionID   = action.getId()
+            print "onAction(): actionID=%3i" % actionID
+            
+            if actionID == ACTION_BACK:
+                self.quit()
+            elif actionID == ACTION_X and self.MODE == "TV" and not self.decale and not self.REC:
+                self.progRec()
+            elif actionID == ACTION_B:
+                if self.MODE == "TV" and self.getFocusID() == 50:
+                    if self.decale:
+                        self.cancelProg()
                     else:
-                        self.quickRec()
-            elif self.MODE == "FILE":
-                self.delFile()
+                        if self.REC:
+                            self.stopRec()
+                        else:
+                            self.quickRec()
+                elif self.MODE == "FILE":
+                    self.delFile()
+        except Exception, erreur:
+            print '__init__: erreur'
+            print erreur
+            import traceback
+            traceback.print_exc()
+            self.quit()
         
     def quit(self):
         if self.REC:
