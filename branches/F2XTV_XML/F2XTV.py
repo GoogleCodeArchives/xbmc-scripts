@@ -193,8 +193,8 @@ class F2XTV (xbmcgui.WindowXML):
             self.decale       = False
             self.temps        = _time()
             self.REC          = False
-            self.MODE         = "TV"           #  pour les chaines freebox
-            #self.MODE         = "FILE"         # pour les enregistrements effectués
+            self.Mode         = "TV"           #  pour les chaines freebox
+            #self.Mode         = "FILE"         # pour les enregistrements effectués
             self.freespace    = get_freespace( self.records )
             self.chaines      = liste_chaines()
             self.proxyrunning = False
@@ -213,7 +213,7 @@ class F2XTV (xbmcgui.WindowXML):
         try:
           if self.firstStart:
               #initialisations
-              if self.MODE == 'TV' : self.FillChannels()
+              if self.Mode == 'TV' : self.FillChannels()
               else:                  self.FillRecords()
               
               self.info    = self.getControl(100) # label d'infos
@@ -391,7 +391,7 @@ class F2XTV (xbmcgui.WindowXML):
         
     
     def toggleOnFile (self):
-        self.MODE = "FILE" # bascule de mode
+        self.Mode = "FILE" # bascule de mode
         self.btnMode.setLabel(" Chaines") # nomme le bouton
         if self.REC == True:
             self.ImageBoutons(" ...fichier"," Eviter..."," ...manip...")
@@ -401,7 +401,7 @@ class F2XTV (xbmcgui.WindowXML):
         
     
     def toggleOnTV (self):
-        self.MODE="TV" # bascule de mode
+        self.Mode="TV" # bascule de mode
         self.btnMode.setLabel(" Enregistrements") # nomme le bouton
         if self.REC == True:
             self.ImageBoutons(" Regarder TV"," Arreter"," -")
@@ -429,10 +429,10 @@ class F2XTV (xbmcgui.WindowXML):
             
             if actionID == ACTION_BACK:
                 self.quit()
-            elif actionID == ACTION_X and self.MODE == "TV" and not self.decale and not self.REC:
+            elif actionID == ACTION_X and self.Mode == "TV" and not self.decale and not self.REC:
                 self.progRec()
             elif actionID == ACTION_B:
-                if self.MODE == "TV" and self.getFocusID() == 50:
+                if self.Mode == "TV" and self.getFocusID() == 50:
                     if self.decale:
                         self.cancelProg()
                     else:
@@ -440,7 +440,7 @@ class F2XTV (xbmcgui.WindowXML):
                             self.stopRec()
                         else:
                             self.quickRec()
-                elif self.MODE == "FILE":
+                elif self.Mode == "FILE":
                     self.delFile()
         except Exception, erreur:
             print '__init__: erreur'
