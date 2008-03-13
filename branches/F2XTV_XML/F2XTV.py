@@ -329,7 +329,7 @@ class F2XTV (xbmcgui.WindowXML):
     def record(self,channel):
         self.ImageBoutons(" Regarder TV"," Arreter"," -")
         numchan,nomchan,idchan = channel
-        nomchan = unicode(nomchan,'utf8')[:21]
+        nomchan = nomchan[:21]
         self.info.setLabel("Enregistrement de %s en cours ..."%nomchan)
         self.Recorder = Recorder( label    = self.info,
                                   chanid   = idchan,
@@ -475,12 +475,12 @@ class F2XTV (xbmcgui.WindowXML):
         else:
             self.eteindre="NON"
         dialog=xbmcgui.Dialog()
-        if dialog.yesno("%s le %s"%(unicode(self.nomchandecale, 'utf8'), self.jourchoix),
+        if dialog.yesno("%s le %s"%(self.nomchandecale, self.jourchoix),
             "Heure de Début %s - Heure de Fin %s"%(self.heurechoix,self.heurefinchoix),
             "Eteindre la console après l'enregistrement : %s"%(self.eteindre),
             "                                       Valider ?"):
             self.ImageBoutons(" Regarder TV"," Annuler P."," -")
-            self.info.setLabel("      %s le %s, de %s à %s."%(unicode(self.nomchandecale,'utf8'),self.jourchoix,self.heurechoix,self.heurefinchoix))
+            self.info.setLabel("      %s le %s, de %s à %s."%(self.nomchandecale,self.jourchoix,self.heurechoix,self.heurefinchoix))
             self.decale = True
             self.testdate()
         
@@ -503,7 +503,7 @@ class F2XTV (xbmcgui.WindowXML):
         item = self.getCurrentListPosition()
         numchan,nomchan,idchan = self.chaines[item]
         dialog = xbmcgui.Dialog()
-        if dialog.yesno(unicode(nomchan,'utf8'),
+        if dialog.yesno(nomchan,
             "Etes-vous sur de vouloir enregistrer cette chaine ?"):
             #vérifie si disponibilité
             code = ServerStatus("%s%s"%(ADDRESSFTV,idchan))
