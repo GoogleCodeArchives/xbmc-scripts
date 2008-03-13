@@ -432,7 +432,7 @@ class F2XTV (xbmcgui.WindowXML):
             elif actionID == ACTION_X and self.Mode == "TV" and not self.decale and not self.REC:
                 self.progRec()
             elif actionID == ACTION_B:
-                if self.Mode == "TV" and self.getFocusID() == 50:
+                if self.Mode == "TV" and self.getFocusId() == 50:
                     if self.decale:
                         self.cancelProg()
                     else:
