@@ -340,6 +340,7 @@ class F2XTV (xbmcgui.WindowXML):
 
     
     def onClick(self, controlID):
+        print "onClick(): controlID=%3i" % controlID
         if controlID == 50 and self.Mode == 'TV':
             self.playCanal()
         elif controlID == 50 and self.Mode == 'FILE':
@@ -404,12 +405,14 @@ class F2XTV (xbmcgui.WindowXML):
         self.FillChannels() # actualise la liste
 
     
-    def onFocus (self):
+    def onFocus (self, controlID):
+        print 'onFocus: controlID %i' % controlID
         pass
     
     def onAction(self, action):
         actionID   = action.getId()
-
+        print "onAction(): actionID=%3i" % actionID
+        
         if actionID == ACTION_BACK:
             self.quit()
         elif actionID == ACTION_X and self.MODE == "TV" and not self.decale and not self.REC:
