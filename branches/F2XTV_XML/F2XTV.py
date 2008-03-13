@@ -260,7 +260,7 @@ class F2XTV (xbmcgui.WindowXML):
                 else:
                     filesize = "%.1f %s" % (size,unite)
                     break
-            self.ChanList.addItem(
+            self.addItem(
                 xbmcgui.ListItem(
                     filename,
                     filesize,
@@ -346,9 +346,9 @@ class F2XTV (xbmcgui.WindowXML):
                 self.playCanal()
             elif controlID == 50 and self.Mode == 'FILE':
                 self.playFile()
-            elif controlID == 104 and self.Mode == 'TV':
+            elif controlID == 105 and self.Mode == 'TV':
                 self.toggleOnFile()
-            elif controlID == 104 and self.Mode == 'FILE':
+            elif controlID == 105 and self.Mode == 'FILE':
                 self.toggleOnTV()
         except Exception, erreur:
             print '__init__: erreur'
@@ -468,7 +468,7 @@ class F2XTV (xbmcgui.WindowXML):
         self.heurefinchoix = keyboard.numeric(2, 'Entrer l heure de fin')
         self.heurefinchoix = self.heurefinchoix.replace(" ","0")
         dialog = xbmcgui.Dialog()
-        if dialog.yesno(unicode(self.nomchandecale,'ut8'),
+        if dialog.yesno(self.nomchandecale,
             "Voulez-vous eteindre la console à la fin",
             "de l'enregistrement ?!"):
             self.eteindre="OUI"
