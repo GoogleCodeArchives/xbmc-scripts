@@ -385,7 +385,7 @@ class F2XTV (xbmcgui.WindowXML):
         
     
     def playFile (self):
-        filename = self.getSelectedItem().getLabel()
+        filename = self.getListItem(self.getCurrentListPosition()).getLabel()
         print "Lance la lecture de : %s" % chemin (self.records, filename)
         player = MyPlayer()
         player.play(chemin (self.records, filename))

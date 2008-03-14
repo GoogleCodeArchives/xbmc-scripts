@@ -484,7 +484,7 @@ class RTSPClient (threading.Thread):
           return 1
         if code == "500" or code == "404" or code == "453":
           print "ATTENTION : flux RTSP inaccessible :", code
-          erreur (self.socketClientHTTP, code, error, "The requested file %s (error %d) was not found on this server" % (self.url, code))
+          erreur (self.socketClientHTTP, code, error, "The requested file %s (error %d) was not found on this server" % (self.url, int(code)))
           return 2
         if code != "200":
           print "ATTENTION : flux RTSP non valide"
@@ -583,9 +583,13 @@ class RTSPClient (threading.Thread):
             self.socketClientHTTP.sendall(data[12:])
             # on envoie la paylaod... C'est a dire, le datgram moins les 12 octets d'entête
           except Exception, err:
-            (num, descr) = err
-            running = False # une exception... on arrete tout !
-            if num != 10054: # le client a coupé la communication
+            if type(err) == tuple:
+              (num, descr) = err
+              running = False # une exception... on arrete tout !
+              if num != 10054: # le client a coupé la communication
+                print "Exception lors de l'envoi des données en http"
+                print err
+            else:
               print "Exception lors de l'envoi des données en http"
               print err
 
