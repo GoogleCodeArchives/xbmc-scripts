@@ -583,14 +583,15 @@ class RTSPClient (threading.Thread):
             self.socketClientHTTP.sendall(data[12:])
             # on envoie la paylaod... C'est a dire, le datgram moins les 12 octets d'entête
           except Exception, err:
+            running = False # une exception... on arrete tout !
             if type(err) == tuple:
               (num, descr) = err
-              running = False # une exception... on arrete tout !
               if num != 10054: # le client a coupé la communication
                 print "Exception lors de l'envoi des données en http"
                 print err
             else:
               print "Exception lors de l'envoi des données en http"
+              print type(err), len(err)
               print err
 
     self.request_Teardown ()
