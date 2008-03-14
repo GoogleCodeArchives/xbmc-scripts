@@ -531,7 +531,7 @@ class F2XTV (xbmcgui.WindowXML):
     
     def delFile(self):
         print "mode : FILE / bouton B"
-        filename = self.getSelectedItem().getLabel() #1- on retrouve la vidéo pointée
+        filename = self.getListItem(self.getCurrentListPosition()).getLabel() #1- on retrouve la vidéo pointée
         if xbmcgui.Dialog().yesno("Suppression", #2- on supprime le fichier
             "Etes vous sur de vouloir supprimer ce fichier :",
             "%s"%filename):
