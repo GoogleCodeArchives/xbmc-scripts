@@ -17,15 +17,15 @@
       <textcolor>white</textcolor>
       <description>logo image</description>
       <posx>50</posx>
-      <posy>56</posy>
+      <posy>46</posy>
       <width>196</width>
       <height>26</height>
       <texture>script_F2XTV_freemultiposte.gif</texture>
     </control>
     <control type="label" id="100">
       <description>info label</description>
-      <posx>50</posx>
-      <posy>85</posy>
+      <posx>190</posx>
+      <posy>80</posy>
       <width>620</width>
       <height>50</height>
       <label>demarrage en cours ...</label>
@@ -39,7 +39,7 @@
       <textcolor>white</textcolor>
       <description>bouton B image</description>
       <posx>290</posx>
-      <posy>56</posy>
+      <posy>50</posy>
       <width>25</width>
       <height>25</height>
       <texture>script_F2XTV_btn_b.png</texture>
@@ -47,7 +47,7 @@
     <control type="label" id="101">
       <description>bouton B label</description>
       <posx>320</posx>
-      <posy>59</posy>
+      <posy>50</posy>
       <width>620</width>
       <height>50</height>
       <label> Quick Rec.</label>
@@ -61,7 +61,7 @@
       <textcolor>white</textcolor>
       <description>bouton X image</description>
       <posx>410</posx>
-      <posy>56</posy>
+      <posy>50</posy>
       <width>25</width>
       <height>25</height>
       <texture>script_F2XTV_btn_x.png</texture>
@@ -69,7 +69,7 @@
     <control type="label" id="102">
       <description>bouton X label</description>
       <posx>440</posx>
-      <posy>59</posy>
+      <posy>50</posy>
       <width>620</width>
       <height>50</height>
       <label> Prog Rec.</label>
@@ -83,7 +83,7 @@
       <textcolor>white</textcolor>
       <description>bouton A image</description>
       <posx>530</posx>
-      <posy>56</posy>
+      <posy>50</posy>
       <width>25</width>
       <height>25</height>
       <texture>script_F2XTV_btn_a.png</texture>
@@ -91,7 +91,7 @@
     <control type="label" id="103">
       <description>bouton A label</description>
       <posx>560</posx>
-      <posy>59</posy>
+      <posy>50</posy>
       <width>620</width>
       <height>50</height>
       <label> Regarder TV</label>
@@ -164,7 +164,7 @@
     </control>
 
     <control type="list" id="50">
-      <posx>190</posx>
+      <posx>185</posx>
       <posy>100</posy>
       <width>485</width>
       <height>425</height>

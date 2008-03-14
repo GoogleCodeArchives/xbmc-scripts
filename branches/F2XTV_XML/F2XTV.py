@@ -234,6 +234,7 @@ class F2XTV (xbmcgui.WindowXML):
         
     
     def FillChannels(self):
+        xbmcgui.lock()
         self.clearList()
         for (numchan,nomchan,idchan) in self.chaines:
             self.addItem(
@@ -244,9 +245,11 @@ class F2XTV (xbmcgui.WindowXML):
                     chemin (__logodir__, '%s.bmp'%idchan)
                     )
                 )
-        
+        xbmcgui.unlock()
+
     
     def FillRecords(self):
+        xbmcgui.lock()
         self.clearList()
         from glob import glob
         from os.path import split, getsize
@@ -268,6 +271,7 @@ class F2XTV (xbmcgui.WindowXML):
                     chemin(self.records, filename[:-3]+"tbn")
                     )
                 )
+        xbmcgui.unlock()
         
     
     ## GESTION de l'attente avant le debut de l'enregistrement ##
