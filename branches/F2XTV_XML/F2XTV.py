@@ -264,6 +264,7 @@ class F2XTV (xbmcgui.WindowXML):
                 xbmcgui.ListItem(
                     filename,
                     filesize,
+                    chemin(self.records, filename[:-3]+"tbn"),
                     chemin(self.records, filename[:-3]+"tbn")
                     )
                 )
