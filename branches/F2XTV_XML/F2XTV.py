@@ -298,7 +298,7 @@ class F2XTV (xbmcgui.WindowXML):
                             "Le proxy ne semble pas être démarré")
 
                     else:
-                        xbmcgui.Dialog().ok("%s (error code %s)" % (self.nomchandecale, code),
+                        xbmcgui.Dialog().ok(u"%s (error code %s)" % (self.nomchandecale, code),
                             "Le multiposte TV ne vous permet pas d'obtenir",
                             "cette chaine. Un redémarrage Freebox permet parfois",
                             "de mettre à jour la liste.")
@@ -469,19 +469,19 @@ class F2XTV (xbmcgui.WindowXML):
         self.heurefinchoix = keyboard.numeric(2, 'Entrer l heure de fin')
         self.heurefinchoix = self.heurefinchoix.replace(" ","0")
         dialog = xbmcgui.Dialog()
-        if dialog.yesno(self.nomchandecale,
-            "Voulez-vous eteindre la console à la fin",
+        if dialog.yesno(u"%s"%(self.nomchandecale),
+            u"Voulez-vous eteindre la console à la fin",
             "de l'enregistrement ?!"):
             self.eteindre="OUI"
         else:
             self.eteindre="NON"
         dialog=xbmcgui.Dialog()
-        if dialog.yesno("%s le %s"%(self.nomchandecale, self.jourchoix),
-            "Heure de Début %s - Heure de Fin %s"%(self.heurechoix,self.heurefinchoix),
-            "Eteindre la console après l'enregistrement : %s"%(self.eteindre),
-            "                                       Valider ?"):
+        if dialog.yesno(u"%s le %s"%(self.nomchandecale, self.jourchoix),
+            u"Heure de Début %s - Heure de Fin %s"%(self.heurechoix,self.heurefinchoix),
+            "Eteindre la console : %s"%(self.eteindre),
+            "                              Valider ?"):
             self.ImageBoutons(" Regarder TV"," Annuler P."," -")
-            self.info.setLabel("      %s le %s, de %s à %s."%(self.nomchandecale,self.jourchoix,self.heurechoix,self.heurefinchoix))
+            self.info.setLabel(u"      %s le %s, de %s à %s."%(self.nomchandecale,self.jourchoix,self.heurechoix,self.heurefinchoix))
             self.decale = True
             self.testdate()
         
