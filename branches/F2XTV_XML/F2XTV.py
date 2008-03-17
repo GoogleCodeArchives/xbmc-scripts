@@ -559,7 +559,7 @@ class MyPlayer (Player):
 
 
 # ------------------------------------------------------------------- #
-from threading import Thread, Lock
+from threading import Thread
 class Recorder(Thread):
 
     def __init__(self,label,chanid,channame,channum):
@@ -570,9 +570,8 @@ class Recorder(Thread):
         self.info = label
         self.filename = "%s_%s.avi"%(channame,strftime("%d%m%y_%Hh%M",localtime()))
         (self.records, self.adresseLocale) = getConfig()
-        self.lock = Lock()
         Thread.__init__(self)
-        self.filesize=0
+#        self.filesize=0
         
     
     def run(self):
@@ -588,20 +587,10 @@ class Recorder(Thread):
             rec = open ( chemin(self.records, self.filename), 'wb', 1 )
             starttime=_time()
             while self.recording:
-                self.lock.acquire()
-                try:
-                    self.info.setLabel("   %.3f Mo en %i sec."%(self.filesize/1024.0,_time()-starttime) )
-                except:
-                    print 25*'-'
-                    print "Mise en place du label impossible"
-                    import traceback
-                    traceback.print_exc()
-                    print 25*'-'
-                    self.recording = False
-                self.lock.release()
+#                 self.info.setLabel("   %.3f Mo en %i sec."%(self.filesize/1024.0,_time()-starttime) )
                 datas = handle.read(1024)
                 rec.write ( datas )
-                self.filesize += 1
+#                 self.filesize += 1
             
             rec.close()
             del rec, handle
