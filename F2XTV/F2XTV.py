@@ -1,68 +1,83 @@
-# -*- coding: cp1252 -*-              #
-#   F2XTV script python pour XBMC     #
-#       par ALEXSOLEX                 #
-#######################################
+# -*- coding: utf-8 -*-
 
-# modif du 10/03/2008 par nioc_bertheloneum et AlexSolex:
-# - Correction de l'erreur d'absence d'attribut _Thread__stopped du Recorder
-# - Suppression de la mise à jour temps réel du label pour afficher le temps d'enregistrement (perturbe l'enregistrement du fichier)
-# - changement de bibliothèque pour la récupération du flux dans le Recorder (urllib -> urllib2)
-# - suppression de commentaires inutiles
+_version = "12/03/08"
 
-# modif du 23/04/2007 par nioc_bertheloneum:
-# - le chemin d'enregistrement est modifiable dans le fichier F2XTV.ini
-# - le port du 'proxy' est modifiable dans le fichier F2XTV.ini
-# - le skin est modifiable dans le fichier S2XTV.ini (deux choix: 0 ou 1)
-# - intégration de la modification du script par piproix
-# - intégration de la modification du skin par blondin000
+import xbmcgui
+from time import time as _time, localtime, sleep, strftime
 
-_version = "10/03/08"
+# import xbmc,xbmcgui
+# import os
+# import time
+# import re
+# import urllib
+# import urllib2
+# import socket
+# import sys
+# import threading
+# import shutil,glob
+# import StringIO
+# from ConfigParser import ConfigParser
 
-import xbmc,xbmcgui
-import os
-import time
-import re
-import urllib
-import urllib2
-import socket
-import sys
-import threading
-import shutil,glob
-import StringIO
-from ConfigParser import ConfigParser
 
-chemin = os.path.join
-
+from os import getcwd
 #dossiers, fichiers et liens
-d = os.getcwd()
-if d[-1] == ';': d = d[:-1]
+__homedir__ = getcwd().replace(';','')
 
-HOMEDIR = d
-PICSDIR = chemin(HOMEDIR, "pics")
-LOGODIR = chemin(HOMEDIR, "logos")
+from os.path import join as chemin
+__logodir__ = chemin(__homedir__, "logos")
 
-Config = chemin('Q:', 'userdata', 'F2XTV.ini')
-if not os.path.isfile (Config) :
-  Config = chemin(HOMEDIR, 'F2XTV.ini')
-  
 
-settings = ConfigParser()
-settings.read(Config)
-RECORDS = settings.get('general','records')
-#port du proxy rtsp2http
-PORT = settings.get('general', 'port')
-ADDRESSFTV = 'http://127.0.0.1:%s/freeboxtv/' % PORT
+def getProxyConfig ():
+    """
+    RÃ©cupÃ©ration de la configuration du Proxy
+    """
+    from ConfigParser import ConfigParser
+    
+    Config = chemin(__homedir__, 'F2XTV.ini')
+    
+    settings = ConfigParser()
+    settings.read(Config)
+    
+    #port du proxy rtsp2http
+    port = settings.get('general', 'port')
+    
+    # version du proxy
+    versionProxy = settings.get('general', 'versionProxy')
+    
+    # chemin oÃ¹ se situe le proxy pour tenter de le dÃ©marrer
+    proxyPath = chemin(__homedir__, "rtsp2http-%s.py" % versionProxy)
+    
+    return (port, proxyPath)
+    
 
-#indice de l'interface graphique (0 = défaut, 1 = blondin000)
-indGUI = settings.getint('general', 'gui')
+def getConfig ():
+    """
+    RÃ©cupÃ©ration de la configuration gÃ©nÃ©rale
+    """
+    
+    from ConfigParser import ConfigParser
+    
+    Config = chemin(__homedir__, 'F2XTV.ini')
+    
+    settings = ConfigParser()
+    settings.read(Config)
+    
+    # dossier d'enregistrement
+    records = settings.get('general','records')
+    
+    #port du proxy rtsp2http
+    port = settings.get('general', 'port')
+    
+    # adresse pour accÃ©der Ã  une chaine sur le proxy
+    adresseLocale = 'http://127.0.0.1:%s/freeboxtv/' % port
+    
+    return (records, adresseLocale)
+    
 
-#chemin où se situe le proxy pour tenter de le démarrer
-ProxyPath = chemin(HOMEDIR, "rtsp2http-0.0.7.py")
-
-#gestion des exceptions d'arrêt d'enregistrement
+#gestion des exceptions d'arrÃªt d'enregistrement
 StopRec = "StopRec"
 
-#Espace libre à conserver en cas de disque plein
+#Espace libre Ã  conserver en cas de disque plein
 MINIFREESPACE = 204800 # int en ko (204800ko = 200Mo)
 
 #taille de fractionnement des fichiers
@@ -84,21 +99,30 @@ ACTION_PAUSE    = 12
 ACTION_STOP     = 13
 ACTION_X        = 18 # X Button
 
+# ------------------------------------------------------------------- #
 def liste_chaines():
-    #Récupère le contenu du fichier playlist.m3u dans la freebox
-    urllib.urlcleanup()
-    m3u=urllib.urlopen("http://mafreebox.freebox.fr/freeboxtv/playlist.m3u").read()
+    """
+    RÃ©cupÃ¨re le contenu du fichier playlist.m3u dans la freebox
+    """
+    from urllib import urlcleanup, urlopen
+    urlcleanup()
+    m3u=urlopen("http://mafreebox.freebox.fr/freeboxtv/playlist.m3u").read().decode('utf8')
     
+#     m3u = open(chemin(__homedir__,'playlist.m3u')).read().decode('utf-8')
+
     #liste les chaines contenues dans la playlist
     try:
+        from re import compile
         # [ (numero de chaine,nom de la chaine,id de la chaine)
-        exp = re.compile(r"#EXTINF:0,(\d+?) - (.*?)\nrtsp://mafreebox\.freebox.fr/freeboxtv/.*?(\d+)\n")
+        exp = compile(r"#EXTINF:0,(\d+?) - ([^\r\n]*?)\nrtsp://mafreebox\.freebox.fr/freeboxtv/.*?(\d+)")
         M3Uchannels = exp.findall(m3u)
     except Exception, erreur:
         print "exception dans la recherche des chaines"
         print erreur
     return M3Uchannels
 
+
+# ------------------------------------------------------------------- #
 def verifrep(repertoire):
     """cree le repertoire si il n'existe pas deja"""
     try:
@@ -106,43 +130,46 @@ def verifrep(repertoire):
     except:
         pass
 
-def suppr_balises(data): # OK A GARDER
-    """
-    Supprime les balises html dans le 'html' (string)
-    Renvoi un 'string' sans les balises html.
-    Le caractère '&nbsp' est remplacé par un espace
-    """
-    exp=r"""<.*?>"""
-    compile_obj = re.compile(exp,  re.IGNORECASE| re.DOTALL)
-    match_obj = compile_obj.search(data)
-    retour = compile_obj.subn('',data, 0)[0]
-    retour=retour.replace("&nbsp;"," ")
-    return retour
-
+# ------------------------------------------------------------------- #
 def get_freespace(path):
-    #freespace = 512000
+    """
+    RÃ©cupÃ¨res l'espace libre dans le dossier d'enregistrement
+    """
+    from os.path import splitdrive
+    from xbmc import getInfoLabel
+    from re import findall
+    
     try:
-        drive=os.path.splitdrive(path)[0][:-1]
-        print " **** %s drive freespace ****"%drive
-        html=urllib.urlopen("http://127.0.0.1/xbmcCmds/xbmcHttp?command=GetSystemInfoByName&parameter=system.freespace(%s)"%drive).read()
-        freespace=int(re.findall(r"(\d+)",html)[0])*1024/1000
-        print "Espace disque récupéré avec succès : %s Mo"%freespace
+        drive = splitdrive(path)[0][0]
+        print " **** %s drive freespace ****" % drive
+        labelFreespace = getInfoLabel ('System.Freespace(%s)' % drive)
+        print labelFreespace
+        freespace = int(findall(r"(\d+)",labelFreespace)[0])*1024/1000
+        print "Espace disque rÃ©cupÃ©rÃ© avec succÃ¨s : %s Mo"%freespace
     except:
-        print "Problème de récupération de l'espace disque"
-        freespace = 0   
+        print "ProblÃ¨me de rÃ©cupÃ©ration de l'espace disque"
+        freespace = -1
     return freespace
 
+
+# ------------------------------------------------------------------- #
 def ServerStatus(url):
+    """
+    VÃ©rifies si le serveur est actif sinon retour le code d'erreur
+    """
+    from urllib import urlcleanup, urlopen
+    from re import findall
     try:
-        serve = urllib.urlopen(url)
-        type = serve.info().getheader("Content-Type","")
-        if type.startswith("text/html"):
+        urlcleanup()
+        serve = urlopen(url)
+        typ = serve.info().getheader("Content-Type","")
+        if typ.startswith("text/html"):
             taille = int(serve.info().getheader("Content-Length",""))
             html = serve.read(taille)
             try:
-                exp=re.compile(r'\(error (.*?)\)')
-                code=exp.findall(html)[0]
+                code = findall(r'\(error (.*?)\)',html)[0]
             except:
+                code = '0'
                 if html.find("<H1>Not Found</H1>"):
                     code="404"
             return int(code)
@@ -151,149 +178,84 @@ def ServerStatus(url):
     except Exception,erreur:
         return None
 
-class main(xbmcgui.Window):
+# ------------------------------------------------------------------- #
+class F2XTV (xbmcgui.WindowXML):
+
+    def __init__(self,strXMLname, strFallbackPath, strDefaultName, forceFallback=1):
+        try:
+            (self.records,self.adresseLocale) = getConfig ()
+            
+            #crÃ©ation du dossier des enregistrements
+            verifrep(self.records)
+            
+            #variables
+            self.eteindre     = "NON"
+            self.decale       = False
+            self.temps        = _time()
+            self.REC          = False
+            self.Mode         = "TV"           #  pour les chaines freebox
+            #self.Mode         = "FILE"         # pour les enregistrements effectuÃ©s
+            self.freespace    = get_freespace( self.records )
+            self.chaines      = liste_chaines()
+            self.proxyrunning = False
+            self.Recorder     = None
+            
+            self.firstStart   = True
+            
+        except Exception, erreur:
+            print '__init__: erreur'
+            print erreur
+            import traceback
+            traceback.print_exc()
+            self.quit()
     
-    def __init__(self):
-        self.setCoordinateResolution(6)
-        xbmcgui.Window.__init__(self)
+    def onInit (self):
+        try:
+          if self.firstStart:
+              #initialisations
+              if self.Mode == 'TV' : self.FillChannels()
+              else:                  self.FillRecords()
+              
+              self.info    = self.getControl(100) # label d'infos
+              self.labelB  = self.getControl(101) # label du bouton B
+              self.labelX  = self.getControl(102) # label du bouton X
+              self.labelA  = self.getControl(103) # label du bouton A
+              self.btnMode = self.getControl(105) # bouton de mode
+              
+              self.info.setLabel("    Espace disque disponible (%s) : %s Mo." % (self.records,self.freespace))
+              
+              self.firstStart = False
+        except Exception, erreur:
+            print 'onInit: erreur'
+            print erreur
+            import traceback
+            traceback.print_exc()
+            self.quit()
         
-        #variables
-        self.eteindre    = "NON"
-        self.decale        = False
-        self.temps        = time.time()
-        self.REC        = False
-        self.MODE        ="TV" #  pour les chaines freebox
-        #self.MODE         = "FILE" pour les enregistrements effectués
-        self.freespace    = get_freespace( RECORDS )
-        self.chaines    = liste_chaines()
-        self.proxyrunning = False
-        self.Recorder    = None
-        
-        #initialisations
-        self.GUI()
-        self.FillChannels()
-        
-        #création du dossier des enregistrements
-        verifrep(RECORDS)
-        
-        self.info.setLabel("    Espace disque disponible (%s) : %s Mo." % (RECORDS,self.freespace))
-        
-        #focus initial
-        self.setFocus(self.btnMode)
-    
-    
-    def GUI(self):
-        
-        # background
-        if indGUI == 1: # Blondin basé sur PMIII
-            x, y, w, h, image = 0, 0, 720, 576, chemin (PICSDIR, 'Freebox.png')
-        else: # AlexSolex basé sur PMIII
-            x, y, w, h, image = 0, 0, 720, 576, 'background.png'
-        self.addControl(xbmcgui.ControlImage(x, y, w, h, image))
-        
-        #logo
-        if indGUI == 1: # Blondin basé sur PMIII
-            x, y, w, h, image = 50, 473, 196, 20, chemin(PICSDIR, 'freemultiposte.gif')
-        else: # AlexSolex basé sur PMIII
-            x, y, w, h, image = 50,  56, 196, 26, chemin(PICSDIR, 'freemultiposte.gif')
-        self.addControl(xbmcgui.ControlImage(x, y, w, h, image))
-        
-        #label d'infos
-        if indGUI == 1: # Blondin basé sur PMIII
-            x, y, w, h, label, font, textColor = 250, 470, 620, 50, "démarrage en cours...", 'font13', '0xFFFFFFFF'
-        else: # AlexSolex basé sur PMIII
-            x, y, w, h, label, font, textColor =  50,  85, 620, 50, "démarrage en cours...", 'font13', '0xFFFFFFFF'
-        self.info = xbmcgui.ControlLabel(x, y, w, h, label, font, textColor)
-        self.addControl(self.info)
-        
-        #label d'enregistrement
-        # AlexSolex et Blondin basé sur PMIII
-        x, y, w, h, label, font, textColor = 250, 56, 400, 50, "", 'font14', '0xFFCC1111'
-        self.addControl(xbmcgui.ControlLabel(x, y, w, h, label, font, textColor))
-        
-        #bouton de mode
-        if indGUI == 1: # Blondin basé sur PMIII
-            x, y, w, h, label = 87, 230,  15, 15, '     Voir Enregistrements'
-        else: # AlexSolex basé sur PMIII
-            x, y, w, h, label = 50, 110, 150, 30, ' Enregistrements'
-        self.btnMode = xbmcgui.ControlButton(x, y, w, h, label)
-        self.addControl(self.btnMode)
-        
-        #label B
-        if indGUI == 1: # Blondin basé sur PMIII
-            x, y, w, h, image =  82, 265, 25, 25, chemin(PICSDIR, 'Btn_b.png')
-        else: # AlexSolex basé sur PMIII
-            x, y, w, h, image = 290,  56, 25, 25, chemin(PICSDIR, 'Btn_b.png')
-        self.addControl(xbmcgui.ControlImage(x, y, w, h, image))
-        if indGUI == 1: # Blondin basé sur PMIII
-            x, y, w, h, label, font, textColor = 114, 266, 620, 50, ' Enregistrement Rapide', 'font13', '0xFFFFFFFF'
-        else: # AlexSolex basé sur PMIII
-            x, y, w, h, label, font, textColor = 320,  59, 620, 50, ' Quick Rec.', 'font13', '0xFFFFFFFF'
-        self.labelB = xbmcgui.ControlLabel(x, y, w, h, label, font, textColor)
-        self.addControl(self.labelB)
-        
-        #label X
-        if indGUI == 1: # Blondin basé sur PMIII
-            x, y, w, h, image =  82, 306, 25, 25, chemin(PICSDIR, 'Btn_x.png')
-        else: # AlexSolex basé sur PMIII
-            x, y, w, h, image = 410,  56, 25, 25, chemin(PICSDIR, 'Btn_x.png')
-        self.addControl(xbmcgui.ControlImage(x, y, w, h, image))
-        if indGUI == 1: # Blondin basé sur PMIII
-            x, y, w, h, label, font, textColor = 114, 306, 620, 50, ' Programmation', 'font13', '0xFFFFFFFF'
-        else: # AlexSolex basé sur PMIII
-            x, y, w, h, label, font, textColor = 440,  59, 620, 50, ' Prog Rec.', 'font13', '0xFFFFFFFF'
-        self.labelX = xbmcgui.ControlLabel(x, y, w, h, label, font, textColor)
-        self.addControl(self.labelX)
-        
-        #label A
-        if indGUI == 1: # Blondin basé sur PMIII
-            x, y, w, h, image =  82, 344, 25, 25, chemin(PICSDIR, 'Btn_a.png')
-        else: # AlexSolex basé sur PMIII
-            x, y, w, h, image = 530,  56, 25, 25, chemin(PICSDIR, 'Btn_a.png')
-        self.addControl(xbmcgui.ControlImage(x, y, w, h, image))
-        if indGUI == 1: # Blondin basé sur PMIII
-            x, y, w, h, label, font, textColor = 114, 345, 620, 50, ' Regarder TV', 'font13', '0xFFFFFFFF'
-        else: # AlexSolex basé sur PMIII
-            x, y, w, h, label, font, textColor = 560,  59, 620, 50, ' Regarder TV', 'font13', '0xFFFFFFFF'
-        self.labelA = xbmcgui.ControlLabel(x, y, w, h, label, font, textColor)
-        self.addControl(self.labelA)
-        
-        #Liste des chaines
-        #   Initialisation
-        if indGUI == 1: # Blondin basé sur PMIII
-            x, y, w, h, font, textColor, iW, iH, itH = 320, 150, 380, 380, 'font13', '0xFFFFFFFF', 60, 60, 60
-        else: # AlexSolex basé sur PMIII
-            x, y, w, h, font, textColor, iW, iH, itH = 200, 110, 415, 430, 'font13', '0xFFFFFFFF', 30, 30, 30
-        self.ChanList=xbmcgui.ControlList(x, y, w, h, font, textColor,
-                                          imageWidth=iW,
-                                          imageHeight=iH,
-                                          itemHeight=itH,
-                                          )
-        self.addControl(self.ChanList)
-        self.ChanList.setPageControlVisible(True)
-        
-        #navigation
-        self.btnMode.controlRight(self.ChanList)
-        self.ChanList.controlLeft(self.btnMode)
-    
     
     def FillChannels(self):
-        self.ChanList.reset()
+        xbmcgui.lock()
+        self.clearList()
         for (numchan,nomchan,idchan) in self.chaines:
-            self.ChanList.addItem(
+            self.addItem(
                 xbmcgui.ListItem(
-                    label    = unicode(nomchan,'utf8'),
-                    label2    = numchan,
-                    thumbnailImage = chemin (LOGODIR, "%s.bmp"%idchan)
+                    nomchan,
+                    numchan,
+                    chemin (__logodir__, '%s.bmp'%idchan),
+                    chemin (__logodir__, '%s.bmp'%idchan)
                     )
                 )
-    
+        xbmcgui.unlock()
+
     
     def FillRecords(self):
-        self.ChanList.reset()
-        for rec in glob.glob(chemin(RECORDS, '*.avi')):
-            filename = os.path.split(rec)[1]
-            size = float(os.path.getsize(chemin(RECORDS,filename)))
+        xbmcgui.lock()
+        self.clearList()
+        from glob import glob
+        from os.path import split, getsize
+        for rec in glob(chemin(self.records, '*.avi')):
+            filename = split(rec)[1]
+            size = float(getsize(chemin(self.records,filename)))
             unites = ["o","kio","Mio","Gio"]
             for unite in unites:
                 if size > 1024.0:
@@ -301,306 +263,366 @@ class main(xbmcgui.Window):
                 else:
                     filesize = "%.1f %s" % (size,unite)
                     break
-            self.ChanList.addItem(
+            self.addItem(
                 xbmcgui.ListItem(
-                    label    = filename,
-                    label2    = filesize,
-                    thumbnailImage = chemin(RECORDS, filename[:-3]+"tbn")
+                    filename,
+                    filesize,
+                    chemin(self.records, filename[:-3]+"tbn"),
+                    chemin(self.records, filename[:-3]+"tbn")
                     )
                 )
+        xbmcgui.unlock()
+        
     
     ## GESTION de l'attente avant le debut de l'enregistrement ##
-    
     def testdate(self):
         while self.decale==True:
-            y, mo, d, h, mi = time.localtime()[:5]
+            y, mo, d, h, mi = localtime()[:5]
             if self.heurechoix == '%.2d:%.2d' % (h, mi):
                 if self.jourchoix == '%.2d/%.2d/%d' % (d, mo, y):
                     self.decale = False
-                    
-                    # vérifie si disponible
-                    code = ServerStatus ( "%s%s" % (ADDRESSFTV, self.idchandecale) )
-                    
-                    # interprétation de la disponibilité
+
+                    # vÃ©rifie si disponible
+                    code = ServerStatus ( "%s%s" % (self.adresseLocale, self.idchandecale) )
+
+                    # interprÃ©tation de la disponibilitÃ©
                     if code == 200:
                         self.ImageBoutons(" Lecture"," Arreter"," -")
                         self.finenregis = False
                         self.record(self.chainesdecale)
                         self.testfin()
-                    
+
                     elif code==453: # max bandwidth
-                        xbmcgui.Dialog().ok("Limite Bande passante", 
+                        xbmcgui.Dialog().ok("Limite Bande passante",
                             "Votre bande passante ne vous permet pas",
-                            "d'obtenir un nouveau flux supplémentaire.")
-                    
+                            "d'obtenir un nouveau flux supplÃ©mentaire.")
+
                     elif not(code):
                         xbmcgui.Dialog().ok("Erreur de proxy",
-                            "Le proxy ne semble pas être démarré")
-                    
+                            "Le proxy ne semble pas Ãªtre dÃ©marrÃ©")
+
                     else:
-                        xbmcgui.Dialog().ok(self.nomchandecale, 
+                        xbmcgui.Dialog().ok(u"%s (error code %s)" % (self.nomchandecale, code),
                             "Le multiposte TV ne vous permet pas d'obtenir",
-                            "cette chaine. Un redémarrage Freebox permet parfois",
-                            "de mettre à jour la liste.")
+                            "cette chaine. Un redÃ©marrage Freebox permet parfois",
+                            "de mettre Ã  jour la liste.")
+        
     
     ## GESTION du temps d'enregistrement ##
     def testfin(self):
         while not self.finenregis:
-            time.sleep(2) # evite de lire l'heure en permanence (enfin je crois)
-            if self.heurefinchoix == '%.2d:%.2d' % time.localtime()[3:5]:
-                if indGUI == 1:
-                    self.ImageBoutons(" Regarder TV"," Enregistremment Rapide"," Programmation")
-                else:
-                    self.ImageBoutons(" Regarder TV"," Quick Rec."," Prog Rec.")
+            sleep(2) # evite de lire l'heure en permanence (enfin je crois)
+            if self.heurefinchoix == '%.2d:%.2d' % localtime()[3:5]:
+                self.ImageBoutons(" Regarder TV"," Quick Rec."," Prog Rec.")
                 self.finenregis = True
                 self.REC = False
                 self.info.setLabel("      Enregistrement fini")
-                self.Recorder.stop()        #arrêt de l'enregistrement
+                self.Recorder.stop()        #arrÃªt de l'enregistrement
                 if self.eteindre == "OUI":    #test si souhait eteindre
                     self.close()
-                    time.sleep(2) # pourquoi 2: pour etre sur de ne pas eteindre sur l'enregistrement(?)
-                    xbmc.shutdown()
-    
-    
+                    sleep(2) # pourquoi 2: pour etre sur de ne pas eteindre sur l'enregistrement(?)
+                    from xbmc import shutdown
+                    shutdown()
+
+
     def ImageBoutons(self,imageA,imageB,imageX):
         self.labelA.setLabel ("%s" % imageA)
         self.labelB.setLabel ("%s" % imageB)
         self.labelX.setLabel ("%s" % imageX)
-    
-    
+
+
     def record(self,channel):
         self.ImageBoutons(" Regarder TV"," Arreter"," -")
         numchan,nomchan,idchan = channel
-        nomchan = unicode(nomchan,'utf8')[:21]
-        print numchan
-        print nomchan
-        print idchan
+        nomchan = nomchan[:21]
         self.info.setLabel("Enregistrement de %s en cours ..."%nomchan)
-        self.Recorder = Recorder( label    = self.info, 
-                                  chanid   = idchan, 
+        self.Recorder = Recorder( label    = self.info,
+                                  chanid   = idchan,
                                   channame = nomchan,
-                                  channum  = numchan) #création du recorder
+                                  channum  = numchan) #crÃ©ation du recorder
         self.Recorder.start()
         self.REC = True
+
     
-    
-    def onControl(self,control):
-        if control == self.ChanList:
-            if self.MODE == "TV":
-                item = self.ChanList.getSelectedPosition()
-                numchan,nomchan,idchan = self.chaines[item]
-                print "play %s%s."%(ADDRESSFTV,idchan)
-                code = ServerStatus("%s%s"%(ADDRESSFTV,idchan))
-                if code == 200:
-                    xbmc.executebuiltin("XBMC.PlayMedia(%s%s)"%(ADDRESSFTV,idchan))
-                
-                elif code == 453: # max bandwidth
-                    xbmcgui.Dialog().ok("Limite Bande passante",
-                        "Votre bande passante ne vous permet pas",
-                        "d'obtenir un nouveau flux supplémentaire.")
-                
-                elif not(code):
-                    xbmcgui.Dialog().ok("Erreur de proxy",
-                        "Le proxy ne semble pas être démarré")
-                
-                else:
-                    xbmcgui.Dialog().ok(nomchan,
-                        "Le multiposte TV ne vous permet pas d'obtenir",
-                        "cette chaine. Un redémarrage Freebox permet parfois",
-                        "de mettre à jour la liste.")
-            
-            elif self.MODE == "FILE":
-                filename = self.ChanList.getSelectedItem().getLabel()
-                print "Lance la lecture de : %s" % chemin (RECORDS, filename)
-                player = MyPlayer()
-                player.play(chemin (RECORDS, filename))
+    def onClick(self, controlID):
+        try:
+            print "onClick(): controlID=%3i" % controlID
+            if controlID == 50 and self.Mode == 'TV':
+                self.playCanal()
+            elif controlID == 50 and self.Mode == 'FILE':
+                self.playFile()
+            elif controlID == 105 and self.Mode == 'TV':
+                self.toggleOnFile()
+            elif controlID == 105 and self.Mode == 'FILE':
+                self.toggleOnTV()
+        except Exception, erreur:
+            print '__init__: erreur'
+            print erreur
+            import traceback
+            traceback.print_exc()
+            self.quit()
         
-        elif control == self.btnMode:
-            if self.MODE=="TV":
-                self.MODE = "FILE" # bascule de mode
-                if indGUI == 1:
-                    self.btnMode.setLabel("     Chaines") # nomme le bouton
-                else:
-                    self.btnMode.setLabel(" Chaines") # nomme le bouton
-                if self.REC == True:
-                    self.ImageBoutons(" ...fichier"," Eviter..."," ...manip...")
-                else:
-                    self.ImageBoutons(" Lecture"," Effacer"," -")
-                self.FillRecords() # actualise la liste
-            
-            elif self.MODE == "FILE":
-                self.MODE="TV" # bascule de mode
-                if indGUI == 1:
-                    self.btnMode.setLabel("     Voir Enregistrements") # nomme le bouton
-                else:
-                    self.btnMode.setLabel(" Enregistrements") # nomme le bouton
-                if self.REC == True:
-                    self.ImageBoutons(" Regarder TV"," Arreter"," -")
-                elif self.decale == True:
-                    self.ImageBoutons(" Regarder TV"," Annuler P."," -")
-                else:
-                    if indGUI == 1:
-                        self.ImageBoutons(" Regarder TV"," Enregistremment Rapide"," Programmation")
-                    else:
-                        self.ImageBoutons(" Regarder TV"," Quick Rec."," Prog. Rec.")
-                self.FillChannels() # actualise la liste
     
+    def playCanal (self):
+        item = self.getCurrentListPosition()
+        numchan,nomchan,idchan = self.chaines[item]
+        print "play %s%s."%(self.adresseLocale,idchan)
+        code = ServerStatus("%s%s"%(self.adresseLocale,idchan))
+        if code == 200:
+            from xbmc import executebuiltin
+            executebuiltin("XBMC.PlayMedia(%s%s)"%(self.adresseLocale,idchan))
+        
+        elif code == 453: # max bandwidth
+            xbmcgui.Dialog().ok("Limite Bande passante",
+                "Votre bande passante ne vous permet pas",
+                "d'obtenir un nouveau flux supplÃ©mentaire.")
+
+        elif not(code):
+            xbmcgui.Dialog().ok("Erreur de proxy",
+                "Le proxy ne semble pas Ãªtre dÃ©marrÃ©")
+
+        else:
+            xbmcgui.Dialog().ok(nomchan,
+                "Le multiposte TV ne vous permet pas d'obtenir",
+                "cette chaine. Un redÃ©marrage Freebox permet parfois",
+                "de mettre Ã  jour la liste.")
+        
+    
+    def playFile (self):
+        filename = self.getListItem(self.getCurrentListPosition()).getLabel()
+        print "Lance la lecture de : %s" % chemin (self.records, filename)
+        player = MyPlayer()
+        player.play(chemin (self.records, filename))
+        
+    
+    def toggleOnFile (self):
+        self.Mode = "FILE" # bascule de mode
+        self.btnMode.setLabel(" Chaines") # nomme le bouton
+        if self.REC == True:
+            self.ImageBoutons(" ...fichier"," Eviter..."," ...manip...")
+        else:
+            self.ImageBoutons(" Lecture"," Effacer"," -")
+        self.FillRecords() # actualise la liste
+        
+    
+    def toggleOnTV (self):
+        self.Mode="TV" # bascule de mode
+        self.btnMode.setLabel(" Enregistrements") # nomme le bouton
+        if self.REC == True:
+            self.ImageBoutons(" Regarder TV"," Arreter"," -")
+        elif self.decale == True:
+            self.ImageBoutons(" Regarder TV"," Annuler P."," -")
+        else:
+            self.ImageBoutons(" Regarder TV"," Quick Rec."," Prog. Rec.")
+        self.FillChannels() # actualise la liste
+
+    
+    def onFocus (self, controlID):
+        try:
+            print 'onFocus: controlID %i' % controlID
+        except Exception, erreur:
+            print '__init__: erreur'
+            print erreur
+            import traceback
+            traceback.print_exc()
+            self.quit()
     
     def onAction(self, action):
-        
-        if action == ACTION_BACK:
-            self.REC=False
-            self.close()
-        
-        ## GESTION de la touche X pour le delai ##
-        elif action == ACTION_X:
-            if self.MODE == "TV" and not self.decale and not self.REC:
-                item = self.ChanList.getSelectedPosition()
-                self.numchandecale, self.nomchandecale, self.idchandecale = self.chaines[item]
-                self.chainesdecale = self.chaines[item]
-                keyboard = xbmcgui.Dialog()
-                self.jourchoix = keyboard.numeric(1, 'Entrer le jour')
-                self.jourchoix = self.jourchoix.replace(" ","0")
-                self.heurechoix = keyboard.numeric(2, 'Entrer l heure de début')
-                self.heurechoix = self.heurechoix.replace(" ","0")
-                self.heurefinchoix = keyboard.numeric(2, 'Entrer l heure de fin')
-                self.heurefinchoix = self.heurefinchoix.replace(" ","0")
-                dialog = xbmcgui.Dialog()
-                if dialog.yesno(unicode(self.nomchandecale,'ut8'),
-                    "Voulez-vous eteindre la console à la fin",
-                    "de l'enregistrement ?!"):
-                    self.eteindre="OUI"
-                else:
-                    self.eteindre="NON"
-                dialog=xbmcgui.Dialog()
-                if dialog.yesno("%s le %s"%(unicode(self.nomchandecale, 'utf8'), self.jourchoix),
-                    "Heure de Début %s - Heure de Fin %s"%(self.heurechoix,self.heurefinchoix),
-                    "Eteindre la console après l'enregistrement : %s"%(self.eteindre),
-                    "                                       Valider ?"):
-                    self.ImageBoutons(" Regarder TV"," Annuler P."," -")
-                    self.info.setLabel("      %s le %s, de %s à %s."%(unicode(self.nomchandecale,'utf8'),self.jourchoix,self.heurechoix,self.heurefinchoix))
-                    self.decale = True
-                    self.testdate()
-        
-        elif action == ACTION_B:
-            if self.MODE == "TV":
-                if self.getFocus() == self.ChanList:
+        try:
+            actionID   = action.getId()
+            print "onAction(): actionID=%3i" % actionID
+            
+            if actionID == ACTION_BACK:
+                self.quit()
+            elif actionID == ACTION_X and self.Mode == "TV" and not self.decale and not self.REC:
+                self.progRec()
+            elif actionID == ACTION_B:
+                if self.Mode == "TV" and self.getFocusId() == 50:
                     if self.decale:
-                        self.decale = False
-                        self.info.setLabel(" Programmation interrompu")
-                        if indGUI == 1:
-                            self.ImageBoutons(" Regarder TV"," Enregistremment Rapide"," Programmation")
-                        else:
-                            self.ImageBoutons(" Regarder TV"," Quick Rec."," Prog. Rec.")
+                        self.cancelProg()
                     else:
                         if self.REC:
-                            self.finenregis = True
-                            self.REC = False
-                            self.Recorder.stop() # arrêt de l'enregistrement
-                            self.info.setLabel(" Enregistrement interrompu")
-                            if indGUI == 1:
-                                self.ImageBoutons(" Regarder TV"," Enregistremment Rapide"," Programmation")
-                            else:
-                                self.ImageBoutons(" Regarder TV"," Quick Rec."," Prog. Rec.")
+                            self.stopRec()
                         else:
-                            item = self.ChanList.getSelectedPosition()
-                            numchan,nomchan,idchan = self.chaines[item]
-                            dialog = xbmcgui.Dialog()
-                            if dialog.yesno(unicode(nomchan,'utf8'),
-                                "Etes-vous sur de vouloir enregistrer cette chaine ?"):
-                                #vérifie si disponibilité
-                                code = ServerStatus("%s%s"%(ADDRESSFTV,idchan))
-                                
-                                #interprétation de la disponibilité
-                                if code == 200:
-                                    self.record(self.chaines[item])
-                                
-                                elif code == 453: # max bandwidth
-                                    xbmcgui.Dialog().ok("Limite Bande passante",
-                                        "Votre bande passante ne vous permet pas",
-                                        "d'obtenir un nouveau flux supplémentaire.")
-                                
-                                elif not(code):
-                                    xbmcgui.Dialog().ok("Erreur de proxy",
-                                        "Le proxy ne semble pas être démarré")
-                                
-                                else:
-                                    xbmcgui.Dialog().ok(nomchan,
-                                        "Le multiposte TV ne vous permet pas d'obtenir",
-                                        "cette chaine. Un redémarrage Freebox permet parfois",
-                                        "de mettre à jour la liste.")
-                
-            elif self.MODE == "FILE":
-                print "mode : FILE / bouton B"
-                listitem = self.ChanList.getSelectedItem()
-                filename = listitem.getLabel()           #1- on retrouve la vidéo pointé
-                if xbmcgui.Dialog().yesno("Suppression", #2- on supprime le fichier
-                    "Etes vous sur de vouloir supprimer ce fichier :",
-                    "%s"%filename):
-                    try:
-                        os.remove(chemin(RECORDS,filename))
-                        os.remove(chemin(RECORDS,filename[:-3]+"tbn"))
-                    except:
-                        print "erreur lors de la suppression"
-                self.FillRecords()                          #3- on actualise la liste
-
-
-class MyPlayer (xbmc.Player):
-    def __init__ ( self ):
-        xbmc.Player.__init__( self )
+                            self.quickRec()
+                elif self.Mode == "FILE":
+                    self.delFile()
+        except Exception, erreur:
+            print '__init__: erreur'
+            print erreur
+            import traceback
+            traceback.print_exc()
+            self.quit()
         
+    def quit(self):
+        if self.REC:
+            self.REC=False
+            sleep(2) # Pour permettre de terminer l'enregistrement proprement
+        self.close()
+        
+    
+    def progRec(self):
+        item = self.getCurrentListPosition()
+        self.numchandecale, self.nomchandecale, self.idchandecale = self.chaines[item]
+        self.chainesdecale = self.chaines[item]
+        keyboard = xbmcgui.Dialog()
+        self.jourchoix = keyboard.numeric(1, 'Entrer le jour')
+        self.jourchoix = self.jourchoix.replace(" ","0")
+        self.heurechoix = keyboard.numeric(2, 'Entrer l heure de dÃ©but')
+        self.heurechoix = self.heurechoix.replace(" ","0")
+        self.heurefinchoix = keyboard.numeric(2, 'Entrer l heure de fin')
+        self.heurefinchoix = self.heurefinchoix.replace(" ","0")
+        dialog = xbmcgui.Dialog()
+        if dialog.yesno(u"%s"%(self.nomchandecale),
+            u"Voulez-vous eteindre la console Ã  la fin",
+            "de l'enregistrement ?!"):
+            self.eteindre="OUI"
+        else:
+            self.eteindre="NON"
+        dialog=xbmcgui.Dialog()
+        if dialog.yesno(u"%s le %s"%(self.nomchandecale, self.jourchoix),
+            u"Heure de DÃ©but %s - Heure de Fin %s"%(self.heurechoix,self.heurefinchoix),
+            "Eteindre la console : %s"%(self.eteindre),
+            "                              Valider ?"):
+            self.ImageBoutons(" Regarder TV"," Annuler P."," -")
+            self.info.setLabel(u"      %s le %s, de %s Ã  %s."%(self.nomchandecale,self.jourchoix,self.heurechoix,self.heurefinchoix))
+            self.decale = True
+            self.testdate()
+        
+    
+    def cancelProg(self):
+        self.decale = False
+        self.info.setLabel(" Programmation interrompu")
+        self.ImageBoutons(" Regarder TV"," Quick Rec."," Prog. Rec.")
+        
+    
+    def stopRec(self):
+        self.finenregis = True
+        self.REC = False
+        self.Recorder.stop() # arrÃªt de l'enregistrement
+        self.info.setLabel(" Enregistrement interrompu")
+        self.ImageBoutons(" Regarder TV"," Quick Rec."," Prog. Rec.")
+        
+    
+    def quickRec(self):
+        item = self.getCurrentListPosition()
+        numchan,nomchan,idchan = self.chaines[item]
+        dialog = xbmcgui.Dialog()
+        if dialog.yesno(nomchan,
+            "Etes-vous sur de vouloir enregistrer cette chaine ?"):
+            #vÃ©rifie si disponibilitÃ©
+            code = ServerStatus("%s%s"%(self.adresseLocale,idchan))
+
+            #interprÃ©tation de la disponibilitÃ©
+            if code == 200:
+                self.record(self.chaines[item])
+
+            elif code == 453: # max bandwidth
+                xbmcgui.Dialog().ok("Limite Bande passante",
+                    "Votre bande passante ne vous permet pas",
+                    "d'obtenir un nouveau flux supplÃ©mentaire.")
+
+            elif not(code):
+                xbmcgui.Dialog().ok("Erreur de proxy",
+                    "Le proxy ne semble pas Ãªtre dÃ©marrÃ©")
+
+            else:
+                xbmcgui.Dialog().ok(nomchan,
+                    "Le multiposte TV ne vous permet pas d'obtenir",
+                    "cette chaine. Un redÃ©marrage Freebox permet parfois",
+                    "de mettre Ã  jour la liste.")
+        
+    
+    def delFile(self):
+        print "mode : FILE / bouton B"
+        filename = self.getListItem(self.getCurrentListPosition()).getLabel() #1- on retrouve la vidÃ©o pointÃ©e
+        if xbmcgui.Dialog().yesno("Suppression", #2- on supprime le fichier
+            "Etes vous sur de vouloir supprimer ce fichier :",
+            "%s"%filename):
+            try:
+                from os import remove
+                remove(chemin(self.records,filename))
+                remove(chemin(self.records,filename[:-3]+"tbn"))
+            except:
+                print "erreur lors de la suppression"
+        self.FillRecords()                          #3- on actualise la liste
+
+
+# ------------------------------------------------------------------- #
+from xbmc import Player
+class MyPlayer (Player):
+    def __init__ ( self ):
+        Player.__init__( self )
+
     def onPlayBackStarted(self):
         print 'playback started'
 
 
-class Recorder(threading.Thread):
-    
+# ------------------------------------------------------------------- #
+from threading import Thread
+class Recorder(Thread):
+
     def __init__(self,label,chanid,channame,channum):
         self.recording = False
         self.chanid = chanid
         self.channum = channum
         self.channame = channame
         self.info = label
-        self.filename = "%s_%s.avi"%(channame,time.strftime("%d%m%y_%Hh%M",time.localtime()))
-        threading.Thread.__init__(self)
+        self.filename = "%s_%s.avi"%(channame,strftime("%d%m%y_%Hh%M",localtime()))
+        (self.records, self.adresseLocale) = getConfig()
+        Thread.__init__(self)
 #        self.filesize=0
+        
     
     def run(self):
-        TV = urllib2.Request("%s%s"%(ADDRESSFTV,self.chanid))
+        from urllib2 import Request, urlopen, HTTPError
+        TV = Request("%s%s"%(self.adresseLocale,self.chanid))
         try:
-            handle = urllib2.urlopen(TV)
-        except urllib2.HTTPError, e:
+            handle = urlopen(TV)
+        except HTTPError, e:
             self.filename = self.filename[:-3] + 'htm'
-            open ( chemin(RECORDS, self.filename), 'wb', 1 ).write(handle.read(2048))
+            open ( chemin(self.records, self.filename), 'wb', 1 ).write(handle.read(2048))
         else:
             self.recording = True
-            rec = open ( chemin(RECORDS, self.filename), 'wb', 1 )
-        starttime=time.time()
-        while self.recording:
-#            self.info.setLabel("   %.3f Mo en %i sec."%(self.filesize/1024.0,time.time()-starttime) )
-            datas = handle.read(1024)
-            rec.write ( datas )
-#            self.filesize += 1
-
-        rec.close()
-        del TV, rec, handle
-        #création d'un tbn
-        try:
-            shutil.copyfile(chemin (LOGODIR, "%s.bmp"%self.chanid) , chemin (RECORDS, self.filename[:-3]+"tbn"))
-        except:
-            print "Erreur de création du .tbn"   
+            rec = open ( chemin(self.records, self.filename), 'wb', 1 )
+            starttime=_time()
+            while self.recording:
+#                 self.info.setLabel("   %.3f Mo en %i sec."%(self.filesize/1024.0,_time()-starttime) )
+                datas = handle.read(1024)
+                rec.write ( datas )
+#                 self.filesize += 1
+            
+            rec.close()
+            del rec, handle
+            
+            # crÃ©ation d'un tbn
+            try:
+                from shutil import copyfile
+                copyfile(chemin (__logodir__, "%s.bmp"%self.chanid) , chemin (self.records, self.filename[:-3]+"tbn"))
+            except:
+                print "Erreur de crÃ©ation du .tbn"
+        del TV
+        
     
     def stop(self):
         self.recording = False
 
 
-#teste si le proxy est déjà lancé
-if not(ServerStatus("http://127.0.0.1:%s/bla"%PORT)):
-    xbmc.executescript(ProxyPath)
-
-
-socket.setdefaulttimeout(2)
-
-go=main()
-go.doModal()
-del go
+# ------------------------------------------------------------------- #
+if __name__ == '__main__':
+    
+    # Configuration du temps limite pour attendre une rÃ©ponse du serveur
+    from socket import setdefaulttimeout
+    setdefaulttimeout (2.0) # 2 secondes
+    
+    (port, proxyPath) = getProxyConfig ()
+    
+    # Lances le proxy s'il n'est pas dÃ©jÃ  actif
+    if not (ServerStatus("http://127.0.0.1:%s/bla" % port)):
+        from xbmc import executescript
+        executescript(proxyPath)
+    
+    w = F2XTV('script_F2XTV.xml', __homedir__, 'Default')
+    w.doModal()
+    del w
+    

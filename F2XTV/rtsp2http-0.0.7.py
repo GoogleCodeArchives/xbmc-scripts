@@ -132,7 +132,7 @@ def erreur (client, numErreur, typeErreur, textErreur):
   tabReponse = ['<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">']
   tabReponse.append('<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr-FR" lang="fr-FR">')
   tabReponse.append('  <head>')
-  tabReponse.append('    <title>%d %s</title>' % (numErreur, typeErreur))
+  tabReponse.append('    <title>%d %s</title>' % (int(numErreur), typeErreur))
   tabReponse.append('  </head>')
   tabReponse.append('  <body>')
   tabReponse.append('    <h1>%s</h1>' % typeErreur)
@@ -144,7 +144,7 @@ def erreur (client, numErreur, typeErreur, textErreur):
   tabReponse.append('</html>')
   reponse = string.join(tabReponse, '\n')
   
-  tabReponse = ['HTTP/1.0 %d %s' % (numErreur, typeErreur)]
+  tabReponse = ['HTTP/1.0 %d %s' % (int(numErreur), typeErreur)]
   tabReponse.append('Server: %s'%_info_server)
   tabReponse.append('Keep-Alive: timeout=15, max=100')
   tabReponse.append('Connection: close')
@@ -484,7 +484,7 @@ class RTSPClient (threading.Thread):
           return 1
         if code == "500" or code == "404" or code == "453":
           print "ATTENTION : flux RTSP inaccessible :", code
-          erreur (self.socketClientHTTP, code, error, "The requested file %s (error %d) was not found on this server" % (self.url, code))
+          erreur (self.socketClientHTTP, code, error, "The requested file %s (error %d) was not found on this server" % (self.url, int(code)))
           return 2
         if code != "200":
           print "ATTENTION : flux RTSP non valide"
@@ -583,11 +583,21 @@ class RTSPClient (threading.Thread):
             self.socketClientHTTP.sendall(data[12:])
             # on envoie la paylaod... C'est a dire, le datgram moins les 12 octets d'entête
           except Exception, err:
-            (num, descr) = err
             running = False # une exception... on arrete tout !
-            if num != 10054: # le client a coupé la communication
+            if type(err) == tuple:
+              (num, descr) = err
+              if num != 10054: # le client a coupé la communication
+                print "Exception lors de l'envoi des données en http"
+                print err
+                import traceback
+                traceback.print_exc()
+            else:
               print "Exception lors de l'envoi des données en http"
+              print type(err)
               print err
+              import traceback
+              traceback.print_exc()
+              
 
     self.request_Teardown ()
   

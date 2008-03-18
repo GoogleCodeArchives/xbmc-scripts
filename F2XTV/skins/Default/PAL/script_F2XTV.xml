@@ -1,0 +1,336 @@
+<window id="3077">
+  <defaultcontrol>105</defaultcontrol>
+  <allowoverlay>yes</allowoverlay>
+  <controls>
+    <control type="image">
+      <colorkey>0</colorkey>
+      <textcolor>white</textcolor>
+      <description>background image</description>
+      <posx>0</posx>
+      <posy>0</posy>
+      <width>720</width>
+      <height>576</height>
+      <texture>script_F2XTV_background.png</texture>
+    </control>
+    <control type="image">
+      <colorkey>0</colorkey>
+      <textcolor>white</textcolor>
+      <description>logo image</description>
+      <posx>50</posx>
+      <posy>46</posy>
+      <width>196</width>
+      <height>26</height>
+      <texture>script_F2XTV_freemultiposte.gif</texture>
+    </control>
+    <control type="label" id="100">
+      <description>info label</description>
+      <posx>190</posx>
+      <posy>80</posy>
+      <width>620</width>
+      <height>50</height>
+      <label>demarrage en cours ...</label>
+      <font>font12</font>
+      <textcolor>white</textcolor>
+    </control>
+    
+    <!--Bouton B-->
+    <control type="image">
+      <colorkey>0</colorkey>
+      <textcolor>white</textcolor>
+      <description>bouton B image</description>
+      <posx>290</posx>
+      <posy>50</posy>
+      <width>25</width>
+      <height>25</height>
+      <texture>script_F2XTV_btn_b.png</texture>
+    </control>
+    <control type="label" id="101">
+      <description>bouton B label</description>
+      <posx>320</posx>
+      <posy>50</posy>
+      <width>620</width>
+      <height>50</height>
+      <label> Quick Rec.</label>
+      <font>font13</font>
+      <textcolor>white</textcolor>
+    </control>
+    
+    <!--Bouton X-->
+    <control type="image">
+      <colorkey>0</colorkey>
+      <textcolor>white</textcolor>
+      <description>bouton X image</description>
+      <posx>410</posx>
+      <posy>50</posy>
+      <width>25</width>
+      <height>25</height>
+      <texture>script_F2XTV_btn_x.png</texture>
+    </control>
+    <control type="label" id="102">
+      <description>bouton X label</description>
+      <posx>440</posx>
+      <posy>50</posy>
+      <width>620</width>
+      <height>50</height>
+      <label> Prog Rec.</label>
+      <font>font13</font>
+      <textcolor>white</textcolor>
+    </control>
+    
+    <!--Bouton A-->
+    <control type="image">
+      <colorkey>0</colorkey>
+      <textcolor>white</textcolor>
+      <description>bouton A image</description>
+      <posx>530</posx>
+      <posy>50</posy>
+      <width>25</width>
+      <height>25</height>
+      <texture>script_F2XTV_btn_a.png</texture>
+    </control>
+    <control type="label" id="103">
+      <description>bouton A label</description>
+      <posx>560</posx>
+      <posy>50</posy>
+      <width>620</width>
+      <height>50</height>
+      <label> Regarder TV</label>
+      <font>font13</font>
+      <textcolor>white</textcolor>
+    </control>
+    
+    <!--<control type="label" id="104">
+      <description>rec label</description>
+      <posx>250</posx>
+      <posy>56</posy>
+      <width>400</width>
+      <height>50</height>
+      <label>-</label>
+      <font>font14</font>
+      <textcolor>0xFFCC1111</textcolor>
+    </control>-->
+    <control type="label" id="12">
+      <description>number of files text label</description>
+      <posx>545</posx>
+      <posy>540</posy>
+      <align>right</align>
+      <label>-</label>
+      <font>font10</font>
+      <textcolor>white</textcolor>
+    </control>
+    
+    <control type="group" id="9000">
+      <posx>20</posx>
+      <posy>100</posy>
+      <control type="button" id="105">
+        <!--</default>-->
+        <description>Mode button</description>
+        <posx>0</posx>
+        <posy>0</posy>
+        <label> Enregistrement</label>
+        <width>160</width>
+        <height>33</height>
+        <texturefocus>script_F2XTV_button-focus.png</texturefocus>
+        <texturenofocus>script_F2XTV_button-nofocus.png</texturenofocus>
+        <font>font13</font>
+        <textcolor>white</textcolor>
+        <disabledcolor>disabled</disabledcolor>
+        <textoffsetx>17</textoffsetx>
+        <aligny>center</aligny>
+        <onleft>50</onleft>
+        <onright>50</onright>
+        <onup>105</onup>
+        <ondown>105</ondown>
+      </control>
+      <!--<control type="button" id="106">
+        <description>Preview button</description>
+        <posx>0</posx>
+        <posy>37</posy>
+        <label>Prévisualiser</label>
+        <width>160</width>
+        <height>33</height>
+        <texturefocus>script_F2XTV_button-focus.png</texturefocus>
+        <texturenofocus>script_F2XTV_button-nofocus.png</texturenofocus>
+        <font>font13</font>
+        <textcolor>white</textcolor>
+        <disabledcolor>disabled</disabledcolor>
+        <textoffsetx>17</textoffsetx>
+        <aligny>center</aligny>
+        <onleft>50</onleft>
+        <onright>4</onright>
+        <onup>2</onup>
+        <ondown>99</ondown>
+      </control>-->
+    </control>
+
+    <control type="list" id="50">
+      <posx>185</posx>
+      <posy>100</posy>
+      <width>485</width>
+      <height>425</height>
+      <onleft>9000</onleft>
+      <onright>60</onright>
+      <onup>50</onup>
+      <ondown>50</ondown>
+      <viewtype label="535">list</viewtype>
+      <pagecontrol>60</pagecontrol>
+      <scrolltime>200</scrolltime>
+      <spinwidth>18</spinwidth>
+      <spinheight>16</spinheight>
+      <spinposx>450</spinposx>
+      <spinposy>445</spinposy>
+      <spincolor>white</spincolor>
+      <spinfont>font10</spinfont>
+      <textureup>script_F2XTV_scroll-up.png</textureup>
+      <texturedown>script_F2XTV_scroll-down.png</texturedown>
+      <textureupfocus>script_F2XTV_scroll-up-focus.png</textureupfocus>
+      <texturedownfocus>script_F2XTV_scroll-down-focus.png</texturedownfocus>
+      <texturefocus>script_F2XTV_list-focus.png</texturefocus>
+      <texturenofocus>script_F2XTV_list-nofocus.png</texturenofocus>
+      <image>icon-folder.png</image>
+      <textureheight>26</textureheight>
+      <font>font13</font>
+      <selectedcolor>green</selectedcolor>
+      <textcolor2>60ffffff</textcolor2>
+      <textcolor>white</textcolor>
+      <suffix>|</suffix>
+      <textxoff>3</textxoff>
+      <textxoff2>0</textxoff2>
+      <aligny>center</aligny>
+      <itemlayout height="29">
+        <control type="image">
+          <texture>-</texture>
+          <colorkey>0</colorkey>
+          <textcolor>white</textcolor>
+          <posx>5</posx>
+          <posy>3</posy>
+          <width>22</width>
+          <height>22</height>
+          <info>ListItem.Icon</info>
+        </control>
+        <control type="label">
+          <label>-</label>
+          <textcolor>white</textcolor>
+          <posx>30</posx>
+          <posy>3</posy>
+          <width>430</width>
+          <height>22</height>
+          <font>font13</font>
+          <aligny>center</aligny>
+          <selectedcolor>green</selectedcolor>
+          <align>left</align>
+          <info>ListItem.Label</info>
+        </control>
+        <control type="label">
+          <label>-</label>
+          <posx>475</posx>
+          <posy>3</posy>
+          <width>300</width>
+          <height>22</height>
+          <font>font13</font>
+          <aligny>center</aligny>
+          <selectedcolor>green</selectedcolor>
+          <textcolor>grey</textcolor>
+          <align>right</align>
+          <info>ListItem.Label2</info>
+        </control>
+      </itemlayout>
+      <focusedlayout height="29">
+        <control type="image">
+          <colorkey>0</colorkey>
+          <textcolor>white</textcolor>
+          <width>485</width>
+          <height>29</height>
+          <posx>0</posx>
+          <posy>0</posy>
+          <visible>Control.HasFocus(50)</visible>
+          <texture>script_F2XTV_list-focus.png</texture>
+        </control>
+        <control type="image">
+          <texture>-</texture>
+          <colorkey>0</colorkey>
+          <textcolor>white</textcolor>
+          <posx>5</posx>
+          <posy>3</posy>
+          <width>22</width>
+          <height>22</height>
+          <info>ListItem.Icon</info>
+        </control>
+        <control type="label">
+          <label>-</label>
+          <textcolor>white</textcolor>
+          <posx>30</posx>
+          <posy>3</posy>
+          <width>430</width>
+          <height>22</height>
+          <font>font13</font>
+          <aligny>center</aligny>
+          <selectedcolor>green</selectedcolor>
+          <align>left</align>
+          <info>ListItem.Label</info>
+        </control>
+        <control type="label">
+          <label>-</label>
+          <posx>475</posx>
+          <posy>3</posy>
+          <width>300</width>
+          <height>22</height>
+          <font>font13</font>
+          <aligny>center</aligny>
+          <selectedcolor>green</selectedcolor>
+          <textcolor>grey</textcolor>
+          <align>right</align>
+          <info>ListItem.Label2</info>
+        </control>
+      </focusedlayout>
+    </control>
+
+
+    <control type="button">
+      <font>font13</font>
+      <textcolor>white</textcolor>
+      <disabledcolor>disabled</disabledcolor>
+      <textoffsetx>17</textoffsetx>
+      <aligny>center</aligny>
+      <posx>680</posx>
+      <posy>100</posy>
+      <width>20</width>
+      <height>20</height>
+      <onclick>PageUp(60)</onclick>
+      <texturefocus border="4">script_F2XTV_scrollbar_arrow_up_focus.png</texturefocus>
+      <texturenofocus border="4">script_F2XTV_scrollbar_arrow_up.png</texturenofocus>
+      <visible>Control.IsVisible(60)</visible>
+    </control>
+    <control type="button">
+      <font>font13</font>
+      <textcolor>white</textcolor>
+      <disabledcolor>disabled</disabledcolor>
+      <textoffsetx>17</textoffsetx>
+      <aligny>center</aligny>
+      <posx>680</posx>
+      <posy>500</posy>
+      <width>20</width>
+      <height>20</height>
+      <onclick>PageDown(60)</onclick>
+      <texturefocus border="4">script_F2XTV_scrollbar_arrow_down_focus.png</texturefocus>
+      <texturenofocus border="4">script_F2XTV_scrollbar_arrow_down.png</texturenofocus>
+      <visible>Control.IsVisible(60)</visible>
+    </control>
+    <control type="scrollbar" id="60">
+      <posx>680</posx>
+      <posy>120</posy>
+      <width>20</width>
+      <height>380</height>
+      <texturesliderbackground border="4">script_F2XTV_scrollbar_background.png</texturesliderbackground>
+      <texturesliderbar border="4">script_F2XTV_scrollbar_bar.png</texturesliderbar>
+      <texturesliderbarfocus border="4">script_F2XTV_scrollbar_bar_focus.png</texturesliderbarfocus>
+      <textureslidernib>-</textureslidernib>
+      <textureslidernibfocus>-</textureslidernibfocus>
+      <onleft>50</onleft>
+      <onright>9000</onright>
+      <showonepage>false</showonepage>
+      <orientation>vertical</orientation>
+    </control>
+
+  </controls>
+</window>
