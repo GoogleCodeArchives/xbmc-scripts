@@ -13,11 +13,10 @@ import time
 __todo__=u"""
 -Harmoniser les retours infructueux de parse (None, variable vide, texte par défaut, exception ?...)
 -Internationaliser les expressions régulières qui ne le sont pas encore
--Mettre le forcing de parse dans toutes les méthodes
--Refaire le parser global de Movie pour qu'il appel les différentes méthodes et supprimer l'utilisation de la variable PARSEDflag
 -Lors du téléchargement des pages film et personnage, vérifier que la page est conforme aux attentes (gérer 404)
+-Refaire le système de l'agenda pour prenre l'url avec les dates seule
 """
-__doc__=u"""To do"""
+
 __author__  = u"Alexsolex"
 __email__   = u"alexsolex(AT)gmail.com"
 __version__ = u"0.0.1"
@@ -26,7 +25,8 @@ __version__ = u"0.0.1"
 global COUNTRY
 global ALLOCINE_ENCODING
 global ALLOCINE_DOMAIN
-
+global VIDEO_STREAM_URL
+global LAST_VISITED_URL 
 AVAILABLE_COUNTRIES = ["FR", "EN", "ES", "DE"]
 
 ALLOCINE_DOMAIN_dic = {"FR":"http://www.allocine.fr",
@@ -44,20 +44,27 @@ VIDEO_STREAM_URL_dic = {"FR":"http://a69.g.akamai.net/n/69/32563/v1/mediaplayer.
                         "ES":"http://h.es.mediaplayer.allocine.fr%s.flv",
                         "DE":"http://h.de.mediaplayer.allocine.fr%s.flv"
                         }
-PHOTOS_MEDIA_URL = "http://a69.g.akamai.net/n/69/10688/v1/img5.allocine.fr/acmedia/rsz/434/x/x/x/medias"
+COUNTRY="FR"
+ALLOCINE_ENCODING=ALLOCINE_ENCODING_dic[COUNTRY]
+ALLOCINE_DOMAIN=ALLOCINE_DOMAIN_dic[COUNTRY]
+VIDEO_STREAM_URL = VIDEO_STREAM_URL_dic[COUNTRY]
+LAST_VISITED_URL =ALLOCINE_DOMAIN
+
+PHOTOS_MEDIA_URL    = "http://a69.g.akamai.net/n/69/10688/v1/img5.allocine.fr/acmedia/rsz/434/x/x/x/medias"
 THIS_WEEK_URL       = "/film/cettesemaine.html"
 AGENDA_URL          = "/film/agenda.html"
 MOVIE_URL           = "/film/fichefilm_gen_cfilm=%s.html"
 CASTING_URL         = "/film/casting_gen_cfilm=%s.html"
 SORTIES_URL         = "/film/agenda_gen_date=%s.html"
 PHOTOS_FILM_URL     = "/film/galerievignette_gen_cfilm=%s.html"
-
+CINEMA_URL          = "/seance/salle_gen_csalle=%s.html"
 PERSO_URL           = "/personne/fichepersonne_gen_cpersonne=%s.html"
 PHOTOS_PERSON_URL   = "/personne/galerievignette_gen_cpersonne=%s.html"
 
 XML_BA_INFOS        = "/video/xml/videos.asp?media=%s"
 
 SEARCH_URL          = "/recherche/"
+
 
 
 import cookielib
@@ -105,27 +112,37 @@ def Log(msg,cat="I"):
         cat = "I"
         msg = "------marker------"
     logcats = {"W":"WARNING",
-               "I":"Info",
-               "E":"Error"
-               }
-    print "%s : %s"%(logcats[cat],msg)
-
+               "I":"INFO",
+               "E":"ERROR",
+               "D":"DEVELOPER",
+               "O":"OTHER"}
+    if not cat in logcats.keys(): cat="O"
+    try:
+        f=open(os.path.join(ROOTDIR,"allocine.log"),"a")
+        f.write("%s : %s"%(logcats[cat],msg)+"\n")
+        f.close()
+    except:
+        print "%s : %s"%(logcats[cat],msg)        
+#log initialisation
+f=open(os.path.join(ROOTDIR,"allocine.log"),"w")
+f.close()
+Log(u"allocine library loading - creation of this log file")
         
         #---------------------------#
         # FONCTIONS TRAITEMENT HTML #
         #---------------------------#
 
-def get_page(url,params={},savehtml=True,filename="defaut.html",debuglevel=0):
+def connect(url,params={},debuglevel=0):
     u"""
     Download given url and return datas. Use GZIP compression if available
     <params> is a ditionnary for POST request
-    when 'True', <savehtml> param indicate that <filename> should be used to write file on disk
     Set debuglevel to 1 to print http headers 
     """
-    import gzip,StringIO,urllib2
+    global LAST_VISITED_URL 
+    import urllib2
     from urlparse import urlparse
     host=urlparse(url)[1]
-    Log( u" >>> get_page(%s) ..."%url)
+
     h1=urllib2.HTTPHandler(debuglevel=debuglevel)
     h=urllib2.HTTPCookieProcessor(cj)
     if not params:
@@ -134,7 +151,7 @@ def get_page(url,params={},savehtml=True,filename="defaut.html",debuglevel=0):
         request = urllib2.Request(url,urllib.urlencode(params))
 
     request.add_header('Host',host)
-    request.add_header('Referer', ALLOCINE_DOMAIN)
+    request.add_header('Referer', LAST_VISITED_URL)
     request.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
     request.add_header('Accept','text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
     request.add_header('Accept-Language','fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3')
@@ -155,27 +172,81 @@ def get_page(url,params={},savehtml=True,filename="defaut.html",debuglevel=0):
     urllib2.install_opener(opener)
     try:
         connexion = opener.open(request)
+        LAST_VISITED_URL = "%s"%url #voir dans le header de réponse si on ne peut pas récupérer une URL 
     except Exception, msg:
         raise AllocineError, "The requested page for download did not succeed. Reason given : %s"%msg
-    html = connexion.read(int(connexion.headers["Content-Length"]))
-    if connexion.headers.has_key("Content-Encoding") and connexion.headers["Content-Encoding"]=="gzip":
-        compressedstream = StringIO.StringIO(html)
-        gzipper = gzip.GzipFile(fileobj=compressedstream)
-        data = gzipper.read()
-        Log( "\tGZIP (%s o) --> HTML (%s o)"%(str(len(html)),str(len(data))))
-    else:
-        data = html
-    if connexion.headers.has_key("Content-Disposition"):
-        Log( connexion.headers["Content-Disposition"].split("filename=")[1] )#: inline; filename=18992446_w434_h_q80.jpg
-
-    try:
-        open(os.path.join(CACHEDIR,filename),"wb").write(data)
-    except Exception,msg:
-        Log("Error while writing download file. \nException says : %s" % msg,"E")
     # save the cookies again
     cj.save(COOKIEFILE)
-    Log(u" <<< Fin du téléchargement")
-    return data
+    #print connexion.headers
+    return connexion
+
+def download_html(url,path="",filename="default.html"):
+    """Download html datas from url."
+    Return HTML datas, GZIP is converted back to HTML."""
+    #Log( u" >>> getting HTML datas (%s) ..."%url.decode(ALLOCINE_ENCODING) )
+    Log( u" >>> getting HTML datas (%s) ..."%url.decode(ALLOCINE_ENCODING) )
+    import gzip,StringIO
+    connexion = connect(url)
+    if connexion.headers.has_key("Content_Length"):
+        datas = connexion.read(int(connexion.headers["Content-Length"]))
+    else:
+        datas = connexion.read(1000000)
+    #we've got html datas.
+    #check if it is gzip and so, unzip to html
+    if connexion.headers.has_key("Content-Encoding") and connexion.headers["Content-Encoding"]=="gzip":
+        compressedstream = StringIO.StringIO(datas)
+        gzipper = gzip.GzipFile(fileobj=compressedstream)
+        html = gzipper.read()
+        Log( u"\tGZIP --> HTML (compressed %s%%)"%str((float(len(datas))/float(len(html)))*100) )
+    else:
+        html = datas
+    #trying now to save html datas
+    try:
+        f=open(os.path.join(path,filename),"w")
+        f.write(html)
+        f.close()
+    except Exception,msg:
+        Log(u"Error while writing HTML datas to file. \nException says : %s" % msg,"E")
+
+    Log(u" <<< HTML datas are now returned")
+    return html
+
+def download_pic(url,path=""):
+    """Download binary file to optional <path>.
+    Try to find the filename in the headers if possible else use the url.
+    If can't get filename, raise AllocineError exception.
+    Return the full path to the local file when succesfully finished."""
+    Log( u" >>> Downloading picture file (%s) ..."%url )
+    connexion = connect(url)
+    filename=""
+    if connexion.headers.has_key("Content-Disposition"):
+        try:
+            filename=connexion.headers["Content-Disposition"].split("filename=")[1]
+            Log(u"Getting filename from headers : %s"%filename)#: inline; filename=18992446_w434_h_q80.jpg
+        except:
+            Log(u'No filename in "Content-Disposition" header.')
+            # A FAIRE : trouver un nom de fichier si le header n'en propose pas
+            pass
+    if not filename:
+        filename = url.split("/")[-1]#si url == "http://serveur/path/to/filename.ext" --> "filename.ext"
+    if not filename:
+        filename = url.split("/")[-2]#si url == "http://serveur/path/to/" --> "to"
+    if not filename:
+        raise AllocineError, "The picture download with given url did not succeed because function was not able to get a filename"
+    if os.path.exists(os.path.join(path,filename)):
+        Log(u" <<< Picture is already downloaded (%s). Skipping !"%os.path.join(path,filename))
+        return os.path.join(path,filename)
+    #save the picture datas in the file at the given path
+    try:
+        f=open(os.path.join(path,filename),"wb")
+        f.write(connexion.read(int(connexion.headers["Content-Length"])))
+        f.close()
+    except Exception,msg:
+        Log(u"Error while writing download file. \nException says : %s" % msg,"E")
+
+    Log(u" <<< Picture is now available locally : %s"%os.path.join(path,filename))
+    return os.path.join(path,filename)
+
 
 def infos_text(datas):
     u"""
@@ -193,14 +264,6 @@ def infos_text(datas):
     datas = re.sub(r"<.*?>", r"", datas)
     #retour du texte échappé (remplacement des caractères html)
     return unescape(datas.decode(ALLOCINE_ENCODING))
-
-def get_pic(url,filename=""):
-    u"""
-    Download the picture in the <url> into the optional <filename>
-    If the <filename> is not given, it will be an arbitrary temporary filename
-    """
-    ret = urllib.urlretrieve(url)
-    print ret
     
         #---------------------------#
         # EXCEPTIONS PERSONNALISEES #
@@ -218,14 +281,18 @@ class AllocineError(Exception):
         #--------------------#
 def set_country(country=None):
     """Change the country website to use to get infos from"""
+    Log(u"set_country(%s)"%country,"I")
     if (not (country in AVAILABLE_COUNTRIES)) or country == None:
         raise AllocineError,"<country> MUST be given and MUST BE one of the followings : \n" + " , ".join(AVAILABLE_COUNTRIES)
     else:
-        global COUNTRY,ALLOCINE_ENCODING,ALLOCINE_DOMAIN,VIDEO_STREAM_URL
+        global COUNTRY,ALLOCINE_ENCODING,ALLOCINE_DOMAIN,VIDEO_STREAM_URL,LAST_VISITED_URL
         COUNTRY = country
         ALLOCINE_ENCODING = ALLOCINE_ENCODING_dic[COUNTRY]
         ALLOCINE_DOMAIN   = ALLOCINE_DOMAIN_dic[COUNTRY]
         VIDEO_STREAM_URL  = VIDEO_STREAM_URL_dic[COUNTRY]
+        LAST_VISITED_URL = ALLOCINE_DOMAIN
+        Log(u"country is set to %s"%COUNTRY)
+        Log(ALLOCINE_DOMAIN)
         return 
 
 def get_video_url(mediaID,quality=None):
@@ -234,7 +301,7 @@ def get_video_url(mediaID,quality=None):
     Will search in this order : HD, MD then LD (the best to the worst quality).
     Optional <quality> parameter enable to limit the search to this quality and beyond.
     """
-    Log("Getting video url for %s media"%mediaID)
+    Log(u"Getting video url for %s media"%mediaID)
     from types import StringType
     if not (type(mediaID) is StringType):
         raise AllocineError,"<mediaID> MUST be String type"
@@ -248,9 +315,9 @@ def get_video_url(mediaID,quality=None):
     for q in lq[lq.index(quality):]:
         Log ("\ttrying %s quality"%q)
         if q=="HD":
-            xml=get_page(ALLOCINE_DOMAIN + XML_BA_INFOS % mediaID + "&hd=1") #HD
+            xml=download_html(ALLOCINE_DOMAIN + XML_BA_INFOS % mediaID + "&hd=1") #HD
         else:
-            xml=get_page(ALLOCINE_DOMAIN + XML_BA_INFOS % mediaID) #LD et MD
+            xml=download_html(ALLOCINE_DOMAIN + XML_BA_INFOS % mediaID) #LD et MD
 
         match = re.search(r'<video\s+title=".*?"\s+xt_title=".*?"\s+ld_path="(.*?)"\s+md_path="(.*?)"\s+hd_path="(.*?)".*?/>',xml)
         if match:
@@ -258,14 +325,15 @@ def get_video_url(mediaID,quality=None):
             if q=="MD" and match.group(2): BA_path = match.group(2)
             if q=="HD" and match.group(3): BA_path = match.group(3)
             if BA_path:
-                Log("\t%s quality successful for media"%q)
+                Log(u"\t%s quality successful for media"%q)
                 break #si match non vide alors on quitte la boucle for
             else: Log ("\t%s quality not available !"%q)
         else:
             #raise AllocineError,"get_video_url did not match anything for the given mediaID. Make sure mediaID#%s on %s is valid."%(mediaID,ALLOCINE_DOMAIN)
             pass
     if not BA_path:
-        raise AllocineError,"The media %s seems not contain videos from <%s> to worst quality(ies). Please try higher quality."%(mediaID,quality)
+        return None
+        #raise AllocineError,"The media %s seems not contain videos from <%s> to worst quality(ies). Please try higher quality."%(mediaID,quality)
     else:
         return VIDEO_STREAM_URL % BA_path
 
@@ -284,12 +352,14 @@ class agenda:
             - 'next' for the next week
             - or a dd/mm/yyyy format date for the corresponding week"""
         if not periode or periode == "now":
-            self.HTML = get_page(ALLOCINE_DOMAIN + THIS_WEEK_URL)
+            self.HTML = download_html(ALLOCINE_DOMAIN + THIS_WEEK_URL)
         elif periode == "next":
-            self.HTML = get_page(ALLOCINE_DOMAIN + AGENDA_URL)
+            self.HTML = download_html(ALLOCINE_DOMAIN + AGENDA_URL)
         else:
             if re.match(r'\d\d/\d\d/\d\d\d\d',periode):
-                self.HTML = get_page(ALLOCINE_DOMAIN + SORTIES_URL % periode)
+                #from time import strptime
+                #year,month,day=strptime(periode,"%d/%m/%Y")[:3]#"%d/%m/%Y"
+                self.HTML = download_html(ALLOCINE_DOMAIN + SORTIES_URL % periode)
             else:
                 raise AllocineError,"<periode> parameter MUST be 'now' for the current week, 'next' for the next week, or a date 'DD/MM/YYYY' for the corresponding week"
         self.PERIODE = periode
@@ -310,7 +380,7 @@ class agenda:
         datas=[]
         for moviedatas in self.get_movies():
             # id, titre et titre original
-            match = re.search(r'<h2><a class="link1" href="(?:/film/)??fichefilm_gen_cfilm=(\d+)\.html">(.*?)</a></h2>(?:&nbsp;<h4>(.*?)</h4>|)',moviedatas)
+            match = re.search(r'<h2><a class="link1" href="(?:/film/)??fichefilm_gen_cfilm=(\d+)\.html">(.*?)</a></h2>(?:&nbsp;<h4>\((.*?)\)</h4>|)',moviedatas)
             if match:
                 ID = match.group(1)
                 Titre = match.group(2)
@@ -393,6 +463,15 @@ class Movies:
             f = Movie(IDmovie)
             self.Session[IDmovie]=f
             return f
+        
+    def titles(self):
+        u"""Get all movie title's handled.
+        Return a list of tuples [ (id,title) , ... ]"""
+        return [( movieID , self.Session[movieID].title() ) for movieID in self.Session.keys() ]
+
+    def __repr__(self):
+        return "<Handler for movies - contain now %s movie object's>"%len(self.Session)
+    
             
 class Movie:
     u"""Movie object instance."""
@@ -400,9 +479,11 @@ class Movie:
         """Create a new Movie object with given ID.
         HTML movie page is fetched directly when instantiated.
         Movie infos are parsed with included functions"""
+        Log( u"Getting movie ID#%s" )
+        Log( ALLOCINE_DOMAIN + MOVIE_URL%IDmovie )
+        
         self.ID=IDmovie
-        self.HTML = get_page(ALLOCINE_DOMAIN + MOVIE_URL%self.ID)
-        print ALLOCINE_DOMAIN + MOVIE_URL%self.ID
+        self.HTML = download_html(ALLOCINE_DOMAIN + MOVIE_URL%self.ID)
         self.TITLE = ""
         self.DATE = ""
         self.DIRECTOR = tuple()
@@ -416,138 +497,144 @@ class Movie:
         self.CASTING = dict()
         self.PICurl = ""
         self.MEDIAS = []
-        self.PARSEDflag = False
+        #self.PARSEDflag = False
 
         #self.parser()
-    
+    def isvalid(self):
+        """Return boolean depending if webpage is correct or not"""
+        match = re.search(r"<title>.+</title>",self.HTML)
+        if match: return True
+        else: return False
+        
     def director(self):
         u"""Return the director of the movie as a tuple ( ID , Name )"""
         #  a internationnaliser !
-        if not self.PARSEDflag:
-            match = re.search(ur'<h4>Réalisé par <a class="link1" href="/personne/fichepersonne_gen_cpersonne=(\d+)\.html">(.*?)</a></h4>',self.HTML)
-            if match: self.DIRECTOR = (match.group(1),match.group(2))# id,nom
-            else: self.DIRECTOR = (None,None)
+        match = re.search(ur'<h4>Réalisé par <a class="link1" href="/personne/fichepersonne_gen_cpersonne=(\d+)\.html">(.*?)</a></h4>',self.HTML)
+        if match: self.DIRECTOR = (match.group(1),match.group(2))# id,nom
+        else: self.DIRECTOR = (None,None)
         return self.DIRECTOR
 
     def nationality(self):
         u"""Return the nationality of the movie as string."""
-        if not self.PARSEDflag:
-            match = re.search(r'<h4>(?:Film|Nationality :|Land:|Película) (.*?)[\.]?&nbsp;</h4><h4>(?:Genre|Género)',self.HTML)
-            if match: self.NATIONALITY = match.group(1)
-            else: self.NATIONALITY = "Not found !!"
+        match = re.search(r'<h4>(?:Film|Nationality :|Land:|Película) (.*?)[\.]?&nbsp;</h4><h4>(?:Genre|Género)',self.HTML)
+        if match: self.NATIONALITY = match.group(1)
+        else: self.NATIONALITY = "Not found !!"
         return self.NATIONALITY
 
     def infos(self):
         u"""Return textual global informations about the movie as string."""
-        if not self.PARSEDflag:
-            #la récupération suivante prend toutes les infos.
-            #A voir si il faut filtrer les infos unitairement
-            #INTERNATIONALISATION A FAIRE ! ! ! !
-            match = re.search(r'<div style=".*?"><h4>(Date de sortie :.*?)(?:<h5>|<div id=\'divRecos\' style=\'width:175px\'>)',self.HTML)
-            if match: self.INFOS = infos_text(match.group(1))
-            else: self.INFOS = "No infos found"
-        return self.INFOS
+        #la récupération suivante prend toutes les infos.
+        #A voir si il faut filtrer les infos unitairement
+        #INTERNATIONALISATION A FAIRE ! ! ! !
+        match = re.search(r'<div style=".*?"><h4>(Date de sortie :.*?)(?:<h5>|<div id=\'divRecos\' style=\'width:175px\'>)',self.HTML)
+        if match: self.INFOS = infos_text(match.group(1))
+        else: self.INFOS = "No infos found"
+        return self.INFOS.encode(ALLOCINE_ENCODING)
 
     def title(self):
         u"""Return the title of the movie."""
-        if not self.PARSEDflag:
-            match = re.search(r'<title>(.*?)</title>',self.HTML)
-            if match: self.TITLE = match.group(1)
-            else: self.TITLE = ""
+        match = re.search(r'<title>(.*?)</title>',self.HTML)
+        if match: self.TITLE = match.group(1)
+        else: self.TITLE = ""
         return self.TITLE
 
     def date(self):
         u"""Return the release date of the movie as string."""
-        if not self.PARSEDflag:
-            match = re.search(r'<h4>[ \w]+? : <b>([\s\w\d].*?)</b>',self.HTML)
-            if match: self.DATE = match.group(1)
-            else: self.DATE = None        
+        match = re.search(r'<h4>[ \w]+? : <b>([\s\w\d].*?)</b>',self.HTML)
+        if match: self.DATE = match.group(1)
+        else: self.DATE = None        
         return self.DATE
     
     def synopsis(self):
         u"""Return the synopsis of the movie"""
-        if not self.PARSEDflag:
-            match = re.search(ur'<td valign="top" style="padding:[\d ]+?"><div align="justify"><h4>(.*?)</h4>',self.HTML)
-            if match: self.SYNOPSIS=infos_text(match.group(1))
-            else: self.SYNOPSIS = ""
-        return self.SYNOPSIS
-
-    def has_videos(self):
-        u"""Return a boolean whether the movie has video or not"""
-        if not self.PARSEDflag:
-            match = re.search(r'<a href="/video/player_gen_cmedia=\d+&cfilm=\d+\.html" class="link5">',self.HTML)
-            if match:self.HAS_VIDEOS=True
-            else: self.HAS_VIDEOS=False
-        return self.HAS_VIDEOS
-
-    def has_casting(self):
-        u"""Return a boolean whether the movie has casting or not"""
-        if not self.PARSEDflag:
-            if self.HTML.count(CASTING_URL%self.ID): self.HAS_CASTING=True
-            else: self.HAS_CASTING=False
-        return self.HAS_CASTING
-    
-    def has_photos(self):
-        u"""Return a boolean whether the movie has photos or not"""
-        if not self.PARSEDflag:
-            if self.HTML.count(PHOTOS_FILM_URL%self.ID): self.HAS_PHOTOS=True
-            else: self.HAS_PHOTOS=False
-        return self.HAS_PHOTOS
-
-    def pictureURL(self):
-        u"""Return the URL of the picture of the movie."""
-        if not self.PARSEDflag:
-            match = re.search(r'<img src="(http://[a-z0-9/\._]+?\.jpg)" border="0" alt="" class="affichette" />',self.HTML)
-            if match: self.PICurl=match.group(1)
-            else: self.PICurl=None
-        return self.PICurl
-
-    def parser(self):
-        u"""Parse all informations available for the movie.
-        Does not return anything. The internal vars of the movie object are filled in"""
-        match = re.search(r'<h4>[ \w]+? : <b>([\s\w\d].*?)</b>',self.HTML)
-        if match: self.DATE = match.group(1)
-        else: self.DATE = None
-        
-        match = re.search(ur'<h4>Réalisé par <a class="link1" href="/personne/fichepersonne_gen_cpersonne=(\d+)\.html">(.*?)</a></h4>',self.HTML)
-        if match: self.DIRECTOR = (match.group(1),match.group(2))# id,nom
-        else: self.DIRECTOR = (None,None)
-        
-        match = re.search(r'<h4>(?:Film|Nationality :|Land:|Película) (.*?)[\.]?&nbsp;</h4><h4>(?:Genre|Género)',self.HTML)
-        if match: self.NATIONALITY = match.group(1)
-        else: self.NATIONALITY = ""
-        
-        #la récupération suivante prend toutes les infos.
-        #A voir si il faut filtrer les infos unitairement
-        match = re.search(r'<div style=".*?"><h4>(Date de sortie :.*?)(?:<h5>|<div id=\'divRecos\' style=\'width:175px\'>)',self.HTML)
-        if match: self.INFOS = infos_text(match.group(1))
-        else: self.INFOS = "No infos found"
-        
-        match = re.search(r'<title>(.*?)</title>',self.HTML)
-        if match: self.TITLE = match.group(1)
-        else: self.TITLE = ""
-        
-        match = re.search(r'<h4>(?:Date de sortie |Theatrical release date |Fecha de estreno|Kinostart): <b>(\d+(?:\.)? \S+? \d{4}?)</b>',self.HTML)
-        if match: self.DATE=match.group(1)
-        else: self.DATE=""
-        
+        Log(u"Movie.synopsis() : Need to verify the regexp as it works on 'regexbuddy' but not in the library... why ?","D")
         #l'expression suivante fonctionne dans regexbuddy mais pas dans python... pkoi ??
         match = re.search(ur'<td valign="top" style="padding:[\d ]+?"><div align="justify"><h4>(.*?)</h4>',self.HTML)
         if match: self.SYNOPSIS=infos_text(match.group(1))
         else: self.SYNOPSIS = ""
-        
-        #booleen qui permet de savoir si la fiche film propose des vidéos
-        match = re.search(r'<a href="(/video/player_gen_cmedia=\d+&cfilm=\d+\.html)" class="link5">',self.HTML)
-        if match:self.HAS_VIDEOS=match.group(1)
+        return self.SYNOPSIS.encode(ALLOCINE_ENCODING)
+
+    def has_videos(self):
+        u"""Return a boolean whether the movie has video or not"""
+        match = re.search(r'<a href="/video/player_gen_cmedia=\d+&cfilm=\d+\.html" class="link5">',self.HTML)
+        if match:self.HAS_VIDEOS=True
         else: self.HAS_VIDEOS=False
-        
+        return self.HAS_VIDEOS
+
+    def has_casting(self):
+        u"""Return a boolean whether the movie has casting or not"""
         if self.HTML.count(CASTING_URL%self.ID): self.HAS_CASTING=True
         else: self.HAS_CASTING=False
-##        self.NOTES = tuple()
-##        self.PICurl = ""
+        return self.HAS_CASTING
+    
+    def has_photos(self):
+        u"""Return a boolean whether the movie has photos or not"""
+        if self.HTML.count(PHOTOS_FILM_URL%self.ID): self.HAS_PHOTOS=True
+        else: self.HAS_PHOTOS=False
+        return self.HAS_PHOTOS
 
-        #when all parsing are done, flag it as parsed
-        self.PARSEDflag = True
+    def pictureURL(self):
+        u"""Return the URL of the picture of the movie."""
+        match = re.search(r'<img src="(http://[a-z0-9/\._]+?\.jpg)" border="0" alt="" class="affichette" />',self.HTML)
+        if match: self.PICurl=match.group(1)
+        else: self.PICurl=None
+        return self.PICurl
+
+##    def parser(self):
+##        u"""Parse all informations available for the movie.
+##        Does not return anything. The internal vars of the movie object are filled in"""
+##        self.date()
+####        match = re.search(r'<h4>[ \w]+? : <b>([\s\w\d].*?)</b>',self.HTML)
+####        if match: self.DATE = match.group(1)
+####        else: self.DATE = None
+##        
+##        self.director()
+####        match = re.search(ur'<h4>Réalisé par <a class="link1" href="/personne/fichepersonne_gen_cpersonne=(\d+)\.html">(.*?)</a></h4>',self.HTML)
+####        if match: self.DIRECTOR = (match.group(1),match.group(2))# id,nom
+####        else: self.DIRECTOR = (None,None)
+##        
+##        self.nationality()
+####        match = re.search(r'<h4>(?:Film|Nationality :|Land:|Película) (.*?)[\.]?&nbsp;</h4><h4>(?:Genre|Género)',self.HTML)
+####        if match: self.NATIONALITY = match.group(1)
+####        else: self.NATIONALITY = ""
+##        
+##        self.infos()
+####        #la récupération suivante prend toutes les infos.
+####        #A voir si il faut filtrer les infos unitairement
+####        match = re.search(r'<div style=".*?"><h4>(Date de sortie :.*?)(?:<h5>|<div id=\'divRecos\' style=\'width:175px\'>)',self.HTML)
+####        if match: self.INFOS = infos_text(match.group(1))
+####        else: self.INFOS = "No infos found"
+##        
+##        self.title()
+####        match = re.search(r'<title>(.*?)</title>',self.HTML)
+####        if match: self.TITLE = match.group(1)
+####        else: self.TITLE = ""
+##        
+##        self.date()
+####        match = re.search(r'<h4>(?:Date de sortie |Theatrical release date |Fecha de estreno|Kinostart): <b>(\d+(?:\.)? \S+? \d{4}?)</b>',self.HTML)
+####        if match: self.DATE=match.group(1)
+####        else: self.DATE=""
+##        
+##        self.synopsis()
+####        #l'expression suivante fonctionne dans regexbuddy mais pas dans python... pkoi ??
+####        match = re.search(ur'<td valign="top" style="padding:[\d ]+?"><div align="justify"><h4>(.*?)</h4>',self.HTML)
+####        if match: self.SYNOPSIS=infos_text(match.group(1))
+####        else: self.SYNOPSIS = ""
+##        
+##        self.has_videos()#booleen qui permet de savoir si la fiche film propose des vidéos
+####        match = re.search(r'<a href="(/video/player_gen_cmedia=\d+&cfilm=\d+\.html)" class="link5">',self.HTML)
+####        if match:self.HAS_VIDEOS=match.group(1)
+####        else: self.HAS_VIDEOS=False
+##        
+##        self.has_casting()
+####        if self.HTML.count(CASTING_URL%self.ID): self.HAS_CASTING=True
+####        else: self.HAS_CASTING=False
+##
+####        self.NOTES = tuple()
+####        self.PICurl = ""
+##
+##        #when all parsing are done, flag it as parsed
+##        self.PARSEDflag = True
 
     def get_photos(self):
         u"""Return photos list related to the movie.
@@ -555,7 +642,7 @@ class Movie:
         """
         if not self.has_photos(): raise AllocineError,"No photos for the movie ID#%s"%self.ID
         if not self.PHOTOS:
-            html=get_page(ALLOCINE_DOMAIN + PHOTOS_FILM_URL%self.ID)#,os.path.join(CACHEDIR,"galery%s.html"%self.ID))
+            html=download_html(ALLOCINE_DOMAIN + PHOTOS_FILM_URL%self.ID)#,os.path.join(CACHEDIR,"galery%s.html"%self.ID))
             exp = re.compile(r'{"\w+?":\d+,"\w+":"([a-z0-9\d/]+\.jpg)","\w+":"(.*?)"}')
             # VIDEO_STREAM_URL + picpath
             self.PHOTOS = [(PHOTOS_MEDIA_URL+picpath,unescape(title.decode(ALLOCINE_ENCODING))) for picpath,title in exp.findall(html)]
@@ -565,9 +652,11 @@ class Movie:
         u"""Return the movie casting as a list of tuples :
         [ (Category, Job, PersonID, PersonName),(...) ...]
         """
+        Log(u"Movie.get_casting : Need to make the get_casting function more fonctionnal... it does not work very well right now","D")
         if not self.has_casting(): raise AllocineError,"No casting for the movie ID#%s"%self.ID
         else: #si le casting est vide
-            html=get_page(ALLOCINE_DOMAIN + CASTING_URL%self.ID)#,os.path.join(CACHEDIR,"casting%s.html"%self.ID))
+            html=download_html(ALLOCINE_DOMAIN + CASTING_URL%self.ID)#,os.path.join(CACHEDIR,"casting%s.html"%self.ID))
+            Log( u"Movie.get_casting() : need to fix and make international the regexp","D")
             match = re.search(ur"<h2.+?>Casting complet</h2>.*?<h3><b>Liens sponsorisés</b></h3>", html,re.DOTALL)#a faire fonctionner et à internationaliser
             if match:
                 # match start: match.start()
@@ -576,22 +665,22 @@ class Movie:
                 # match end (exclusive): match.end()
                 # matched text: match.group()
             else:
-                print "pas de match"
+                Log(u"Movie.get_casting : regexp doesn't match")
             casting = []
             exp = re.compile(ur'<h4.*?><b>(.*?)</b></h4><hr /></td></tr>(.*?)</tr>\s+</table>',re.DOTALL)
             fonctions = exp.findall(html[deb:fin])
             for fcttitre,fctdatas in fonctions:
-                print fcttitre
+                #print fcttitre
                 exp = re.compile(ur'tr.*?>\s+<td.*?>(?:<h5>)?(.*?)(?:</h5>)?</td>\s+<td.*?><h5>\s*<a href="/personne/fichepersonne_gen_cpersonne=(\d+).html" class="link1">(.*?)</a>\s+</h5></td>\s+</tr>')
                 persos = exp.findall(fctdatas)
-                print persos
+                #print persos
                 memmetier = "-"
                 for metier,idp,nom in persos:
                     if not metier:
                         metier = memmetier
                     else:
                         memmetier = metier
-                    print "\t%s (%s) [%s]"%(nom,metier,idp)
+                    #print "\t%s (%s) [%s]"%(nom,metier,idp)
                     casting.append((fcttitre,metier,idp,nom))
 
     def get_mediaIDs(self):
@@ -608,20 +697,17 @@ class Movie:
             for datamedia in datas:
                 match = exp.search("".join(datamedia))
                 if match:self.MEDIAS.append((match.group(1),match.group(2),unescape(match.group(3).decode(ALLOCINE_ENCODING))))
-                else: Log("No match for these media datas","W")
+                else: Log(u"Movie.get_mediaIDs() : No match for these media datas","W")
         return self.MEDIAS
 
     def BAurl(self):
         u"""Return the first mediaID video url found for the current movie
         """
         if self.has_videos():
-            if not self.MEDIAS:
-                self.get_mediaIDs()
-                IDmedia,title=self.get_mediaIDs()[0]
-                
-            else:
-                IDmedia,title=self.MEDIAS[0]
-            return get_video_url(IDmedia)
+            for IDmedia,PICurl,title in self.get_mediaIDs():
+                vidurl = get_video_url(IDmedia)
+                if vidurl: break
+            return vidurl
         else:
             raise AllocineError,"No available media Video for the movie ID#%s"%self.ID
 
@@ -633,7 +719,7 @@ class Movie:
         """
         #A FAIRE ! ! 
         # et il faudra définir un format de XML intéressant
-        Log("XML output is not supported yet")
+        Log(u"Movie.XML() : XML output is not supported yet","D")
         
     def __repr__(self):
         return "< Allocine movie object ID#%s >"%self.ID
@@ -669,7 +755,7 @@ class SearchOLD:
                         }
         #getting allocine search themes
         self.SEARCH_THEMES = self.get_Themes()
-        print "\n".join(["%s : %s"%(tid,self.SEARCH_THEMES[tid]) for tid in self.SEARCH_THEMES.keys()])
+        #print "\n".join(["%s : %s"%(tid,self.SEARCH_THEMES[tid]) for tid in self.SEARCH_THEMES.keys()])
         ##advanced checkings
         #if not searchtype in self.SEARCH_THEMES.keys(): raise AllocineError,"If given, <searchtype> argument MUST be one of the followings : "+self.SEARCH_THEMES.keys()
 
@@ -696,7 +782,7 @@ class SearchOLD:
         u"""
         Return a dictionnary with themesID as int and themes name as string
         """
-        html=get_page(ALLOCINE_DOMAIN + SEARCH_URL)
+        html=download_html(ALLOCINE_DOMAIN + SEARCH_URL)
         exp=re.compile(r'<option value="(\d+)" (?:selected="selected" )?/>([^<\t]*)')
         types = exp.findall(html)
         return dict([(tid,unescape(tname.decode(ALLOCINE_ENCODING))) for tid,tname in types])
@@ -714,7 +800,7 @@ class SearchOLD:
         if next and self.HAS_NEXT: page="&page="+next
         else: page =""
         #on va remplir une liste de résultats
-        html = get_page(ALLOCINE_DOMAIN + SEARCH_URL + "?motcle=%s&rub=%s"%(keyword,Type) + page)
+        html = download_html(ALLOCINE_DOMAIN + SEARCH_URL + "?motcle=%s&rub=%s"%(keyword,Type) + page)
         #parser html selon le theme
         exp=re.compile(self.REGEXP[Type]) #ATTENTION, le parser doit retourner l'ID de l'élément considéré ainsi que son libellé
         results = exp.findall(html)
@@ -729,14 +815,17 @@ class SearchOLD:
             self.RESULTS_PAGE = results#... on mémorise les derniers résultats trouvés
             return results
         else:
-            raise AllocineError, "Search in '%s' (%s) for '%s' did not match anything."%(self.SEARCH_THEMES[Type],Type,keyword)
+            raise AllocineError, "Search in '%s' (%s) for '%s' did not match anything."%(self.SEARCH_THEMES[Type],Type,keyword) 
+
+
         
+    
     def has_next(self):
         u"""
         Return wether or not, the search results contain a 'next page' link
         Return False if no other page or page number if next page
         """
-        match=re.search(ur'<a href="/recherche/default\.html\?motcle=.*?&rub=\d*?&page=(\d*)" class="link1">.*?</a>',self.HTML)
+        match=re.search(ur'<a href="/recherche/default\.html\?motcle=.*?&rub=\d*?&page=(\d*)" class="link1">.*?</a>&nbsp;',self.HTML)
         if match: self.HAS_NEXT = match.group(1)
         else: self.HAS_NEXT = None
         return self.HAS_NEXT
@@ -758,72 +847,110 @@ class Search:
     def __init__(self,keyword="",searchtype="0"):
         """INITialise vars and check of searchtype is correct (i.e. the searchtype is supported by the website AND by the library).
         Client SHOULD check for available searchs before instantiate a search."""
-        self.KW = keyword.encode(ALLOCINE_ENCODING)
-        self.TYPE = searchtype
-        self.HAS_NEXT = False #booleen pour savoir si la recherche contient une page de résultat suivante
+        from urllib import quote
+        self.KW               = quote(keyword)#.decode(ALLOCINE_ENCODING)
+        self.TYPE             = searchtype
+        self.HAS_NEXT         = False #booleen pour savoir si la recherche contient une page de résultat suivante
+        self.HAS_PREVIOUS     = False #booleen pour savoir si la recherche contient une page de résultat précédente
+        self.CURRENT_PAGE     = "1"
         self.RESULTS_PER_PAGE = [] #the results on only one page
-        self.RESULTS_ALL = [] #all differents results found for this search
-        self.HTML = ""
-        self.SEARCH_THEMES = self.get_Themes()
+        self.RESULTS_ALL      = [] #all differents results found for this search
+        self.HTML             = ""
+        self.SEARCH_THEMES    = self.get_Themes()
         #check if searctype is supported by the website
         if not self.TYPE in self.SEARCH_THEMES.keys():
             raise AllocineError,"The search ID you asked for is not available for this website. Available web site searchs are %s"%", ".join(self.SEARCH_THEMES.keys())
         
-        AvailableRegexp = { "1" : r'<a href="/film/fichefilm_gen_cfilm=(\d+)\.html"><img src="(http:[a-z0-9/\.-_]+?)"[^/]*?/>.*?</a></td><td valign="top"><h4><a href="/film/fichefilm_gen_cfilm=\1\.html" class="link1">(.*?)</a></h4>',
-                            "2" : r'<a href="/personne/fichepersonne_gen_cpersonne=(\d+)\.html"><img src="(http:[a-z0-9/\.-_]+?)"[^/]*?/>.*?</a></td><td valign="top"><h4><a href="/personne/fichepersonne_gen_cpersonne=\1\.html" class="link1">(.*?)</a>', #REGEXP est utilisé également pour connaitre les recherches supportées
+        AvailableRegexp = { "1" : r'<a href="/film/fichefilm_gen_cfilm=(\d+)\.html"><img src="(http:[-_/a-z0-9\.]+?)"[^/]*?/>.*?</a></td><td valign="top"><h4><a href="/film/fichefilm_gen_cfilm=\1\.html" class="link1">(.*?)</a></h4>',
+                            "2" : r'<a href="/personne/fichepersonne_gen_cpersonne=(\d+)\.html"><img src="(http:[-_/a-z0-9\.]+?)"[^>]*>(|<br/><img border="0" src="(http:[-_/a-z0-9\.]+?)"[^>]*>)</a></td><td valign="top"><h4><a href="/personne/fichepersonne_gen_cpersonne=\1\.html" class="link1">(.*?)</a>',#r'<a href="/personne/fichepersonne_gen_cpersonne=(\d+)\.html"><img src="(http:[a-z0-9/\.-_]+?)"[^/]*?/>.*?</a></td><td valign="top"><h4><a href="/personne/fichepersonne_gen_cpersonne=\1\.html" class="link1">(.*?)</a>', #REGEXP est utilisé également pour connaitre les recherches supportées
                             "3" : r'<a href="/seance/salle_gen_csalle=([A-Za-z0-9]+)\.html" class="link1"([^>]*)>(.*?)<hr />'
                             }
         #check if searchtype is supported by the library
         if not self.TYPE in AvailableRegexp.keys(): raise AllocineError,u"Type of search #%s is not supported. Should be in %s"%(self.TYPE,AvailableRegexp.keys())
+        else: self.REGEXP = AvailableRegexp[self.TYPE]
+
+    def result_number(self):
+        u"""Return number of results for the search"""
+        Log(u"Search.result_number() : need to parse HTML to get results number. Need some more tests.","D")
+        if not self.HTML:
+            raise AllocineError,"To get result number for the search, you fist MUST run search() function"
+        return len(self.RESULTS_ALL)
     
     def get_Themes(self):
         u"""Return available search types of the website used.
         Return format is a dictionnary with themeID as key and themeName as value."""
-        html=get_page(ALLOCINE_DOMAIN + SEARCH_URL)
+        html=download_html(ALLOCINE_DOMAIN + SEARCH_URL)
         exp=re.compile(r'<option value="(\d+)" (?:selected="selected" )?/>([^<\t]*)')
         types = exp.findall(html)
         return dict([(tid,unescape(tname.decode(ALLOCINE_ENCODING))) for tid,tname in types])
     
-    def start(self,nextpage=None):
+    def search(self,nextpage=None):
         u"""Start the search and return a list of tuples [ (id,text,title) , ... ]
         If <nextpage> is not given, first page of results is returned."""
         if nextpage: page="&page="+nextpage
         else: page =""
-
+        html = download_html(ALLOCINE_DOMAIN + SEARCH_URL + "?motcle=%s&rub=%s"%(self.KW,self.TYPE) + page)
         #parser html selon le theme
         exp=re.compile(self.REGEXP)
         results = exp.findall(html)
         results = [ (id,text,infos_text(title).replace("\n","")) for id,text,title in results ]
         if results: # en cas de résultats ...
             self.HTML = html
-            self.HAS_NEXT = self.has_next() #... on cherche si éventuellement la page contient d'autres résultats et on mémorise le numéro de page
-            self.RESULTS_ALL= self.RESULTS_ALL + results #... on ajoute les résultats à tous les autres résultats précédents
+            self.CURRENT_PAGE = nextpage #... la page en cours de traitement est mémorisée
+            self.HAS_NEXT = self.has_next() #... on cherche si éventuellement la page contient d'autres résultats et on mémorise le numéro de page suivante
+            self.HAS_PREVIOUS = self.has_previous() #... on cherche si éventuellement la page contient d'autres résultats et on mémorise le numéro de page précédente
+            self.RESULTS_ALL= list(set(self.RESULTS_ALL + results)) #... on ajoute les résultats à tous les autres résultats précédents
             self.RESULTS_PAGE = results#... on mémorise les derniers résultats trouvés
+            print "current:",self.CURRENT_PAGE
+            print "next:",self.HAS_NEXT
+            print "previous:",self.HAS_PREVIOUS
             return results
         else:
-            raise AllocineError, "Search in '%s' (%s) for '%s' did not match anything."%(self.SEARCH_THEMES[Type],Type,keyword)        
+            #raise AllocineError, "Search in '%s' (%s) for '%s' did not match anything."%(self.SEARCH_THEMES[self.TYPE],self.TYPE,self.KW.decode(ALLOCINE_ENCODING))
+            Log(u"Search in '%s' (%s) for '%s' did not match anything."%(self.SEARCH_THEMES[self.TYPE],self.TYPE,self.KW.decode(ALLOCINE_ENCODING)))
+            return []
 
+    def nbresults(self):
+        u"""Return the number of results as mentionned in the web page."""
+        match=re.search(ur'<h4>\((\d+) .*\)</h4>',self.HTML)
+        if match: return match.group(1)
+        else: return "0"
+        
     def has_next(self):
         """
         Return wether or not, the search results contain a 'next page' link
         Return False if no other page or page number if next page
         """
-        match=re.search(ur'<a href="/recherche/default\.html\?motcle=.*?&rub=\d*?&page=(\d*)" class="link1">.*?</a>',self.HTML)
+        match=re.search(ur'<a href="/recherche/default\.html\?motcle=[^&]*?&rub=\d*?&page=(\d*)" class="link1">[^<]+</a>&nbsp;',self.HTML)
         if match: return match.group(1)
         else: return False
 
     def next(self):
         u"Continue la recherche sur la page suivante"
-        if self.HAS_NEXT: return self.start(self.HAS_NEXT)
-        else: raise AllocineError, u"Search do not have more page results"
+        if self.has_next(): return self.search(self.has_next())
+        else:
+            Log(u"Search do not have more page results","I")
+            return []#raise AllocineError, u"Search do not have more page results"
 
+    def has_previous(self):
+        """
+        Return wether or not, the search results contain a 'previous page' link
+        Return False if no other page or page number if previous page
+        """
+        match=re.search(ur'&nbsp;<a href="/recherche/default\.html\?motcle=[^&]*?&rub=\d*?&page=(\d*)" class="link1">[^<]+</a>',self.HTML)
+        if match: return match.group(1)
+        else: return False
+        
     def previous(self):
-        u"Recupère la page précédente de résultats"
-        #A FAIRE
-        pass
-
+        u"Continue la recherche sur la page précédente"
+        if self.has_previous(): return self.search(self.has_previous())
+        else:
+            Log(u"Search do not have previous page results","I")
+            return []#raise AllocineError, u"Search do not have more page results"
     
-
+    def current(self):
+        u"""Return current page of results"""
+        return self.CURRENT_PAGE
     
 
 class Movie_search(Search):#inutilisé, pour tests et conservé pour mémoire
@@ -837,7 +964,7 @@ class Personality:
     def __init__(self,IDperso):
         u"""Initialise vars and get source page for the requested <IDperso>."""
         self.ID = IDperso
-        self.HTML = get_page(ALLOCINE_DOMAIN + PERSO_URL%self.ID)
+        self.HTML = download_html(ALLOCINE_DOMAIN + PERSO_URL%self.ID)
         self.NAME = ""
         self.JOBS = ""
         self.BIRTH =""
@@ -849,8 +976,11 @@ class Personality:
         self.MEDIAS = None
         self.parser()
 
-    def __repr__(self):
-        return "< Allocine character object ID#%s >"%self.ID
+    def isvalid(self):
+        """Return boolean depending if webpage is correct or not"""
+        match = re.search(r"<title>.+</title>",self.HTML)
+        if match: return True
+        else: return False
 
     def parser(self):
         u"""Parse all informations available for the personnality.
@@ -913,6 +1043,7 @@ class Personality:
     def Filmography(self,force=False):
         u"""Return filmography of the personnality.
         NOT FULLY WORKING"""
+        Log(u"Personnality.Filmography() is not fully working yet. Need improvments !!","D")
         ## NON FONCTIONNEL... A refaire plus complet ultérieurement
         #il faut télécharger la page de filmographie
         if not(self.FILMO) or force:
@@ -935,7 +1066,7 @@ class Personality:
         return is a list of tuples : [ ( PicturePath , PictureTitle ) , ... ]"""
         if not self.has_photos(): raise AllocineError,"No photos for the personnality ID#%s"%self.ID
         if not (self.PHOTOS) or force:
-            html=get_page(ALLOCINE_DOMAIN + PHOTOS_PERSON_URL%self.ID)
+            html=download_html(ALLOCINE_DOMAIN + PHOTOS_PERSON_URL%self.ID)
             exp = re.compile(r'{"\w+?":\d+,"\w+":"([a-z0-9\d/]+\.jpg)","\w+":"(.*?)"}')
             self.PHOTOS = [(PHOTOS_MEDIA_URL+picpath,unescape(title.decode(ALLOCINE_ENCODING))) for picpath,title in exp.findall(html)]
         return self.PHOTOS
@@ -961,17 +1092,203 @@ class Personality:
             for datamedia in datas:
                 match = exp.search("".join(datamedia))
                 if match:self.MEDIAS.append((match.group(1),match.group(2),unescape(match.group(3).decode(ALLOCINE_ENCODING))))
-                else: Log("No match for these media datas","W")
+                else: Log(u"Personality.get_mediaIDs() : No match for these media datas","W")
         return self.MEDIAS
+    
+    def __repr__(self):
+        return "< Allocine character object ID#%s >"%self.ID
 
+    
+class Cinemas:
+    def __init__(self):
+        self.HTML = ""
+        self.Session = {}
+        
+    def new(self,CID):
+        """Create a new cinema object if needed"""
+        if self.Session.has_key(CID):
+            return self.Session[CID]
+        else:
+            c = Cinema(CID)
+            self.Session[CID]=c
+            return c
+    def discard(self,CID):
+        """Discard from Cinemas Handler, the #<CID> cinema"""
+        if self.Session.has_key(CID):
+            self.Session.pop(CID)
+            
+    def whereplaying(self,MID):
+        """Browse all Cinema instance handled by Cinemas and return a list of Cinema IDs where playing the #<MID> movie"""
+        playingIn = {}
+        for CID in self.Session.keys():
+            if self.Session[CID].isplaying(MID):
+                playingIn[CID] = self.Session[CID]
+        return playingIn[CID]
+    
+            
+            
+class Cinema:
+    def __init__(self,CID):
+        self.CID=CID
+        self.HTML = download_html(ALLOCINE_DOMAIN + CINEMA_URL%self.CID )
+        self.TIMETABLE={}
+        self.maketimetable() #launch the making of the time table
+    def name(self):
+        u"""Return the name of the Cinema."""
+        Log(u"Cinema.name : TODO","D")
+        return self.address().split("-")[0]
+    def address(self):
+        u"""return the address of the cinema."""
+        #match=re.search(ur'</SCRIPT>\s*<h4 style="[^>]+>(.*?)</a><a href="/salle/fichesalle_gen_csalle=[A-Za-z0-9]+\.html">',self.HTML,re.DOTALL)
+        match=re.search(r'<meta name="description" content="(.*?)">',self.HTML,re.DOTALL)
+        if match: return infos_text(match.group(1).replace("\n",""))
+        else: return "not found"
+    def movies(self):
+        u"""Return movies playing in the Cinema"""
+        MOVIES = {}
+        Log(u"Cinema.movies(MID) : make it better to catch infos singlely, and to prevent a no match at all when only one of the movie ino is not found","D")
+##        for MovieBlocMatch in re.finditer(r'<a class="link1" href="/film/fichefilm_gen_cfilm=(\d+)\.html"><img src="([a-zA-Z0-9/:\._\-]+)"[^/]+/></a></td><td[^>]+>.*?<table[^>]+><tr>(.*?)</tr><tr>(.*?)</tr>.*?<tr><td[^>]+><h5 style="color:#808080">(.*?)</h5></td></tr>',self.HTML):
+##            MOVIES[MovieBlocMatch.group(1)] = [infos_text(MovieBlocMatch.group(3)),MovieBlocMatch.group(2),infos_text(MovieBlocMatch.group(4)),infos_text(MovieBlocMatch.group(5))]
+##        print MOVIES
+        for MovieBlocDatas in re.finditer(r'<a class="link1" href="/film/fichefilm_gen_cfilm=\d+\.html"><img.*?\r',self.HTML):
+            #ID and picture URL
+            match = re.search(r'<a class="link1" href="/film/fichefilm_gen_cfilm=(\d+)\.html"><img src="([a-zA-Z0-9/:\._\-]+)"[^/]+/></a>',MovieBlocDatas.group(0))
+            if match:
+                MID = match.group(1)
+                pictureURL = match.group(2)
+            else:
+                raise
+            #title
+            match = re.search(r'<h2><a class="link1" href="/film/fichefilm_gen_cfilm=%s\.html">(.*?)</a>'%MID,MovieBlocDatas.group(0))
+            if match: title=match.group(1)
+            else: title = "Not Found !"
+            #genre and lasting
+            match = re.search(r'<h5>([^\(]+)\((\d+h(?: \d+min)?)\)</h5>',MovieBlocDatas.group(0))
+            if match:
+                genre=match.group(1)
+                duree=match.group(2)
+            else:
+                genre="Not Found !!"
+                duree="Not Found !!"
+            match = re.search(r'<h5 style="color:#808080">(.*?)</h5>',MovieBlocDatas.group(0))
+            if match: synopsis=match.group(1)
+            else: synopsis="Not Found !!"
+            MOVIES[MID]=[title,pictureURL,genre,duree,synopsis]
+        print MOVIES            
 
+    def isplaying(self,MID):
+        u"""Return True/False whether movie #<MID> is playing in this Cinema or not."""
+        if MID in self.TIMETABLE: return True
+        else: return False
 
+    def maketimetable(self):
+        """Feed and return timetable for all movies in this Cinema
+        {IDmovie : [ [day1,scheduling], [day2,scheduling], ... ], .... }"""
+        #htmlMovieDataBlocs = re.findall(r'<a class="link1" href="/film/fichefilm_gen_cfilm=\d+\.html"><img.*?\r',self.HTML)
+        #TimePlayingMoviesBlocs = re.findall(r'<tr><td[^>]+><table[^>]+>.*?(?:<div id="div_seance\d+_jour\d"[^>]+>).*?\r',self.HTML)
+        #CalendarInfoBlocs = re.findall(r'<table[^>]+>\s+<tr>\s+(<td id="td_(seance\d+_jour\d)"[^>]+>\s+<h5 id="h5_\2"[^>]+>.*?</h5>\s+</td>\s+)+</tr>\s+</table>',self.HTML)
+        #cinema page is made of :
+        #   - one bloc of html datas for movie infos
+        #   - one or more bloc made of :
+        #       - one bloc of calendar infos (each day that has scheduling, has a link)
+        #       - one bloc of scheduling infos
+        #the idea is to browse all this big blocs (for each movie).
+        #For on movie bloc, get the Movie ID, get the html infos of the movie, get a list of all links per day
+        #   then, for any of these days, we find the corresponding schedule using 'seanceXX_jourX' string as key
+        #get a big bloc of html datas
+        for match in re.finditer(r'<a class="link1" href="/film/fichefilm_gen_cfilm=(\d+)\.html"><img.*?(?:</td></tr><tr><td colspan="2"><hr|</td></tr></table><br />)',self.HTML,re.DOTALL):
+            MID = match.group(1)
+            MovieBlocMatch = re.match(r'<a class="link1" href="/film/fichefilm_gen_cfilm=\d+\.html"><img.*?\r',match.group())
+            MovieDataBloc = MovieBlocMatch.group(0)
+            DayLinks = re.findall(r'<h5 id="h5_(seance\d+_jour\d+)"[^>]+><a href="javascript:change_seance_jour\(\d+, \d\);"[^>]+>(.*?)(?:</a>)?</h5>',match.group())
+            for repere,date in DayLinks:
+                match2=re.search(r'<div id="div_%s"[^>]+>(.*?)</table></div>'%repere,match.group(0))
+                if match2:
+                    if MID in self.TIMETABLE:
+                        self.TIMETABLE[MID].append([date,infos_text(match2.group(1))])
+                    else:
+                        self.TIMETABLE[MID]=[[date,infos_text(match2.group(1))]]
+                else:
+                    Log("Cinema.maketimetable() : No match for given day.","E")
+
+        return self.TIMETABLE
+            
+    def get_schedule(self,MID):
+        """Return scheduling for the <MID> movie in this Cinema.
+        [ [day1, [ (timestart,timeend) , ... ]] , [day2, [ (timestart,timeend) , ... ]] , ... ]"""
+        if not MID in self.TIMETABLE:
+            return []
+        else:
+            return self.TIMETABLE[MID]
+    def pictureURL(self):
+        u"""return the picture url of the movie"""
+        exp=re.compile(r'<img src="([a-z0-9:/_.-]+)" border="0" alt=".*?" />')        
+    def __repr__(self):
+        return "<Theater ID#%s object>"%self.CID
+
+class Favourite:
+    """handle favourite items"""
+    def __init__(self,name=""):
+        """favourite initialisation."""
+        Log(u"Favourite.__init__ : a voir l'utilité de la variable name en définition d'instance. Soit on utilise name pour enregistrer ou charger, soit on travaille avec un favoris nommé lors de son instanciation")
+        self.NAME = name 
+        self.FAVOURITE = []
+        self.FAVTYPES = ["MOVIE","PERSON","CINEMA"]
+        
+    def load(self,name,path="",append=True):
+        """Load a favourite file using the name given to the Favourite instance"""
+        if not name: name="MyFavourites"
+        if not os.path.exists(os.path.join(path,name+".p")): raise AllocineError,"Favourite pickle file not found !"
+        import cPickle
+        favourite = cPickle.load(open(os.path.join(path,name+".p")))
+        from types import ListType
+        if not type(favourite) is ListType:
+            raise AllocineError,"file is not a valid Favourite Pickle file"
+        #...
+        #we may need some more tests to be sure 'favourite' looks like a FAVOURITE correct list variable [(type,id,title),....]
+        if append:
+            self.FAVOURITE = list(set(self.FAVOURITE + favourite))
+        else:
+            self.FAVOURITE = favourite
+        #return favourite
+
+    def save(self,name,path="",replace=False):
+        """Save the FAVOURITE list in a pickle stream.
+        If the pickle stream file exist, and <replace> is set to False, load the pickle stream before writing the new one.
+        Else, write the temporary pickle stream into <name> file inside <path>."""
+        Log(u"Favourite.save(name,path,replace) : Need to be tested", "D")
+        Log(u"Favourite.save(name,path,replace) : Need to test if pickling 'self' is possible and if it works. Not sure if useful, but need to know","D")
+        if not name: name="MyFavourites"
+        import cPickle
+        if os.path.exists(os.path.join(path,name+".p")) and not replace:
+            favourite = cPickle.load(open(os.path.join(path,name+".p"))) #lecture
+            favourite = list(set(favourite + self.FAVOURITE)) #ajout du pickle lu et des temporaires
+        else:
+            favourite = self.FAVOURITE
+        cPickle.dump(favourite,open(os.path.join(path,name+".p"),"w"))
+        
+    def add(self,identifier):
+        """Add an item represented by the <identifier> to the favourites.
+        <identifier> is a tuple (type,id,title)"""
+        Log(u"Favourite.add(identifier) : TODO", "D")
+        self.FAVOURITE.append(identifier)
+        self.FAVOURITE = list(set(self.FAVOURITE)) #extract 'doublons'
+        
+    def remove(self,identifier):
+        """Remove the favourite item represented by the <identifier>."""
+        Log(u"Favourite.remove(identifier) : Need to be tested", "D")
+        if self.FAVOURITE.count(identifier):
+            self.FAVOURITE.remove(identifier)
+        
+        
+        
+#LAST_VISITED_URL    = "http://www.allocine.fr"
 #initialisation des domaines pour l'internationalisation
-set_country("FR")
+#set_country("FR")
 
 if __name__ == "__main__":
-    print "This script is intended to be used as a library."
-    #print len(get_page("http://a69.g.akamai.net/n/69/10688/v1/img5.allocine.fr/acmedia/rsz/434/x/x/x/medias/nmedia/18/67/67/24/18992446.jpg"))
+    Log( u"This script is intended to be used as a library.")
+    #print len(download_html("http://a69.g.akamai.net/n/69/10688/v1/img5.allocine.fr/acmedia/rsz/434/x/x/x/medias/nmedia/18/67/67/24/18992446.jpg"))
     pass
-
+    
              
