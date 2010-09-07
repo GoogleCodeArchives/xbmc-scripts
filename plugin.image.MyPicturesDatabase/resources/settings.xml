@@ -15,7 +15,7 @@
     <!-- retirer de la base les images manquantes -->
     <setting id="updateDB" type="bool" label="30021" default="false" />
     
-    <setting type="lsep" label="database" />
+    <setting type="lsep" label="30001" />
     <!-- pour recréer la base lors du scan -->
     <setting id="initDB" type="bool" label="30025" default="true" />
 

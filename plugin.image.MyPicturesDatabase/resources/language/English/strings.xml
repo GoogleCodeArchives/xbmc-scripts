@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
     <string id="30000">MyPicture Database</string>
-    <string id="30001">Base de données</string>
-
-    <!--  <string id="30002">Changer la base de données par défaut</string>  -->
-    <string id="30002">Utiliser la base de données par défaut</string>
-    <string id="30003"></string>        <!-- Créer ou choisir une base de données : -->
-    <string id="30004">Choisir une base existante</string>
-    <string id="30005">Créer une nouvelle base de données</string>
-    <string id="30006">Rechercher une base de données</string>
-    <string id="30007">Chemin d'enregistrement</string>
-    <string id="30008">Nom de la base de données</string>
+    <string id="30001">Database</string>
 
     <string id="30020">Picture folder</string>
     <string id="30021">Remove from database missing pictures</string>
