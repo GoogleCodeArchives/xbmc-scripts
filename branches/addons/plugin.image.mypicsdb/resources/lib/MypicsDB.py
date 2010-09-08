@@ -23,7 +23,7 @@ home = os.getcwd().replace(';','')
 #these few lines are taken from AppleMovieTrailers script
 # Shared resources
 BASE_RESOURCE_PATH = makepath( home, "resources" )
-DATA_PATH = xbmc.translatePath( "special://profile/addon_data/plugin.image.MyPictures/")
+DATA_PATH = xbmc.translatePath( "special://profile/addon_data/plugin.image.mypicsdb/")
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 # append the proper platforms folder to our path, xbox is the same as win32
@@ -59,17 +59,31 @@ sys_enc = sys.getfilesystemencoding()
 lists_separator = "||"
 
 def razlog():
-    f=open(os.path.join(DATA_PATH,"MPDB.bak"),"w")
-    g=open(os.path.join(DATA_PATH,"MPDB.txt"),"r")
-    f.write(g.read())
-    f.close()
-    g.close()
-    f=open(os.path.join(DATA_PATH,"MPDB.txt"),"w")
-    f.write("new log file for MyPictureDB plugin\n\n")
-    f.close()
+    logfile=os.path.join(DATA_PATH,"MPDB.txt")
+    bakfile=os.path.join(DATA_PATH,"MPDB.bak")
+    print logfile
+    print bakfile
+    if not os.path.isfile(logfile):
+        log=open(logfile,"w")
+        log.write("new log file for MyPictureDB plugin\n\n")
+        log.close()
+    else:
+        log=open(logfile,"r")
+        bak=open(bakfile,"w")
+        bak.write( log.read() )
+        bak.close()
+        log.close()
+        log=open(logfile,"w")
+        log.write("new log file for MyPictureDB plugin\n\n")
+        log.close()
+
     
 def log(msg):
-    print str(msg)
+    print str("MyPicsDB >> %s"%msg)
+##    logcontent = open(os.path.join(DATA_PATH,"MPDB.txt")).read()
+##    log=open(os.path.join(DATA_PATH,"MPDB.txt"),"a")
+##    log.write(msg)
+##    log.close()
     
 def mount(mountpoint="z:",path="\\",login=None,password=""):
     import os

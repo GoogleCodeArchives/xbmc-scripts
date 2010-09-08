@@ -11,7 +11,7 @@ home = os.getcwd().replace(';','')
 #these few lines are taken from AppleMovieTrailers script
 # Shared resources
 BASE_RESOURCE_PATH = makepath( home, "resources" )
-DATA_PATH = xbmc.translatePath( "special://profile/addon_data/plugin.image.MyPictures/")
+DATA_PATH = xbmc.translatePath( "special://profile/addon_data/plugin.image.mypicsdb/")
 
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 # append the proper platforms folder to our path, xbox is the same as win32
