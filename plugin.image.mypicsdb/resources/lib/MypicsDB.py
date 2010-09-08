@@ -24,7 +24,7 @@ home = os.getcwd().replace(';','')
 # Shared resources
 BASE_RESOURCE_PATH = makepath( home, "resources" )
 DATA_PATH = xbmc.translatePath( "special://profile/addon_data/plugin.image.mypicsdb/")
-
+DB_PATH = xbmc.translatePath( "special://database/")
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 # append the proper platforms folder to our path, xbox is the same as win32
 env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
@@ -53,7 +53,7 @@ except:
     pass
 
 global pictureDB
-pictureDB = os.path.join(DATA_PATH,"MyPictures.db")
+pictureDB = os.path.join(DB_PATH,"MyPictures.db")
 sys_enc = sys.getfilesystemencoding()
 
 lists_separator = "||"
@@ -556,7 +556,15 @@ def get_exif(picfile):
         #mais on ne traite que les tags présents dans la photo
         if tag in tags.keys():
             if tag in ["EXIF DateTimeOriginal","EXIF DateTimeDigitized","Image DateTime"]:
-                tagvalue = time.strftime("%Y-%m-%d %H:%M:%S",time.strptime(tags[tag].__str__(),"%Y:%m:%d %H:%M:%S"))
+                tagvalue=None
+                for datetimeformat in ["%Y:%m:%d %H:%M:%S","%Y.%m.%d %H.%M.%S","%Y-%m-%d %H:%M:%S"]:
+                    try:
+                        tagvalue = time.strftime("%Y-%m-%d %H:%M:%S",time.strptime(tags[tag].__str__(),datetimeformat))
+                        break
+                    except:
+                        log( "Datetime (%s) did not match for '%s' format... trying an other one..."%(tags[tag].__str__(),datetimeformat) )
+                if not tagvalue:
+                    log( "ERROR : the datetime format is not recognize (%s)"%tags[tag].__str__() )
                 #tagvalue = time.mktime(time.strptime(tags[tag].__str__(),"%Y:%m:%d %H:%M:%S"))
                 #tagvalue = tags[tag].__str__()
             else:
