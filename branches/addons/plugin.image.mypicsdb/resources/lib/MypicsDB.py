@@ -803,6 +803,8 @@ def search_year(year):
 #def search_between_dates(datestart='2007-01-01 00:00:01',dateend='2008-01-01 00:00:01'):
 def search_between_dates(DateStart=("2007","%Y"),DateEnd=("2008","%Y")):
     """Cherche les photos qui ont été prises entre 'datestart' et 'dateend'."""
+    log(DateStart)
+    log(DateEnd)
     DS = time.strftime("%Y-%m-%d %H:%M:%S",time.strptime(DateStart[0],DateStart[1]))#time.mktime(time.strptime(DateStart[0],DateStart[1]))
     DE = time.strftime("%Y-%m-%d %H:%M:%S",time.strptime(DateEnd[0],DateEnd[1]))#time.mktime(time.strptime(DateEnd[0],DateEnd[1]))
     #SELECT strPath,strFilename FROM files WHERE strftime('%Y-%m-%d %H:%M:%S', "EXIF DateTimeOriginal") BETWEEN strftime('%Y-%m-%d %H:%M:%S','2007-01-01 00:00:01') AND strftime('%Y-%m-%d %H:%M:%S','2007-12-31 23:59:59') ORDER BY "EXIF DateTimeOriginal" ASC
@@ -820,7 +822,8 @@ def get_dates(year_month):
     return [t for (t,) in Request("""SELECT distinct strftime("%%Y-%%m-%%d","EXIF DateTimeOriginal") FROM files where strftime("%%Y-%%m","EXIF DateTimeOriginal") = '%s' ORDER BY "EXIF DateTimeOriginal" ASC"""%year_month)]
 def search_all_dates():
     return [t for t in Request("""SELECT strPath,strFilename FROM files ORDER BY "EXIF DateTimeOriginal" ASC""")]
-
+def get_pics_dates():
+    return [t for (t,) in Request("""SELECT distinct "EXIF DateTimeOriginal" FROM files where "EXIF DateTimeOriginal"  not null ORDER BY "EXIF DateTimeOriginal" ASC""")]
 #Quelques requêtes SQLite
 #
 """

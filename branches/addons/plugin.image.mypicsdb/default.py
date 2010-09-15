@@ -147,6 +147,8 @@ class Main:
         self.addDir(unescape(__language__(30102)),[("method","folders"),("folderid",""),("onlypics","non")],"showfolder","")
         # par mots clés
         self.addDir(unescape(__language__(30103)),[("kw",""),],"showkeywords","")
+        # période
+        self.addDir(unescape(__language__(30105)),[("kw",""),],"showperiod","")
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category=urllib.unquote_plus("My Pictures Library".encode("utf-8")) )
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -256,7 +258,29 @@ class Main:
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s : %s"%(__language__(30103),urllib.unquote_plus(self.args.kw.encode("utf-8"))) )
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-
+    def show_period(self):
+##        self.args.period = "period"
+##        self.args.method = "date"
+##        self.show_pics()
+        dateofpics = MPDB.get_pics_dates()
+        dialog = xbmcgui.Dialog()
+        rets = dialog.select("Select a Start date",dateofpics)
+        datestart = dateofpics[rets]
+        retf = dialog.select("Select a End date",dateofpics[rets:])
+        dateend = dateofpics[rets+retf]
+        self.addDir(name      = "Show pictures from %s to %s"%(datestart,dateend), #libellé
+                    params    = [("method","date"),("period","period"),("datestart",datestart),("dateend",dateend)],#paramètres
+                    action    = "showpics",#action
+                    iconimage = "",#icone
+                    contextmenu   = None)#menucontextuel
+        #Ajouter ici les périodes déjà mémorisées (à faire dans la base de données par exemple)
+        #...
+        
+        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
+        xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s"%(__language__(30105)))
+        xbmcplugin.endOfDirectory(int(sys.argv[1]))
+        
+        
 
     def show_pics(self):
         if self.args.method == "folder":#NON UTILISE : l'affichage par dossiers affiche de lui même les photos
@@ -264,7 +288,7 @@ class Main:
 
         elif self.args.method == "date":
             #   lister les images pour une date donnée
-            format = {"year":"%Y","month":"%Y-%m","date":"%Y-%m-%d","":"%Y"}[self.args.period]
+            format = {"year":"%Y","month":"%Y-%m","date":"%Y-%m-%d","":"%Y","period":"%Y-%m-%d %H:%M:%S"}[self.args.period]
             if self.args.period=="year" or self.args.period=="":
                 if self.args.value:
                     filelist = MPDB.search_between_dates( (self.args.value,format) , ( str( int(self.args.value) +1 ),format) )
@@ -285,7 +309,16 @@ class Main:
                 #BUG CONNU : trouver un moyen de trouver le jour suivant en prenant en compte le nb de jours par mois
                 a,m,j=self.args.value.split("-")              
                 filelist = MPDB.search_between_dates( ("%s-%s-%s"%(a,m,j),format) , ( "%s-%s-%s"%(a,m,int(j)+1),format) )
-                
+            elif self.args.period=="period":
+##                dialog = xbmcgui.Dialog()
+##                datestart = dialog.numeric(1, 'Start date')
+##                dateend = dialog.numeric(1, 'End date')
+##                filelist = MPDB.search_between_dates(DateStart=datestart.replace(" ",""),format),
+##                                                     DateEnd=(dateend.replace(" ",""),format))
+                filelist = MPDB.search_between_dates(DateStart=(urllib.unquote_plus(self.args.datestart),format),
+                                                     DateEnd=(urllib.unquote_plus(self.args.dateend),format))
+                    
+                        
             else:
                 #pas de periode, alors toutes les photos du 01/01 de la plus petite année, au 31/12 de la plus grande année
                 listyears=MPDB.get_years()
@@ -400,6 +433,8 @@ if __name__=="__main__":
         m.show_keywords()
     elif m.args.action=='showpics':
         m.show_pics()
+    elif m.args.action=='showperiod':
+        m.show_period()
     elif m.args.action=='scan':
         #un scan simple est demandé...
         ok = scan_my_pics()
