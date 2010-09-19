@@ -15,6 +15,7 @@ home = os.getcwd().replace(';','')
 # Shared resources
 BASE_RESOURCE_PATH = makepath( home, "resources" )
 DATA_PATH = xbmc.translatePath( "special://profile/addon_data/plugin.image.mypicsdb/")
+PIC_PATH = makepath( BASE_RESOURCE_PATH, "images")
 DB_PATH = xbmc.translatePath( "special://database/")
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 # append the proper platforms folder to our path, xbox is the same as win32
@@ -114,7 +115,7 @@ class Main:
     def Title(self,title):
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category=urllib.unquote_plus(title.encode("utf-8")) )
         
-    def addDir(self,name,params,action,iconimage,contextmenu=None,total=0,info="*"):
+    def addDir(self,name,params,action,iconimage,contextmenu=None,total=0,info="*",replacemenu=True):
         #params est une liste de tuples [(nomparametre,valeurparametre),]
         #contitution des paramètres
         try:
@@ -125,30 +126,32 @@ class Main:
         u=sys.argv[0]+"?"+parameter+"&action="+repr(str(action))+"&name="+repr(urllib.quote_plus(name.encode("utf8")))
         ok=True
         #création de l'item de liste
-        liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
+        liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
         #adjonction d'informations
         #liz.setInfo( type="Pictures", infoLabels={ "Title": name } )
         #menu contextuel
         if contextmenu :
-            liz.addContextMenuItems(contextmenu)
+            liz.addContextMenuItems(contextmenu,replacemenu)
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True,totalItems=total)
         return ok
     
-    def addPic(self,picname,picpath,info="*"):
+    def addPic(self,picname,picpath,info="*",contextmenu=None,replacemenu=True):
         ok=True
         liz=xbmcgui.ListItem(picname,info)
         liz.setLabel2(info)
+        if contextmenu:
+            liz.addContextMenuItems(contextmenu,replacemenu)
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=os.path.join(picpath,picname),listitem=liz,isFolder=False)
         
     def show_home(self):
         # par années
-        self.addDir(unescape(__language__(30101)),[("period","year"),("value","")],"showdate","")
+        self.addDir(unescape(__language__(30101)),[("period","year"),("value","")],"showdate",os.path.join(PIC_PATH,"dates.png"))
         # par dossiers
-        self.addDir(unescape(__language__(30102)),[("method","folders"),("folderid",""),("onlypics","non")],"showfolder","")
+        self.addDir(unescape(__language__(30102)),[("method","folders"),("folderid",""),("onlypics","non")],"showfolder",os.path.join(PIC_PATH,"folders.png"))
         # par mots clés
-        self.addDir(unescape(__language__(30103)),[("kw",""),],"showkeywords","")
+        self.addDir(unescape(__language__(30103)),[("kw",""),],"showkeywords",os.path.join(PIC_PATH,"keywords.png"))
         # période
-        self.addDir(unescape(__language__(30105)),[("kw",""),],"showperiod","")
+        self.addDir(unescape(__language__(30105)),[("period",""),("update",False)],"showperiod",os.path.join(PIC_PATH,"period.png"))
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category=urllib.unquote_plus("My Pictures Library".encode("utf-8")) )
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -158,24 +161,18 @@ class Main:
         #value  = "2009"|"12/2009"|"25/12/2009"
         action="showdate"
         if self.args.period=="year":
-            #TODO : interroger la base pour obtenir la liste des années disponibles
-            #   (self.args.value sera inutile)
-            listperiod=MPDB.get_years()#["2006","2007","2009"]
+            listperiod=MPDB.get_years()
             nextperiod="month"
             allperiod =""
             action="showdate"
         elif self.args.period=="month":
-            #TODO : interroger la base pour obtenir la liste des mois disponibles
-            #   (self.args.value contiendra l'année dont on veut les mois)
-            listperiod=MPDB.get_months(self.args.value)#[self.args.value+"-02",self.args.value+"-05",self.args.value+"-06"]
+            listperiod=MPDB.get_months(self.args.value)
             nextperiod="date"
             allperiod="year"
             action="showdate"
         elif self.args.period=="date":
-            #TODO : interroger la base pour obtenir la liste des dates disponibles
-            #   (self.args.value contiendra le mois/jour dont on veut les dates
-            listperiod=MPDB.get_dates(self.args.value)#[self.args.value+"-06",self.args.value+"-07",self.args.value+"-08",self.args.value+"-14"]
-            nextperiod="date"#None
+            listperiod=MPDB.get_dates(self.args.value)
+            nextperiod="date"
             allperiod = "month"
             action="showpics"
         else:
@@ -209,13 +206,6 @@ class Main:
         else:#sinon on affiche les sous dossiers du dossier sélectionné
             childrenfolders=[row for row in MPDB.Request("SELECT idFolder,FolderName FROM folders WHERE ParentFolder='%s'"%self.args.folderid)]
         total = len(childrenfolders)
-##        if total>0: #on a des sous dossiers...
-##            #il faut afficher un item pour lister toutes les photos de ce dossier et des sous dossiers
-##            self.addDir(name      = "Tous les dossiers enfants", #libellé
-##                        params    = [("method","folders"),("folderid",str(self.args.folderid)),("onlypics","oui")],#paramètres
-##                        action    = "showpics",#action
-##                        iconimage = "",#icone
-##                        contextmenu   = None)#menucontextuel
 
         #on ajoute les dossiers 
         for idchildren, childrenfolder in childrenfolders:
@@ -230,7 +220,7 @@ class Main:
         #maintenant, on liste les photos si il y en a, du dossier en cours
         picsfromfolder = [row for row in MPDB.Request("SELECT p.FullPath,f.strFilename FROM files f,folders p WHERE f.idFolder=p.idFolder AND f.idFolder='%s'"%self.args.folderid)]
         for path,filename in picsfromfolder:
-            self.addPic(filename,path)
+            self.addPic(filename,path,contextmenu=[("Add to Collection","XBMC.RunPlugin(%s?method='folders'&folderid='2'&onlypics='non'&action='showfolder'&name='2005-05+%%2823+images%%29')"%sys.argv[0]),("Don't use this picture","XBMC.RunScript(special://home/scripts/showtimes/default.py,Iron Man)",)])
             
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s : %s"%(__language__(30102),urllib.unquote_plus(self.args.folderid.encode("utf-8"))) )
@@ -259,27 +249,67 @@ class Main:
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     def show_period(self):
-##        self.args.period = "period"
-##        self.args.method = "date"
-##        self.show_pics()
-        dateofpics = MPDB.get_pics_dates()
-        dialog = xbmcgui.Dialog()
-        rets = dialog.select("Select a Start date",dateofpics)
-        datestart = dateofpics[rets]
-        retf = dialog.select("Select a End date",dateofpics[rets:])
-        dateend = dateofpics[rets+retf]
-        self.addDir(name      = "Show pictures from %s to %s"%(datestart,dateend), #libellé
-                    params    = [("method","date"),("period","period"),("datestart",datestart),("dateend",dateend)],#paramètres
-                    action    = "showpics",#action
-                    iconimage = "",#icone
+        self.addDir(name      = __language__(30106),
+                    params    = [("period","setperiod"),],#paramètres
+                    action    = "showperiod",#action
+                    iconimage = os.path.join(PIC_PATH,"add.png"),#icone
                     contextmenu   = None)#menucontextuel
-        #Ajouter ici les périodes déjà mémorisées (à faire dans la base de données par exemple)
-        #...
-        
-        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
+        #If We previously choose to add a new period, this test will ask user for setting the period :
+        if self.args.period=="setperiod":
+            dateofpics = MPDB.get_pics_dates()#the choice of the date is made with pictures in database (datetime of pics are used)
+            dialog = xbmcgui.Dialog()
+            rets = dialog.select(__language__(30107),dateofpics)#choose the start date
+            if not rets==-1:#is not canceled
+                datestart = dateofpics[rets]
+                retf = dialog.select(__language__(30108),dateofpics[rets:])#choose the end date (all dates before startdate are ignored to preserve begin/end)
+                if not rets==-1:#if end date is not canceled...
+                    dateend = dateofpics[rets+retf]
+                    #now input the title for the period
+                    kb = xbmc.Keyboard(__language__(30109)%(datestart,dateend), __language__(30110), False)
+                    kb.doModal()
+                    if (kb.isConfirmed()):
+                        titreperiode = kb.getText()
+                    else:
+                        titreperiode = __language__(30109)%(datestart,dateend)
+                    #add the new period inside the database
+                    MPDB.addPeriode(titreperiode,"datetime('%s')"%datestart,"datetime('%s')"%dateend)
+            update=True
+        else:
+            update=False
+
+        #search for inbase periods and show periods
+        for periodname,dbdatestart,dbdateend in MPDB.ListPeriodes():
+            datestart,dateend = MPDB.Request("SELECT strftime('%%Y-%%m-%%d',datetime('%s')),strftime('%%Y-%%m-%%d',datetime('%s','+1 day'))"%(dbdatestart,dbdateend))[0]
+            self.addDir(name      = "%s (%s)"%(periodname,__language__(30113)%(datestart,dateend)), #libellé
+                        params    = [("method","date"),("period","period"),("datestart",datestart),("dateend",dateend)],#paramètres
+                        action    = "showpics",#action
+                        iconimage = "",#icone
+                        contextmenu   = [ ( __language__(30111),"XBMC.RunPlugin(\"%s?action='removeperiod'&periodname='%s'&period='period'\")"%(sys.argv[0],periodname) ),
+                                          ( __language__(30112),"XBMC.RunPlugin(\"%s?action='renameperiod'&periodname='%s'&period='period'\")"%(sys.argv[0],periodname) )
+                                        ] )#menucontextuel
+            
+        xbmcplugin.addSortMethod( int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE )
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s"%(__language__(30105)))
-        xbmcplugin.endOfDirectory(int(sys.argv[1]))
+        xbmcplugin.endOfDirectory( int(sys.argv[1]),updateListing=update )
+
+    ##################################
+    #traitement des menus contextuels
+    ##################################
+    def remove_period(self):
+        MPDB.delPeriode(self.args.periodname)
+        #xbmc.executebuiltin( "XBMC.RunPlugin(\"%s?action='showperiod'&period=''\")"%sys.argv[0] )
+        xbmc.executebuiltin( "Container.Update(\"%s?action='showperiod'&period=''\" , replace)"%sys.argv[0] , )
         
+    def rename_period(self):
+        datestart,dateend = MPDB.Request( """SELECT DateStart,DateEnd FROM Periodes WHERE PeriodeName='%s'"""%self.args.periodname )[0]
+        kb = xbmc.Keyboard(self.args.periodname, __language__(30110), False)
+        kb.doModal()
+        if (kb.isConfirmed()):
+            titreperiode = kb.getText()
+        else:
+            titreperiode = self.args.periodname
+        MPDB.renPeriode(self.args.periodname,titreperiode)
+        xbmc.executebuiltin( "Container.Update(\"%s?action='showperiod'&period=''\" , replace)"%sys.argv[0] , )
         
 
     def show_pics(self):
@@ -288,7 +318,7 @@ class Main:
 
         elif self.args.method == "date":
             #   lister les images pour une date donnée
-            format = {"year":"%Y","month":"%Y-%m","date":"%Y-%m-%d","":"%Y","period":"%Y-%m-%d %H:%M:%S"}[self.args.period]
+            format = {"year":"%Y","month":"%Y-%m","date":"%Y-%m-%d","":"%Y","period":"%Y-%m-%d"}[self.args.period]
             if self.args.period=="year" or self.args.period=="":
                 if self.args.value:
                     filelist = MPDB.search_between_dates( (self.args.value,format) , ( str( int(self.args.value) +1 ),format) )
@@ -411,6 +441,7 @@ def scan_my_pics():
 if __name__=="__main__":
 
     m=Main()
+
     if not sys.argv[ 2 ]: #pas de paramètres : affichage du menu principal
 
         ok = scan_my_pics()#scan lorsque le plugin n'a pas de paramètres
@@ -438,6 +469,10 @@ if __name__=="__main__":
     elif m.args.action=='scan':
         #un scan simple est demandé...
         ok = scan_my_pics()
+    elif m.args.action=='removeperiod':
+        m.remove_period()
+    elif m.args.action=='renameperiod':
+        m.rename_period()
     else:
         m.show_home()
     del MPDB

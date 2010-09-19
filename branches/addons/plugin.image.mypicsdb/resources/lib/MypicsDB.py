@@ -112,6 +112,20 @@ def Make_new_base(DBpath,ecrase=True):
             log( "%s - %s"%(Exception,msg) )
             log( "~~~~" )
             log( "" )
+        try:
+            cn.execute("""DROP TABLE Collections""")
+        except Exception,msg:
+            log( ">>> Make_new_base - DROP TABLE Collections" )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+        try:
+            cn.execute("""DROP TABLE Periodes""")
+        except Exception,msg:
+            log( ">>> Make_new_base - DROP TABLE Periodes" )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
 
 
     #table 'files'
@@ -142,7 +156,7 @@ def Make_new_base(DBpath,ecrase=True):
             log( "" )
     #table 'KeywordsInFiles'
     try:
-        cn.execute("""CREATE TABLE "KeywordsInFiles" ("idKW" INTEGER, "idFile" INTEGER);""")
+        cn.execute("""CREATE TABLE "KeywordsInFiles" ("idKW" INTEGER NOT NULL, "idFile" INTEGER NOT NULL);""")
     except Exception,msg:
         if msg.args[0].startswith("table 'KeywordsInFiles' already exists"):
             #cette exception survient lorsque la table existe déjà.
@@ -163,6 +177,51 @@ def Make_new_base(DBpath,ecrase=True):
             pass
         else: #sinon on imprime l'exception levée pour la traiter
             log( ">>> Make_new_base - CREATE TABLE folders ..." )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+    #table 'Collections'
+    try:
+        cn.execute("""CREATE TABLE "Collections" ("idCol" INTEGER PRIMARY KEY, "CollectionName" TEXT UNIQUE);""")
+    except Exception,msg:
+        if msg.args[0].startswith("table 'Collections' already exists"):
+            #cette exception survient lorsque la table existe déjà.
+            #   elle n'est pas une erreur, on la passe
+            pass
+        else: #sinon on imprime l'exception levée pour la traiter
+            log( ">>> Make_new_base - CREATE TABLE Collections ..." )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+    #table 'FilesInCollections'
+    try:
+        cn.execute("""CREATE TABLE "FilesInCollections" ("idCol" INTEGER, "idFile" INTEGER);""")
+    except Exception,msg:
+        if msg.args[0].startswith("table 'FilesInCollections' already exists"):
+            #cette exception survient lorsque la table existe déjà.
+            #   elle n'est pas une erreur, on la passe
+            pass
+        else: #sinon on imprime l'exception levée pour la traiter
+            log( ">>> Make_new_base - CREATE TABLE FilesInCollections ..." )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+    #table 'c'
+    try:
+        cn.execute("""CREATE TABLE "periodes" 
+  ("idPeriode" INTEGER  PRIMARY KEY NOT NULL,
+   "PeriodeName" TEXT UNIQUE NOT NULL,
+   "DateStart" DATETIME NOT NULL,
+   "DateEnd" DATETIME NOT NULL,
+   CONSTRAINT UNI_PERIODE UNIQUE ("PeriodeName","DateStart","DateEnd")
+   )""")
+    except Exception,msg:
+        if msg.args[0].startswith("table 'Periodes' already exists"):
+            #cette exception survient lorsque la table existe déjà.
+            #   elle n'est pas une erreur, on la passe
+            pass
+        else: #sinon on imprime l'exception levée pour la traiter
+            log( ">>> Make_new_base - CREATE TABLE Periodes ..." )
             log( "%s - %s"%(Exception,msg) )
             log( "~~~~" )
             log( "" )
@@ -364,10 +423,61 @@ UseIt = 1
 AND
 idFolder = 6"""
 
+###################################
+# Collection functions
+#####################################
+def ListCollections():
+    """List all available collections"""
+    return [row for row in Request( """SELECT CollectionName FROM Collections""")]
 
+def NewCollection(Colname):
+    """Add a new collection"""
+    if Colname :
+        Request( """INSERT INTO Collections(CollectionName) VALUES (%s)"""%Colname )
+    else:
+        log( """NewCollection : User did not specify a name for the collection.""")
 
+def getCollectionPics(Colname):
+    """List all pics associated to the Collection given as Colname"""
+
+def addPicToCollection(Colname,filepath,filename):
+    #cette requête ne vérifie pas si :
+    #   1- le nom de la collection existe dans la table Collections
+    #   2- si l'image est bien une image en base de donnée Files
+    #ces points sont solutionnés partiellement car les champs ne peuvent être NULL
+    #   3- l'association idCol et idFile peut apparaitre plusieurs fois...
+    Request( """INSERT INTO FilesInCollections(idCol,idFile) VALUES ( (SELECT idCol FROM Collections WHERE CollectionName="%s") , (SELECT idFile FROM files WHERE strPath="%s" AND strFilename="%s") )"""%(Colname,filepath,filename) )
+
+def delPicFromCollection(Colname,filepath,filename):
+    Request( """DELETE FROM FilesInCollections WHERE idCol=(SELECT idCol FROM Collections WHERE CollectionName="%s") AND idFile=(SELECT idFile FROM files WHERE strPath="%s" AND strFilename="%s")"""%(Colname,filepath,filename) )
     
+####################
+# Periodes functions
+#####################
+def ListPeriodes():
+    """List all periodes"""
+    return [row for row in Request( """SELECT PeriodeName,DateStart,DateEnd FROM Periodes""")]
 
+def addPeriode(periodname,datestart,dateend):
+    #datestart et dateend doivent être au format string ex.: "datetime('2009-07-12')" ou "strftime('%Y',now)"
+    Request( """INSERT INTO Periodes(PeriodeName,DateStart,DateEnd) VALUES ('%s',%s,%s)"""%(periodname,datestart,dateend) )
+    return
+
+def delPeriode(periodname):
+    Request( """DELETE FROM Periodes WHERE PeriodeName="%s" """%periodname )
+    return
+
+def renPeriode(periodname,newname):
+    Request( """UPDATE Periodes SET PeriodeName = "%s" WHERE PeriodeName="%s" """%(newname,periodname) )
+    return
+
+def PicsForPeriode(periodname):
+    """Get pics for the given period name"""
+    period = Request( """SELECT DateStart,DateEnd FROM Periodes WHERE PeriodeName=%s"""%periodname )
+    return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN %s AND %s ORDER BY "EXIF DateTimeOriginal" ASC"""%period )]
+
+###
+    
 def hook_directory ( filepath,filename,filecount, nbfiles ):
     import sys
     log( "%s/%s - %s"%(filecount,nbfiles,os.path.join(filepath,filename)) )
@@ -807,7 +917,7 @@ def get_dates(year_month):
 def search_all_dates():
     return [t for t in Request("""SELECT strPath,strFilename FROM files ORDER BY "EXIF DateTimeOriginal" ASC""")]
 def get_pics_dates():
-    return [t for (t,) in Request("""SELECT distinct "EXIF DateTimeOriginal" FROM files where "EXIF DateTimeOriginal"  not null ORDER BY "EXIF DateTimeOriginal" ASC""")]
+    return [t for (t,) in Request("""SELECT distinct strftime("%Y-%m-%d","EXIF DateTimeOriginal") FROM files where "EXIF DateTimeOriginal"  not null ORDER BY "EXIF DateTimeOriginal" ASC""")]
 #Quelques requêtes SQLite
 #
 """
