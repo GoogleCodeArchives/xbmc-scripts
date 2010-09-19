@@ -280,7 +280,7 @@ class Main:
         #search for inbase periods and show periods
         for periodname,dbdatestart,dbdateend in MPDB.ListPeriodes():
             datestart,dateend = MPDB.Request("SELECT strftime('%%Y-%%m-%%d',datetime('%s')),strftime('%%Y-%%m-%%d',datetime('%s','+1 day'))"%(dbdatestart,dbdateend))[0]
-            self.addDir(name      = "%s (%s)"%(periodname,__language__(30113)%(datestart,dateend)), #libellé
+            self.addDir(name      = "%s (%s)"%(periodname.decode("utf8"),__language__(30113)%(datestart,dateend)), #libellé
                         params    = [("method","date"),("period","period"),("datestart",datestart),("dateend",dateend)],#paramètres
                         action    = "showpics",#action
                         iconimage = "",#icone
