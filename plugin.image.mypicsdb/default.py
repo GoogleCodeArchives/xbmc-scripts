@@ -116,7 +116,7 @@ class Main:
     def Title(self,title):
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category=urllib.unquote_plus(title.encode("utf-8")) )
         
-    def addDir(self,name,params,action,iconimage,contextmenu=None,total=0,info="*",replacemenu=True):
+    def addDir(self,name,params,action,iconimage,fanart=None,contextmenu=None,total=0,info="*",replacemenu=True):
         #params est une liste de tuples [(nomparametre,valeurparametre),]
         #contitution des paramètres
         print params
@@ -128,7 +128,9 @@ class Main:
         u=sys.argv[0]+"?"+parameter+"&action="+repr(str(action))+"&name="+repr(urllib.quote_plus(name.encode("utf8")))
         ok=True
         #création de l'item de liste
-        liz=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
+        liz=xbmcgui.ListItem(name, thumbnailImage=iconimage)
+        if fanart:
+            liz.setProperty( "Fanart_Image", fanart )
         #adjonction d'informations
         #liz.setInfo( type="Pictures", infoLabels={ "Title": name } )
         #menu contextuel
@@ -137,25 +139,27 @@ class Main:
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True,totalItems=total)
         return ok
     
-    def addPic(self,picname,picpath,info="*",contextmenu=None,replacemenu=True):
+    def addPic(self,picname,picpath,info="*",fanart=None,contextmenu=None,replacemenu=True):
         ok=True
         liz=xbmcgui.ListItem(picname,info)
         liz.setLabel2(info)
         if contextmenu:
             liz.addContextMenuItems(contextmenu,replacemenu)
+        if fanart:
+            liz.setProperty( "Fanart_Image", fanart )
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=os.path.join(picpath,picname),listitem=liz,isFolder=False)
         
     def show_home(self):
         # par années
-        self.addDir(unescape(__language__(30101)),[("period","year"),("value","")],"showdate",os.path.join(PIC_PATH,"dates.png"))
+        self.addDir(unescape(__language__(30101)),[("period","year"),("value","")],"showdate",os.path.join(PIC_PATH,"dates.png"),fanart=os.path.join(PIC_PATH,"fanart-date.png"))
         # par dossiers
-        self.addDir(unescape(__language__(30102)),[("method","folders"),("folderid",""),("onlypics","non")],"showfolder",os.path.join(PIC_PATH,"folders.png"))
+        self.addDir(unescape(__language__(30102)),[("method","folders"),("folderid",""),("onlypics","non")],"showfolder",os.path.join(PIC_PATH,"folders.png"),fanart=os.path.join(PIC_PATH,"fanart-folder.png"))
         # par mots clés
-        self.addDir(unescape(__language__(30103)),[("kw",""),],"showkeywords",os.path.join(PIC_PATH,"keywords.png"))
+        self.addDir(unescape(__language__(30103)),[("kw",""),],"showkeywords",os.path.join(PIC_PATH,"keywords.png"),fanart=os.path.join(PIC_PATH,"fanart-keyword.png"))
         # période
-        self.addDir(unescape(__language__(30105)),[("period",""),],"showperiod",os.path.join(PIC_PATH,"period.png"))
+        self.addDir(unescape(__language__(30105)),[("period",""),],"showperiod",os.path.join(PIC_PATH,"period.png"),fanart=os.path.join(PIC_PATH,"fanart-period.png"))
         # Collections
-        self.addDir(unescape(__language__(30150)),[("collect",""),("method","show")],"showcollection","")
+        self.addDir(unescape(__language__(30150)),[("collect",""),("method","show")],"showcollection",os.path.join(PIC_PATH,"collection.png"),fanart=os.path.join(PIC_PATH,"fanart-collection.png"))
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category=urllib.unquote_plus("My Pictures Library".encode("utf-8")) )
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -187,7 +191,8 @@ class Main:
             self.addDir(name      = __language__(30100)%(self.args.value,MPDB.countPeriod(allperiod,self.args.value)), #libellé#"All the period %s (%s pics)"%(self.args.value,MPDB.countPeriod(allperiod,self.args.value)), #libellé
                         params    = [("method","date"),("period",allperiod),("value",self.args.value)],#paramètres
                         action    = "showpics",#action
-                        iconimage = "",#icone
+                        iconimage = os.path.join(PIC_PATH,"dates.png"),#icone
+                        fanart    = os.path.join(PIC_PATH,"fanart-date.png"),
                         contextmenu   = None)#menucontextuel
             total=len(listperiod)
             for period in listperiod:
@@ -195,7 +200,8 @@ class Main:
                     self.addDir(name      = "%s (%s %s)"%(period,MPDB.countPeriod(self.args.period,period),__language__(30050)), #libellé
                                 params    = [("method","date"),("period",nextperiod),("value",period)],#paramètres
                                 action    = action,#action
-                                iconimage = "",#icone
+                                iconimage = os.path.join(PIC_PATH,"dates.png"),#icone
+                                fanart    = os.path.join(PIC_PATH,"fanart-date.png"),
                                 contextmenu   = None,#menucontextuel
                                 total = total)#nb total d'éléments
                 
@@ -217,21 +223,25 @@ class Main:
             self.addDir(name      = "%s (%s %s)"%(childrenfolder.decode("utf8"),MPDB.countPicsFolder(idchildren),__language__(30050)), #libellé
                         params    = [("method","folders"),("folderid",str(idchildren)),("onlypics","non")],#paramètres
                         action    = "showfolder",#action
-                        iconimage = "",#icone
+                        iconimage = os.path.join(PIC_PATH,"folders.png"),#icone
+                        fanart    = os.path.join(PIC_PATH,"fanart-folder.png"),
                         contextmenu   = None,#menucontextuel
                         total = total)#nb total d'éléments
         
         #maintenant, on liste les photos si il y en a, du dossier en cours
         picsfromfolder = [row for row in MPDB.Request("SELECT p.FullPath,f.strFilename FROM files f,folders p WHERE f.idFolder=p.idFolder AND f.idFolder='%s'"%self.args.folderid)]
         for path,filename in picsfromfolder:
-            self.addPic(filename,path,contextmenu=[( "Add to Collection","XBMC.RunPlugin(\"%s?action='addtocollection'&path='%s'&filename='%s'\")"%(sys.argv[0],
+            self.addPic(filename,path,contextmenu=[( __language__(30152),"XBMC.RunPlugin(\"%s?action='addtocollection'&path='%s'&filename='%s'\")"%(sys.argv[0],
                                                                                                                          urllib.quote_plus(path),
                                                                                                                          urllib.quote_plus(filename))
-                              ),("Don't use this picture","XBMC.RunScript(special://home/scripts/showtimes/default.py,Iron Man)",)])
+                              ),("Don't use this picture","",)],
+                        fanart = os.path.join(PIC_PATH,"fanart-folder.png")
+                        )
                             #("Add to Collection","XBMC.RunPlugin(%s?method='folders'&folderid='2'&onlypics='non'&action='showfolder'&name='2005-05+%%2823+images%%29')"%sys.argv[0])
             
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s : %s"%(__language__(30102),urllib.unquote_plus(self.args.folderid.encode("utf-8"))) )
+        #xbmcplugin.setPluginFanart(int(sys.argv[1]), os.path.join(PIC_PATH,"fanart-period.png"))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     def show_keywords(self):
@@ -241,7 +251,8 @@ class Main:
             self.addDir(name      = "%s (%s %s)"%(__language__(30104),MPDB.countKW(None),__language__(30050)), #libellé
                         params    = [("method","keyword"),("kw","")],#paramètres
                         action    = "showpics",#action
-                        iconimage = "",#icone
+                        iconimage = os.path.join(PIC_PATH,"keywords.png"),#icone
+                        fanart    = os.path.join(PIC_PATH,"fanart-keyword.png"),
                         contextmenu   = None)#menucontextuel
         total = len(listkw)
         for kw in listkw:
@@ -249,7 +260,8 @@ class Main:
             self.addDir(name      = "%s (%s %s)"%(kw,MPDB.countKW(kw),__language__(30050)), #libellé
                         params    = [("method","keyword"),("kw",kw)],#paramètres
                         action    = "showpics",#action
-                        iconimage = "",#icone
+                        iconimage = os.path.join(PIC_PATH,"keywords.png"),#icone
+                        fanart    = os.path.join(PIC_PATH,"fanart-keyword.png"),
                         contextmenu   = None,#menucontextuel
                         total = total)#nb total d'éléments
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
@@ -260,7 +272,8 @@ class Main:
         self.addDir(name      = __language__(30106),
                     params    = [("period","setperiod")],#paramètres
                     action    = "showperiod",#action
-                    iconimage = os.path.join(PIC_PATH,"add.png"),#icone
+                    iconimage = os.path.join(PIC_PATH,"newperiod.png"),#icone
+                    fanart    = os.path.join(PIC_PATH,"fanart-period.png"),
                     contextmenu   = None)#menucontextuel
         #If We previously choose to add a new period, this test will ask user for setting the period :
         if self.args.period=="setperiod":
@@ -291,7 +304,8 @@ class Main:
             self.addDir(name      = "%s (%s)"%(periodname.decode("utf8"),__language__(30113)%(datestart,dateend)), #libellé
                         params    = [("method","date"),("period","period"),("datestart",datestart),("dateend",dateend)],#paramètres
                         action    = "showpics",#action
-                        iconimage = "",#icone
+                        iconimage = os.path.join(PIC_PATH,"period.png"),#icone
+                        fanart    = os.path.join(PIC_PATH,"fanart-period.png"),
                         contextmenu   = [ ( __language__(30111),"XBMC.RunPlugin(\"%s?action='removeperiod'&periodname='%s'&period='period'\")"%(sys.argv[0],periodname) ),
                                           ( __language__(30112),"XBMC.RunPlugin(\"%s?action='renameperiod'&periodname='%s'&period='period'\")"%(sys.argv[0],periodname) )
                                         ] )#menucontextuel
@@ -317,14 +331,16 @@ class Main:
         self.addDir(name      = __language__(30160),
                     params    = [("method","setcollection"),("collect",""),],#paramètres
                     action    = "showcollection",#action
-                    iconimage = "",#icone
+                    iconimage = os.path.join(PIC_PATH,"newcollection.png"),#icone
+                    fanart    = os.path.join(PIC_PATH,"fanart-collection.png"),
                     contextmenu   = None)#menucontextuel
 
         for collection in MPDB.ListCollections():
             self.addDir(name      = collection[0].decode("utf8"),
                         params    = [("method","collection"),("collect",collection[0].decode("utf8"))],#paramètres
                         action    = "showpics",#action
-                        iconimage = "",#icone
+                        iconimage = os.path.join(PIC_PATH,"collection.png"),#icone
+                        fanart    = os.path.join(PIC_PATH,"fanart-collection.png"),
                         contextmenu   = [(__language__(30158),"XBMC.RunPlugin(\"%s?action='removecollection'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8")) ),
                                          (__language__(30159),"XBMC.RunPlugin(\"%s?action='renamecollection'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8")) )
                                          ] )#menucontextuel
@@ -398,11 +414,13 @@ class Main:
         xbmc.executebuiltin( "Container.Update(\"%s?action='showpics'&collect='%s'&method='collection'\" , replace)"%(sys.argv[0],self.args.collect) , )
         
     def show_pics(self):
+        picfanart = None
         if self.args.method == "folder":#NON UTILISE : l'affichage par dossiers affiche de lui même les photos
             pass
 
         elif self.args.method == "date":
             #   lister les images pour une date donnée
+            picfanart = os.path.join(PIC_PATH,"fanart-date.png")
             format = {"year":"%Y","month":"%Y-%m","date":"%Y-%m-%d","":"%Y","period":"%Y-%m-%d"}[self.args.period]
             if self.args.period=="year" or self.args.period=="":
                 if self.args.value:
@@ -426,6 +444,7 @@ class Main:
                 filelist = MPDB.search_between_dates( ("%s-%s-%s"%(a,m,j),format) , ( "%s-%s-%s"%(a,m,int(j)+1),format) )
                 
             elif self.args.period=="period":
+                picfanart = os.path.join(PIC_PATH,"fanart-period.png")
                 filelist = MPDB.search_between_dates(DateStart=(urllib.unquote_plus(self.args.datestart),format),
                                                      DateEnd=(urllib.unquote_plus(self.args.dateend),format))
                          
@@ -441,6 +460,7 @@ class Main:
                     
         elif self.args.method == "keyword":
             #   lister les images correspondant au mot clé
+            picfanart = os.path.join(PIC_PATH,"fanart-keyword.png")
             if not self.args.kw: #le mot clé est vide '' --> les photos sans mots clés
                 filelist = MPDB.search_keyword(None)
             else:
@@ -450,10 +470,12 @@ class Main:
             #   lister les images du dossier self.args.folderid et ses sous-dossiers
             # BUG CONNU : cette requête ne récupère que les photos du dossier choisi, pas les photos 'filles' des sous dossiers
             #   il faut la modifier pour récupérer les photos filles des sous dossiers
+            picfanart = os.path.join(PIC_PATH,"fanart-folder.png")
             listid = MPDB.all_children(self.args.folderid)
             filelist = [row for row in MPDB.Request( "SELECT p.FullPath,f.strFilename FROM files f,folders p WHERE f.idFolder=p.idFolder AND p.ParentFolder in ('%s')"%"','".join([str(i) for i in listid]))]
             
         elif self.args.method == "collection":
+            picfanart = os.path.join(PIC_PATH,"fanart-collection.png")
             filelist = MPDB.getCollectionPics(urllib.unquote_plus(self.args.collect))
             
         #alimentation de la liste
@@ -477,7 +499,8 @@ class Main:
                 
             self.addPic(filename,
                         path,
-                        contextmenu = context
+                        contextmenu = context,
+                        fanart = picfanart
                         )
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="photos" )
