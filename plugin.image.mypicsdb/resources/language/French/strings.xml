@@ -30,6 +30,18 @@
     <string id="30115"></string>
     <string id="30116"></string>
     
+    <string id="30150">Collections</string>
+    <string id="30151">Retirer de la collection</string>
+    <string id="30152">Ajouter à la collection...</string>
+    <string id="30153">Saisir un nouveau titre</string>
+    <string id="30154">Photo ajoutée dans</string>
+    <string id="30155">Saisir un titre pour la nouvelle collection</string>
+    <string id="30156">Choisir une collection</string>
+    <string id="30157">Nouvelle collection</string>
+    <string id="30158">Supprimer cette collection</string>
+    <string id="30159">Renommer cette collection</string>
+    <string id="30160">Créer une nouvelle collection</string>
+    
     <string id="30201">Aucun dossier à scanner n'est configuré !</string>
     <string id="30202">Veuillez éditer les paramètres du plugin pour configurer un chemin</string>
     <string id="30203">Parcours du chemin :</string>

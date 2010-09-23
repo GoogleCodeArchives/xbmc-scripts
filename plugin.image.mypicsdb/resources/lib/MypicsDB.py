@@ -120,6 +120,13 @@ def Make_new_base(DBpath,ecrase=True):
             log( "~~~~" )
             log( "" )
         try:
+            cn.execute("""DROP TABLE FilesInCollections""")
+        except Exception,msg:
+            log( ">>> Make_new_base - DROP TABLE FilesInCollections" )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+        try:
             cn.execute("""DROP TABLE Periodes""")
         except Exception,msg:
             log( ">>> Make_new_base - DROP TABLE Periodes" )
@@ -195,7 +202,10 @@ def Make_new_base(DBpath,ecrase=True):
             log( "" )
     #table 'FilesInCollections'
     try:
-        cn.execute("""CREATE TABLE "FilesInCollections" ("idCol" INTEGER, "idFile" INTEGER);""")
+        cn.execute("""CREATE TABLE "FilesInCollections" ("idCol" INTEGER NOT NULL,
+                                   "idFile" INTEGER NOT NULL,
+                                   CONSTRAINT UNI_COLLECTION UNIQUE ("idCol","idFile")
+                                   );""")
     except Exception,msg:
         if msg.args[0].startswith("table 'FilesInCollections' already exists"):
             #cette exception survient lorsque la table existe déjà.
@@ -326,15 +336,21 @@ def DB_file_insert(path,filename,dictionnary,update=False):
             if mot: #on ajoute que les mots clés non vides
                 #First for keywords, create an entry for this keyword in keywords table
                 try:
-                    cn.execute("""INSERT INTO keywords(keyword) VALUES("%s")"""%mot.encode("utf8","replace"))
+                    cn.execute("""INSERT INTO keywords(keyword) VALUES("%s")"""%mot.encode("utf8","replace"))##
                 except Exception,msg:
-                    log( 'EXCEPTION >> keywords' )
-                    log( "\t%s - %s"%(Exception,msg) )
-                    log( "~~~~" )
-                    log( "" )
+                    if str(msg)=="column keyword is not unique":
+                        pass
+                    else:
+                        log( 'EXCEPTION >> keywords' )
+                        log( "\t%s - %s"%(Exception,msg) )
+                        log( "~~~~" )
+                        log( "" )
                 #Then, add the corresponding id of file and id of keyword inside the KeywordsInFiles database
                 try:
-                    cn.execute("""INSERT INTO KeywordsInFiles(idKW,idFile) SELECT k.idKW,f.idFile FROM keywords k, files f WHERE k.keyword=? AND f.strPath=? AND f.strFilename=?""",(mot,path,filename))
+                    print type(mot)
+                    cn.execute("""INSERT INTO KeywordsInFiles(idKW,idFile) SELECT k.idKW,f.idFile FROM keywords k, files f WHERE k.keyword=? AND f.strPath=? AND f.strFilename=?""",(mot.decode("utf8"),
+                                                                                                                                                                                     path.encode("utf8"),
+                                                                                                                                                                                     filename.encode("utf8")))
                 except Exception,msg:
                     log("Error while adding KeywordsInFiles")
                     print Exception,msg
@@ -433,19 +449,34 @@ def ListCollections():
 def NewCollection(Colname):
     """Add a new collection"""
     if Colname :
-        Request( """INSERT INTO Collections(CollectionName) VALUES (%s)"""%Colname )
+        Request( """INSERT INTO Collections(CollectionName) VALUES ("%s")"""%Colname )
     else:
         log( """NewCollection : User did not specify a name for the collection.""")
-
+def delCollection(Colname):
+    """delete a collection"""
+    if Colname:
+        Request( """DELETE FROM FilesInCollections WHERE idCol=(SELECT idCol FROM Collections WHERE CollectionName="%s");"""%Colname )
+        Request( """DELETE FROM Collections WHERE CollectionName="%s";"""%Colname )
+    else:
+        log( """delCollection : User did not specify a name for the collection""" )
 def getCollectionPics(Colname):
     """List all pics associated to the Collection given as Colname"""
+    return [row for row in Request( """SELECT strPath,strFilename FROM Files WHERE idFile IN (SELECT idFile FROM FilesInCollections WHERE idCol IN (SELECT idCol FROM Collections WHERE CollectionName='%s'))"""%Colname)]
 
+def renCollection(Colname,newname):
+    """rename give collection"""
+    if Colname:
+        Request( """UPDATE Collections SET CollectionName = "%s" WHERE CollectionName="%s";"""%(newname,Colname) )
+    else:
+        log( """renCollection : User did not specify a name for the collection""")
+        
 def addPicToCollection(Colname,filepath,filename):
     #cette requête ne vérifie pas si :
     #   1- le nom de la collection existe dans la table Collections
     #   2- si l'image est bien une image en base de donnée Files
     #ces points sont solutionnés partiellement car les champs ne peuvent être NULL
     #   3- l'association idCol et idFile peut apparaitre plusieurs fois...
+    print """(SELECT idFile FROM files WHERE strPath="%s" AND strFilename="%s")"""%(filepath,filename)
     Request( """INSERT INTO FilesInCollections(idCol,idFile) VALUES ( (SELECT idCol FROM Collections WHERE CollectionName="%s") , (SELECT idFile FROM files WHERE strPath="%s" AND strFilename="%s") )"""%(Colname,filepath,filename) )
 
 def delPicFromCollection(Colname,filepath,filename):
@@ -768,7 +799,9 @@ def Request(SQLrequest):
         conn.commit()
         retour = [row for row in cn]
     except Exception,msg:
+        log( "The request failed :" )
         log( "%s - %s"%(Exception,msg) )
+        log( "---" )     
         retour= []
     cn.close()
     return retour
@@ -777,7 +810,7 @@ def search_keyword(kw=None):
     """Look for given keyword and return the list of pictures.
 If keyword is not given, pictures with no keywords are returned"""
     if kw is not None: #si le mot clé est fourni
-        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile in (SELECT idFile FROM KeywordsInFiles WHERE idKW =(SELECT idKW FROM keywords WHERE keyword="%s"))"""%kw)]
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile in (SELECT idFile FROM KeywordsInFiles WHERE idKW =(SELECT idKW FROM keywords WHERE keyword="%s"))"""%kw.encode("utf8"))]
     else: #sinon, on retourne toutes les images qui ne sont pas associées à des mots clés
         return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile in (SELECT DISTINCT idFile FROM KeywordsInFiles)""" )]
 
