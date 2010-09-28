@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
+  <category label="general">
 
     <setting type="lsep" label="30020" />
     <!-- le dossier à scanner -->
@@ -16,7 +17,15 @@
     <setting id="updateDB" type="bool" label="30021" default="false" />
     
     <setting type="lsep" label="30001" />
+  </category>
+  <category label="montage">
+    <setting id="sharepath" type="folder" source="pictures" label="chemin reseau" default="smb://192.168.0.22" />
+    <setting id="sharelogin" type="text" label="login" default="" />
+    <setting id="sharepass" type="text" option="hidden" label="password" default="" />
+  </category>                    
+  <category label="debugging">
     <!-- pour recréer la base lors du scan -->
     <setting id="initDB" type="bool" label="30025" default="false" />
+  </category>
 
 </settings>
