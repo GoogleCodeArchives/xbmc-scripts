@@ -65,6 +65,7 @@ def log(msg):
     
 def mount(mountpoint="z:",path="\\",login=None,password=""):
     import os
+    print "net use %s %s %s /USER:%s"%(mountpoint,path,login,password)
     if not os.path.exists(mountpoint):
         log( "Mounting %s as %s..."%(path,mountpoint) )
         if login:
@@ -130,6 +131,13 @@ def Make_new_base(DBpath,ecrase=True):
             cn.execute("""DROP TABLE Periodes""")
         except Exception,msg:
             log( ">>> Make_new_base - DROP TABLE Periodes" )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+        try:
+            cn.execute("""DROP TABLE Rootpaths""")
+        except Exception,msg:
+            log( ">>> Make_new_base - DROP TABLE Rootpaths" )
             log( "%s - %s"%(Exception,msg) )
             log( "~~~~" )
             log( "" )
@@ -216,7 +224,7 @@ def Make_new_base(DBpath,ecrase=True):
             log( "%s - %s"%(Exception,msg) )
             log( "~~~~" )
             log( "" )
-    #table 'c'
+    #table 'periodes'
     try:
         cn.execute("""CREATE TABLE "periodes" 
   ("idPeriode" INTEGER  PRIMARY KEY NOT NULL,
@@ -232,6 +240,23 @@ def Make_new_base(DBpath,ecrase=True):
             pass
         else: #sinon on imprime l'exception levée pour la traiter
             log( ">>> Make_new_base - CREATE TABLE Periodes ..." )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+    #table 'Rootpaths'
+    try:
+        cn.execute("""CREATE TABLE "Rootpaths" 
+  ("idRoot" INTEGER  PRIMARY KEY NOT NULL,
+   "path" TEXT UNIQUE NOT NULL,
+   "recursive" INTEGER NOT NULL,
+   "remove" INTEGER NOT NULL)""")
+    except Exception,msg:
+        if msg.args[0].startswith("table 'Rootpaths' already exists"):
+            #cette exception survient lorsque la table existe déjà.
+            #   elle n'est pas une erreur, on la passe
+            pass
+        else: #sinon on imprime l'exception levée pour la traiter
+            log( ">>> Make_new_base - CREATE TABLE Rootpaths ..." )
             log( "%s - %s"%(Exception,msg) )
             log( "~~~~" )
             log( "" )
@@ -255,18 +280,18 @@ def addColumn(table,colheader,format="text"):
     conn.commit()
     cn.close()
  
-def getColumns(table):
-    conn = sqlite.connect(pictureDB)
-    cn=conn.cursor()
-    cn.execute("select * from files")
-    retour= "\n".join([field[0] for field in cn.description])
-   
-    conn.commit()
-    cn.close()
-    return retour
+##def getColumns(table):
+##    conn = sqlite.connect(pictureDB)
+##    cn=conn.cursor()
+##    cn.execute("select * from files")
+##    retour= "\n".join([field[0] for field in cn.description])
+##    print retour
+##    conn.commit()
+##    cn.close()
+##    return retour
 
 
-def DB_exists(picpath,picfile):
+def DB_exists(picpath,picfile): # NOT USED ! ! ! 
     """
     Check wether or not a file exists in the DB
     """
@@ -294,10 +319,8 @@ def DB_listdir(path):
     conn = sqlite.connect(pictureDB)
     cn=conn.cursor()
     conn.text_factory = str #sqlite.OptimizedUnicode
-    #attention path doit être unicode !!
     log( path )
     try:
-        #cn.execute( """SELECT strFilename FROM "files" WHERE strPath = (?);""",(path,))
         cn.execute( """SELECT f.strFilename FROM files f,folders p WHERE f.idFolder=p.idFolder AND p.FullPath=(?)""",(path,))
     except Exception,msg:
         log( "ERROR : DB_listdir ..." )
@@ -318,7 +341,7 @@ def DB_file_insert(path,filename,dictionnary,update=False):
     conn = sqlite.connect(pictureDB)
     cn=conn.cursor()
     #méthode dajout d'une ligne d'un coup
-    conn.text_factory = sqlite.OptimizedUnicode      
+    conn.text_factory = str#sqlite.OptimizedUnicode      
     try:
         cn.execute( """INSERT INTO files('%s') values (%s)""" % ( "','".join(dictionnary.keys()), ",".join(["?"]*len(dictionnary.values())) ) ,
                                                                      dictionnary.values()
@@ -336,7 +359,7 @@ def DB_file_insert(path,filename,dictionnary,update=False):
             if mot: #on ajoute que les mots clés non vides
                 #First for keywords, create an entry for this keyword in keywords table
                 try:
-                    cn.execute("""INSERT INTO keywords(keyword) VALUES("%s")"""%mot.encode("utf8","replace"))##
+                    cn.execute("""INSERT INTO keywords(keyword) VALUES("%s")"""%mot.encode("utf8"))
                 except Exception,msg:
                     if str(msg)=="column keyword is not unique":
                         pass
@@ -347,13 +370,13 @@ def DB_file_insert(path,filename,dictionnary,update=False):
                         log( "" )
                 #Then, add the corresponding id of file and id of keyword inside the KeywordsInFiles database
                 try:
-                    print type(mot)
-                    cn.execute("""INSERT INTO KeywordsInFiles(idKW,idFile) SELECT k.idKW,f.idFile FROM keywords k, files f WHERE k.keyword=? AND f.strPath=? AND f.strFilename=?""",(mot.decode("utf8"),
-                                                                                                                                                                                     path.encode("utf8"),
-                                                                                                                                                                                     filename.encode("utf8")))
+                    cn.execute("""INSERT INTO KeywordsInFiles(idKW,idFile) SELECT k.idKW,f.idFile FROM keywords k, files f WHERE k.keyword="%s" AND f.strPath="%s" AND f.strFilename="%s";"""%(mot.encode("utf8"),
+                                                                                                                                                                                               path,
+                                                                                                                                                                                               filename))
                 except Exception,msg:
                     log("Error while adding KeywordsInFiles")
                     print Exception,msg
+                                                                                                                                                                                 
 ##    # TRAITEMENT DES FOLDERS
 ##    try:
 ##        haspic = "1" if True else "0"
@@ -366,14 +389,18 @@ def DB_file_insert(path,filename,dictionnary,update=False):
     return True
 
 def DB_folder_insert(foldername,folderpath,parentfolderID,haspic):
+    """insert into folders database, the folder name, folder parent, full path and if has pics
+        Return the id of the folder inserted"""
     conn = sqlite.connect(pictureDB)
     cn=conn.cursor()
-    conn.text_factory = sqlite.OptimizedUnicode      
+    conn.text_factory = sqlite.OptimizedUnicode
+    #insert in the folders database
     try:
         cn.execute("""INSERT INTO folders(FolderName,ParentFolder,FullPath,HasPics) VALUES (?,?,?,?);""",(foldername.decode("utf8"),parentfolderID,folderpath.decode("utf8"),haspic))
     except sqlite.IntegrityError:
         pass
     conn.commit()
+    #return the id of the folder inserted
     cn.execute("""SELECT idFolder FROM folders where FullPath= ?""",(folderpath.decode("utf8"),))
     try:
         retour = [row for (row,) in cn][0]
@@ -383,14 +410,15 @@ def DB_folder_insert(foldername,folderpath,parentfolderID,haspic):
     return retour
 
 
-def DB_del_path(path):
-    #recup l'id du path donné
-    idpath = Request("SELECT idPath from folders where FullPath like '%?'",(path,))
-    deletelist=[]# listera les id des dossiers à supprimer
-    deletelist.append(idpath)#le dossier en paramètres est aussi à supprimer
-    deletelist.extend(get_children(idpath))#on ajoute tous les enfants en sous enfants du dossier
+##def DB_del_path(path):
+##    #recup l'id du path donné
+##    idpath = Request("SELECT idPath from folders where FullPath like '%?'",(path,))
+##    deletelist=[]# listera les id des dossiers à supprimer
+##    deletelist.append(idpath)#le dossier en paramètres est aussi à supprimer
+##    deletelist.extend(get_children(idpath))#on ajoute tous les enfants en sous enfants du dossier
 
 def get_children(folderid):
+    """search all children folders ids for the given folder id"""
     childrens=[c[0] for c in Request("SELECT idFolder FROM folders WHERE ParentFolder='%s'"%folderid)]
     log( childrens )
     list_child=[]
@@ -507,8 +535,51 @@ def PicsForPeriode(periodname):
     period = Request( """SELECT DateStart,DateEnd FROM Periodes WHERE PeriodeName=%s"""%periodname )
     return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN %s AND %s ORDER BY "EXIF DateTimeOriginal" ASC"""%period )]
 
+def Searchfiles(column,searchterm,count=False):
+    if count:
+        return [row for row in Request( """SELECT count(*) FROM files WHERE files.'%s' LIKE "%%%s%%";"""%(column,searchterm))][0][0]
+    else:
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE files.'%s' LIKE "%%%s%%";"""%(column,searchterm))]
 ###
-    
+def getGPS(filepath,filename):
+    return Request( """SELECT files.'GPS GPSLatitude' as lat,files.'GPS GPSLongitude' as lon FROM files WHERE lat NOT NULL AND lon NOT NULL AND strPath="%s" AND strFilename="%s";"""%(filepath,filename) )
+
+######################################"
+#  Fonctions pour les dossiers racines
+######################################"
+
+def RootFolders():
+    "return folders which are root for scanning pictures"
+    return [row for row in Request( """SELECT path,recursive,remove FROM Rootpaths""")]
+
+def AddRoot(path,recursive,remove):
+    "add the path root inside the database. Recursive is 0/1 for recursive scan, remove is 0/1 for removing files that are not physically in the place"
+    Request( """INSERT INTO Rootpaths(path,recursive,remove) VALUES ("%s",%s,%s)"""%(path,recursive,remove) )
+
+def RemoveRoot(path):
+    "remove the given rootpath, remove pics from this path, ..."
+    #récupère l'id de ce chemin
+    idpath = Request( """SELECT idFolder FROM folders WHERE FullPath = "%s";"""%path )[0][0]
+    log("removeroot")
+    log( idpath )
+    log(path)
+    Request( """DELETE FROM files WHERE idFolder='%s'"""%idpath)
+    #1- récupère la liste des images de ce dossier
+    for idchild in all_children(idpath):
+        #supprime les keywordsinfiles
+        Request( """DELETE FROM KeywordsInFiles WHERE idKW in (SELECT idKW FROM KeywordsInFiles WHERE idFile in (SELECT idFile FROM files WHERE idFolder='%s'))"""%idchild )
+        #supprime les photos de files in collection
+        Request( """DELETE FROM FilesInCollections WHERE idFile in (SELECT idFile FROM files WHERE idFolder='%s')"""%idchild )
+        #2- supprime toutes les images
+        Request( """DELETE FROM files WHERE idFolder='%s'"""%idchild)
+    #3- supprime le dossier
+    Request( """DELETE FROM folders WHERE idFolder='%s'"""%idpath)
+    #4- supprime le rootpath
+    Request( """DELETE FROM Rootpaths WHERE path="%s" """%path )
+
+##########################################
+##########################################
+
 def hook_directory ( filepath,filename,filecount, nbfiles ):
     import sys
     log( "%s/%s - %s"%(filecount,nbfiles,os.path.join(filepath,filename)) )
@@ -789,6 +860,10 @@ def get_iptc(path,filename):
 def MakeRequest(field,comparator,value):
     return Request( """SELECT p.FullPath,f.strFilename FROM files f,folders p WHERE f.idFolder=p.idFolder AND %s %s %s """%(field,comparator,value))
 
+def get_fields(table="files"):
+    tableinfo = Request( """pragma table_info("%s")"""%table)
+    return [(name,typ) for cid,name,typ,notnull,dflt_value,pk in tableinfo]        
+
 def Request(SQLrequest):
     log( "SQL > %s"%SQLrequest)
     conn = sqlite.connect(pictureDB)
@@ -822,7 +897,7 @@ def countKW(kw):
     if kw is not None:
         return Request("""SELECT count(*) FROM files WHERE idFile in (SELECT idFile FROM KeywordsInFiles WHERE idKW =(SELECT idKW FROM keywords WHERE keyword="%s"))"""%kw.encode("utf8"))[0][0]
     else:
-        return Request("""SELECT count(*) FROM files WHERE idFile in (SELECT DISTINCT idFile FROM KeywordsInFiles)""" )[0][0]
+        return Request("""SELECT count(*) FROM files WHERE idFile not in (SELECT DISTINCT idFile FROM KeywordsInFiles)""" )[0][0]
 
 def countPicsFolder(folderid):
     log("TEST : tous les enfants de %s"%folderid)

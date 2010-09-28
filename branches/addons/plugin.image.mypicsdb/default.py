@@ -151,15 +151,34 @@ class Main:
         
     def show_home(self):
         # par années
-        self.addDir(unescape(__language__(30101)),[("period","year"),("value","")],"showdate",os.path.join(PIC_PATH,"dates.png"),fanart=os.path.join(PIC_PATH,"fanart-date.png"))
+        self.addDir(unescape(__language__(30101)),[("period","year"),("value",""),("viewmode","view")],
+                    "showdate",os.path.join(PIC_PATH,"dates.png"),
+                    fanart=os.path.join(PIC_PATH,"fanart-date.png"))
         # par dossiers
-        self.addDir(unescape(__language__(30102)),[("method","folders"),("folderid",""),("onlypics","non")],"showfolder",os.path.join(PIC_PATH,"folders.png"),fanart=os.path.join(PIC_PATH,"fanart-folder.png"))
+        self.addDir(unescape(__language__(30102)),[("method","folders"),("folderid",""),("onlypics","non"),("viewmode","view")],
+                    "showfolder",os.path.join(PIC_PATH,"folders.png"),
+                    fanart=os.path.join(PIC_PATH,"fanart-folder.png"))
         # par mots clés
-        self.addDir(unescape(__language__(30103)),[("kw",""),],"showkeywords",os.path.join(PIC_PATH,"keywords.png"),fanart=os.path.join(PIC_PATH,"fanart-keyword.png"))
+        self.addDir(unescape(__language__(30103)),[("kw",""),("viewmode","view")],"showkeywords",
+                    os.path.join(PIC_PATH,"keywords.png"),
+                    fanart=os.path.join(PIC_PATH,"fanart-keyword.png"))
         # période
-        self.addDir(unescape(__language__(30105)),[("period",""),],"showperiod",os.path.join(PIC_PATH,"period.png"),fanart=os.path.join(PIC_PATH,"fanart-period.png"))
+        self.addDir(unescape(__language__(30105)),[("period",""),("viewmode","view"),],"showperiod",
+                    os.path.join(PIC_PATH,"period.png"),
+                    fanart=os.path.join(PIC_PATH,"fanart-period.png"))
         # Collections
-        self.addDir(unescape(__language__(30150)),[("collect",""),("method","show")],"showcollection",os.path.join(PIC_PATH,"collection.png"),fanart=os.path.join(PIC_PATH,"fanart-collection.png"))
+        self.addDir(unescape(__language__(30150)),[("collect",""),("method","show"),("viewmode","view")],"showcollection",
+                    os.path.join(PIC_PATH,"collection.png"),
+                    fanart=os.path.join(PIC_PATH,"fanart-collection.png"))
+        # recherche globale
+        self.addDir(unescape("Global search"),[("searchterm",""),("viewmode","view")],"globalsearch",
+                    os.path.join(PIC_PATH,"search.png"),
+                    fanart=os.path.join(PIC_PATH,"fanart-search.png"))
+        # chemin scannés
+        self.addDir(unescape("Chemins racines"),[("do","showroots"),("viewmode","view")],"rootfolders",
+                    os.path.join(PIC_PATH,"search.png"),
+                    fanart=os.path.join(PIC_PATH,"fanart-search.png"))
+        
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category=urllib.unquote_plus("My Pictures Library".encode("utf-8")) )
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -189,7 +208,7 @@ class Main:
 
         if not None in listperiod:
             self.addDir(name      = __language__(30100)%(self.args.value,MPDB.countPeriod(allperiod,self.args.value)), #libellé#"All the period %s (%s pics)"%(self.args.value,MPDB.countPeriod(allperiod,self.args.value)), #libellé
-                        params    = [("method","date"),("period",allperiod),("value",self.args.value)],#paramètres
+                        params    = [("method","date"),("period",allperiod),("value",self.args.value),("viewmode","view")],#paramètres
                         action    = "showpics",#action
                         iconimage = os.path.join(PIC_PATH,"dates.png"),#icone
                         fanart    = os.path.join(PIC_PATH,"fanart-date.png"),
@@ -198,7 +217,7 @@ class Main:
             for period in listperiod:
                 if period:
                     self.addDir(name      = "%s (%s %s)"%(period,MPDB.countPeriod(self.args.period,period),__language__(30050)), #libellé
-                                params    = [("method","date"),("period",nextperiod),("value",period)],#paramètres
+                                params    = [("method","date"),("period",nextperiod),("value",period),("viewmode","view")],#paramètres
                                 action    = action,#action
                                 iconimage = os.path.join(PIC_PATH,"dates.png"),#icone
                                 fanart    = os.path.join(PIC_PATH,"fanart-date.png"),
@@ -221,7 +240,7 @@ class Main:
         for idchildren, childrenfolder in childrenfolders:
             #print "%s (%s pics)"%(childrenfolder,MPDB.countPicsFolder(idchildren))
             self.addDir(name      = "%s (%s %s)"%(childrenfolder.decode("utf8"),MPDB.countPicsFolder(idchildren),__language__(30050)), #libellé
-                        params    = [("method","folders"),("folderid",str(idchildren)),("onlypics","non")],#paramètres
+                        params    = [("method","folders"),("folderid",str(idchildren)),("onlypics","non"),("viewmode","view")],#paramètres
                         action    = "showfolder",#action
                         iconimage = os.path.join(PIC_PATH,"folders.png"),#icone
                         fanart    = os.path.join(PIC_PATH,"fanart-folder.png"),
@@ -231,7 +250,7 @@ class Main:
         #maintenant, on liste les photos si il y en a, du dossier en cours
         picsfromfolder = [row for row in MPDB.Request("SELECT p.FullPath,f.strFilename FROM files f,folders p WHERE f.idFolder=p.idFolder AND f.idFolder='%s'"%self.args.folderid)]
         for path,filename in picsfromfolder:
-            self.addPic(filename,path,contextmenu=[( __language__(30152),"XBMC.RunPlugin(\"%s?action='addtocollection'&path='%s'&filename='%s'\")"%(sys.argv[0],
+            self.addPic(filename,path,contextmenu=[( __language__(30152),"XBMC.RunPlugin(\"%s?action='addtocollection'&viewmode='view'&path='%s'&filename='%s'\")"%(sys.argv[0],
                                                                                                                          urllib.quote_plus(path),
                                                                                                                          urllib.quote_plus(filename))
                               ),("Don't use this picture","",)],
@@ -249,7 +268,7 @@ class Main:
         listkw = [u"%s"%k.decode("utf8")  for k in MPDB.list_KW()]
         if MPDB.search_keyword(None): #si il y a des photos sans mots clés
             self.addDir(name      = "%s (%s %s)"%(__language__(30104),MPDB.countKW(None),__language__(30050)), #libellé
-                        params    = [("method","keyword"),("kw","")],#paramètres
+                        params    = [("method","keyword"),("kw",""),("viewmode","view")],#paramètres
                         action    = "showpics",#action
                         iconimage = os.path.join(PIC_PATH,"keywords.png"),#icone
                         fanart    = os.path.join(PIC_PATH,"fanart-keyword.png"),
@@ -258,11 +277,11 @@ class Main:
         for kw in listkw:
             #on alimente le plugin en mots clés
             self.addDir(name      = "%s (%s %s)"%(kw,MPDB.countKW(kw),__language__(30050)), #libellé
-                        params    = [("method","keyword"),("kw",kw)],#paramètres
+                        params    = [("method","keyword"),("kw",kw),("viewmode","view")],#paramètres
                         action    = "showpics",#action
                         iconimage = os.path.join(PIC_PATH,"keywords.png"),#icone
                         fanart    = os.path.join(PIC_PATH,"fanart-keyword.png"),
-                        contextmenu   = None,#menucontextuel
+                        contextmenu   = [( "Tout ajouter à la collection...","XBMC.RunPlugin(\"%s?action='addfolder'&method='keyword'&kw='%s'&viewmode='scan'\")"%(sys.argv[0],kw))],#menucontextuel
                         total = total)#nb total d'éléments
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s : %s"%(__language__(30103),urllib.unquote_plus(self.args.kw.encode("utf-8"))) )
@@ -270,7 +289,7 @@ class Main:
 
     def show_period(self):
         self.addDir(name      = __language__(30106),
-                    params    = [("period","setperiod")],#paramètres
+                    params    = [("period","setperiod"),("viewmode","view")],#paramètres
                     action    = "showperiod",#action
                     iconimage = os.path.join(PIC_PATH,"newperiod.png"),#icone
                     fanart    = os.path.join(PIC_PATH,"fanart-period.png"),
@@ -302,12 +321,12 @@ class Main:
         for periodname,dbdatestart,dbdateend in MPDB.ListPeriodes():
             datestart,dateend = MPDB.Request("SELECT strftime('%%Y-%%m-%%d',datetime('%s')),strftime('%%Y-%%m-%%d',datetime('%s','+1 day'))"%(dbdatestart,dbdateend))[0]
             self.addDir(name      = "%s (%s)"%(periodname.decode("utf8"),__language__(30113)%(datestart,dateend)), #libellé
-                        params    = [("method","date"),("period","period"),("datestart",datestart),("dateend",dateend)],#paramètres
+                        params    = [("method","date"),("period","period"),("datestart",datestart),("dateend",dateend),("viewmode","view")],#paramètres
                         action    = "showpics",#action
                         iconimage = os.path.join(PIC_PATH,"period.png"),#icone
                         fanart    = os.path.join(PIC_PATH,"fanart-period.png"),
-                        contextmenu   = [ ( __language__(30111),"XBMC.RunPlugin(\"%s?action='removeperiod'&periodname='%s'&period='period'\")"%(sys.argv[0],periodname) ),
-                                          ( __language__(30112),"XBMC.RunPlugin(\"%s?action='renameperiod'&periodname='%s'&period='period'\")"%(sys.argv[0],periodname) )
+                        contextmenu   = [ ( __language__(30111),"XBMC.RunPlugin(\"%s?action='removeperiod'&viewmode='view'&periodname='%s'&period='period'\")"%(sys.argv[0],periodname) ),
+                                          ( __language__(30112),"XBMC.RunPlugin(\"%s?action='renameperiod'&viewmode='view'&periodname='%s'&period='period'\")"%(sys.argv[0],periodname) )
                                         ] )#menucontextuel
             
         xbmcplugin.addSortMethod( int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE )
@@ -329,7 +348,7 @@ class Main:
         else:
             refresh=False
         self.addDir(name      = __language__(30160),
-                    params    = [("method","setcollection"),("collect",""),],#paramètres
+                    params    = [("method","setcollection"),("collect",""),("viewmode","view"),],#paramètres
                     action    = "showcollection",#action
                     iconimage = os.path.join(PIC_PATH,"newcollection.png"),#icone
                     fanart    = os.path.join(PIC_PATH,"fanart-collection.png"),
@@ -337,25 +356,103 @@ class Main:
 
         for collection in MPDB.ListCollections():
             self.addDir(name      = collection[0].decode("utf8"),
-                        params    = [("method","collection"),("collect",collection[0].decode("utf8"))],#paramètres
+                        params    = [("method","collection"),("collect",collection[0].decode("utf8")),("viewmode","view")],#paramètres
                         action    = "showpics",#action
                         iconimage = os.path.join(PIC_PATH,"collection.png"),#icone
                         fanart    = os.path.join(PIC_PATH,"fanart-collection.png"),
-                        contextmenu   = [(__language__(30158),"XBMC.RunPlugin(\"%s?action='removecollection'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8")) ),
-                                         (__language__(30159),"XBMC.RunPlugin(\"%s?action='renamecollection'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8")) )
+                        contextmenu   = [(__language__(30158),"XBMC.RunPlugin(\"%s?action='removecollection'&viewmode='view'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8")) ),
+                                         (__language__(30159),"XBMC.RunPlugin(\"%s?action='renamecollection'&viewmode='view'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8")) )
                                          ] )#menucontextuel
             
         xbmcplugin.addSortMethod( int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE )
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s"%(__language__(30105)))
         xbmcplugin.endOfDirectory( int(sys.argv[1]),updateListing=refresh)
-        
+
+    def global_search(self):
+        #récupére la liste des colonnes de la table files
+        if not self.args.searchterm:
+            kb = xbmc.Keyboard("","Mot à rechercher" , False)
+            kb.doModal()
+            if (kb.isConfirmed()):
+                motrecherche = kb.getText()
+            else:
+                return
+            refresh=False
+        else:
+            motrecherche = self.args.searchterm
+            refresh=True
+
+        filedesc = MPDB.get_fields("files")
+        result = False
+        for colname,coltype in filedesc:
+            compte = MPDB.Searchfiles(colname,motrecherche,count=True)
+            if compte:
+                result = True
+                self.addDir(name      = u"%s résultats pour '%s' dans '%s'"%(compte,motrecherche.decode("utf8"),colname),
+                            params    = [("method","search"),("field",u"%s"%colname.decode("utf8")),("searchterm",u"%s"%motrecherche.decode("utf8")),("viewmode","view")],#paramètres
+                            action    = "showpics",#action
+                            iconimage = os.path.join(PIC_PATH,"search.png"),#icone
+                            fanart    = os.path.join(PIC_PATH,"fanart-search.png"),
+                            contextmenu   = None)#menucontextuel
+        if not result:
+            dialog = xbmcgui.Dialog()
+            dialog.ok("My Pics Database - Search results", "The search for '%s' did not return any results in the whole database"%motrecherche)
+            return
+        xbmcplugin.addSortMethod( int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE )
+        xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="search")
+        xbmcplugin.endOfDirectory( int(sys.argv[1]),updateListing=refresh)
+
+    def show_roots(self):
+        "show the root folders"
+        refresh=True
+        if self.args.do=="addroot":
+            dialog = xbmcgui.Dialog()
+            newroot = dialog.browse(0, 'Dossier à scanner', 'pictures')
+            if not newroot: return
+            recursive = dialog.yesno("My Pictures Database","Parcourir ce dossier récursivement") and 1 or 0
+            remove = dialog.yesno("My Pictures Database","Remove files from database if pictures does not exists") and 1 or 0
+            #ajoute le rootfolder dans la base
+            MPDB.AddRoot(newroot,recursive,remove)
+            #scan_my_pics(newroot)
+            xbmc.executebuiltin( "Notification(MyPictures Database,Folder added !)" )
+            if dialog.yesno("My Pictures Database","Do you want to perform a scan now ?"):
+                scan_my_pics(newroot)
+                xbmc.executebuiltin( "Notification(My Pictures Database,Folder has been scanned)" )
+        elif self.args.do=="delroot":
+            MPDB.RemoveRoot( urllib.unquote_plus(self.args.delpath) )
+            xbmc.executebuiltin( "Notification(deletefolder,%s)"%urllib.unquote_plus(self.args.delpath) )
+        elif self.args.do=="rootclic":
+            dialog = xbmcgui.Dialog()
+            if dialog.yesno("My Pictures Database","Do you want to perform a scan now ?"):
+                scan_my_pics(urllib.unquote_plus(self.args.rootpath))
+                xbmc.executebuiltin( "Notification(My Pictures Database,Folder has been scanned)" )
+        else:
+            refresh=False
+            
+        self.addDir(name      = "Ajouter un chemin",
+                    params    = [("do","addroot"),("viewmode","view"),],#paramètres
+                    action    = "rootfolders",#action
+                    iconimage = os.path.join(PIC_PATH,"search.png"),#icone
+                    fanart    = os.path.join(PIC_PATH,"fanart-search.png"),
+                    contextmenu   = None)#menucontextuel
+        for path in MPDB.RootFolders():
+            self.addDir(name      = path[0],
+                        params    = [("do","rootclic"),("rootpath",path[0]),("viewmode","view"),],#paramètres
+                        action    = "rootfolders",#action
+                        iconimage = os.path.join(PIC_PATH,"search.png"),#icone
+                        fanart    = os.path.join(PIC_PATH,"fanart-search.png"),
+                        contextmenu   = [("Scan this path","Notification(scan folder,scan this folder now !)"),
+                                         ("Remove this path from DB","Container.Update(\"%s?action='rootfolders'&do='delroot'&delpath='%s'&viewmode='view'\",replace)"%(sys.argv[0],urllib.quote_plus(path[0].decode("utf8"))))])#menucontextuel
+        xbmcplugin.addSortMethod( int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE )
+        xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="search")
+        xbmcplugin.endOfDirectory( int(sys.argv[1]),updateListing=refresh)
+            
     ##################################
     #traitement des menus contextuels
     ##################################
     def remove_period(self):
         MPDB.delPeriode(self.args.periodname)
-        #xbmc.executebuiltin( "XBMC.RunPlugin(\"%s?action='showperiod'&period=''\")"%sys.argv[0] )
-        xbmc.executebuiltin( "Container.Update(\"%s?action='showperiod'&period=''\" , replace)"%sys.argv[0] , )
+        xbmc.executebuiltin( "Container.Update(\"%s?action='showperiod'&viewmode='view'&period=''\" , replace)"%sys.argv[0] , )
         
     def rename_period(self):
         datestart,dateend = MPDB.Request( """SELECT DateStart,DateEnd FROM Periodes WHERE PeriodeName='%s'"""%self.args.periodname )[0]
@@ -366,7 +463,7 @@ class Main:
         else:
             titreperiode = self.args.periodname
         MPDB.renPeriode(self.args.periodname,titreperiode)
-        xbmc.executebuiltin( "Container.Update(\"%s?action='showperiod'&period=''\" , replace)"%sys.argv[0] , )
+        xbmc.executebuiltin( "Container.Update(\"%s?action='showperiod'&viewmode='view'&period=''\" , replace)"%sys.argv[0] , )
 
     def addTo_collection(self):
         listcollection = ["[[%s]]"%__language__(30157)]+[col[0] for col in MPDB.ListCollections()]
@@ -387,17 +484,45 @@ class Main:
             MPDB.NewCollection(namecollection)
         else: #dans tous les autres cas, une collection existente choisie
             namecollection = listcollection[rets]
-        print type(namecollection)
         #3 associe en base l'id du fichier avec l'id de la collection
         MPDB.addPicToCollection( namecollection,urllib.unquote_plus(self.args.path),urllib.unquote_plus(self.args.filename) )
         xbmc.executebuiltin( "Notification(%s,%s %s)"%(__language__(30000).encode("utf8"),
                                                        __language__(30154).encode("utf8"),
                                                        namecollection)
                              )
+    def add_folder_to_collection(self):
+        listcollection = ["[[%s]]"%__language__(30157)]+[col[0] for col in MPDB.ListCollections()]
+
+        dialog = xbmcgui.Dialog()
+        rets = dialog.select(__language__(30156),listcollection)
+        if rets==-1: #choix de liste annulé
+            return
+        if rets==0: #premier élément : ajout manuel d'une collection
+            kb = xbmc.Keyboard("", __language__(30155), False)
+            kb.doModal()
+            if (kb.isConfirmed()):
+                namecollection = kb.getText()
+            else:
+                #il faut traiter l'annulation
+                return
+            #2 créé la collection en base
+            MPDB.NewCollection(namecollection)
+        else: #dans tous les autres cas, une collection existente choisie
+            namecollection = listcollection[rets]
+        #3 associe en base l'id du fichier avec l'id de la collection
+        filelist = self.show_pics() #on récupère les photos correspondantes à la vue
+        c=0
+        for path,filename in filelist: #on les ajoute une par une
+            c=c+1
+            MPDB.addPicToCollection( namecollection,path,filename )
+        xbmc.executebuiltin( "Notification(%s,%s %s)"%(__language__(30000).encode("utf8"),
+                                                       "%s photos ajoutées dans :"%c,
+                                                       namecollection)
+                             )
         
     def remove_collection(self):
         MPDB.delCollection(self.args.collect)
-        xbmc.executebuiltin( "Container.Update(\"%s?action='showcollection'&collect=''&method='show'\" , replace)"%sys.argv[0] , )
+        xbmc.executebuiltin( "Container.Update(\"%s?action='showcollection'&viewmode='view'&collect=''&method='show'\" , replace)"%sys.argv[0] , )
 
     def rename_collection(self):
         kb = xbmc.Keyboard(self.args.collect, __language__(30153), False)
@@ -407,12 +532,31 @@ class Main:
         else:
             newname = self.args.collect
         MPDB.renCollection(self.args.collect,newname)
-        xbmc.executebuiltin( "Container.Update(\"%s?action='showcollection'&collect=''&method='show'\" , replace)"%sys.argv[0] , )
+        xbmc.executebuiltin( "Container.Update(\"%s?action='showcollection'&viewmode='view'&collect=''&method='show'\" , replace)"%sys.argv[0] , )
 
     def del_pics_from_collection(self):
         MPDB.delPicFromCollection(urllib.unquote_plus(self.args.collect),urllib.unquote_plus(self.args.path),urllib.unquote_plus(self.args.filename))
-        xbmc.executebuiltin( "Container.Update(\"%s?action='showpics'&collect='%s'&method='collection'\" , replace)"%(sys.argv[0],self.args.collect) , )
-        
+        xbmc.executebuiltin( "Container.Update(\"%s?action='showpics'&viewmode='view'&collect='%s'&method='collection'\" , replace)"%(sys.argv[0],self.args.collect) , )
+
+    def get_map(self):
+        #1- récupère les données GPS de la photo
+        #2- si il y a des coordonnées, on valide le menu contextuel
+        pass
+##>>> gps="[53, 1, 60073/2071]"
+##>>> exec("gpslist=%s"%gps)
+##>>> gpslist
+##[53, 1, 29]
+##>>> print "%s° %s' %s\""%tuple(gpslist)
+##53° 1' 29"
+##print "%s, %s"%(toGPS("[16, 15, 61307/1888]"),toGPS("[145, 23, 170571/3125]"))
+##def toGPS(iptcGPS):
+##    exec("gpslist=%s"%iptcGPS)
+##    return "%s° %s' %s\""%tuple(gpslist)
+##html = urllib.urlopen("http://maps.google.fr/mobile?q=-16%C2%B0+15%27+32%22%2C+145%C2%B0+23%27+54%22").read()
+##re.findall(r"""<img src="(http://mt0\.google\.com/vt/data=[^"]+)" width="\d+" height="\d+" alt="carte"/>""",html)
+##re.findall(r"""<img class=".*?" src="(http://mt0\.google\.com/vt/data=[^"]+)" width="\d+" height="\d+" alt="carte"/>""",html) #celle ci si on utilise un header firefox
+##f=open("carte.jpg","wb").write(urllib.urlopen("http://mt0.google.com/vt/data=DGISkzGkvSKtpmptuxGtSlAxye35anR50gV8p99SMBV7lhz5_SO6d2GJtFS6x5v99bmP4fyMNtom1qmOLUz5lAEhA5p2Pag4B-8CXugaRH-y82_kkw").read())
+    
     def show_pics(self):
         picfanart = None
         if self.args.method == "folder":#NON UTILISE : l'affichage par dossiers affiche de lui même les photos
@@ -477,26 +621,40 @@ class Main:
         elif self.args.method == "collection":
             picfanart = os.path.join(PIC_PATH,"fanart-collection.png")
             filelist = MPDB.getCollectionPics(urllib.unquote_plus(self.args.collect))
-            
+
+        elif self.args.method == "search":
+            picfanart = os.path.join(PIC_PATH,"fanart-collection.png")
+            filelist = MPDB.Searchfiles(urllib.unquote_plus(self.args.field),urllib.unquote_plus(self.args.searchterm),count=False)
+
+        #on teste l'argumen 'viewmode'
+            #si viewmode = view : on liste les images
+            #si viewmode = scan : on liste les photos qu'on retourne
+        if self.args.viewmode=="scan":
+            return filelist
         #alimentation de la liste
         for path,filename in filelist:
             #création du menu contextuel selon les situasions
             #1 - add to collection : tous les cas mais pas les collections
             context=[]
-            context.append( ( __language__(30152),"XBMC.RunPlugin(\"%s?action='addtocollection'&path='%s'&filename='%s'\")"%(sys.argv[0],
+            context.append( ( __language__(30152),"XBMC.RunPlugin(\"%s?action='addtocollection'&viewmode='view'&path='%s'&filename='%s'\")"%(sys.argv[0],
                                                                                                                          urllib.quote_plus(path),
                                                                                                                          urllib.quote_plus(filename))
                               )
                             )
             #2 - del pic from collection : seulement les images des collections
             if self.args.method=="collection":
-                context.append( ( __language__(30151),"XBMC.RunPlugin(\"%s?action='delfromcollection'&collect='%s'&path='%s'&filename='%s'\")"%(sys.argv[0],
+                context.append( ( __language__(30151),"XBMC.RunPlugin(\"%s?action='delfromcollection'&viewmode='view'&collect='%s'&path='%s'&filename='%s'\")"%(sys.argv[0],
                                                                                                                                              self.args.collect,
                                                                                                                                              urllib.quote_plus(path),
                                                                                                                                              urllib.quote_plus(filename))
                                   )
                                 )
                 
+            #3 - montrer où est localisé physiquement la photo
+                ## ATTENTION ne fonctionne pas, retourne le message suivant : Unable to locate window with id 126.  Check skin files
+            context.append( ( "Localiser sur le disque","XBMC.ActivateWindow(126)" ) )
+            #4 - les infos de la photo
+            #context.append( ( "paramètres de l'addon","XBMC.ActivateWindow(virtualkeyboard)" ) )
             self.addPic(filename,
                         path,
                         contextmenu = context,
@@ -513,39 +671,40 @@ global pDialog
 def pupdate(percent, line1="", line2="", line3=""):
     pDialog.update(percent, line1,line2,line3)
     
-def scan_my_pics():
+def scan_my_pics(path=None):
     global pictureDB,pDialog
     #dialog = xbmcgui.Dialog()
     #ok = dialog.ok("scan","scan préalable")
     pDialog = xbmcgui.DialogProgress()
     ret = pDialog.create('MyPicsDB', __language__(30205),pictureDB)
 
-    # initialisation de la base :
-    MPDB.pictureDB = pictureDB
-    #   - efface les tables et les recréés
-    MPDB.Make_new_base(pictureDB,
-                       ecrase= xbmcplugin.getSetting(int(sys.argv[1]),"initDB") == "true")
-    picpath=[]
-    if xbmcplugin.getSetting(int(sys.argv[1]),'scanfolder'):
-        picpath.append(xbmcplugin.getSetting(int(sys.argv[1]),'scanfolder'))
-    else:
-        # A FAIRE : voir ce qu'on peut prendre comme dossier si aucun n'est configuré
-        dialog = xbmcgui.Dialog()
-        ok = dialog.ok("MyPicsDB",__language__(30201),__language__(30202))
-        return False
+##    # initialisation de la base :
+##    MPDB.pictureDB = pictureDB
+##    #   - efface les tables et les recréés
+##    MPDB.Make_new_base(pictureDB,
+##                       ecrase= xbmcplugin.getSetting(int(sys.argv[1]),"initDB") == "true")
+    #picpath=[]
+    #if xbmcplugin.getSetting(int(sys.argv[1]),'scanfolder'):
+    #    picpath.append(xbmcplugin.getSetting(int(sys.argv[1]),'scanfolder'))
+    #else:
+    #    # A FAIRE : voir ce qu'on peut prendre comme dossier si aucun n'est configuré
+    #    dialog = xbmcgui.Dialog()
+    #    ok = dialog.ok("MyPicsDB",__language__(30201),__language__(30202))
+    #    return False
     
     import time
     t=time.time()
     
     # parcours récursif du dossier 'picpath'
     total = 0
-    n=0
-    for chemin in picpath:
-        pDialog.update(n*100/len(picpath), __language__(30203),chemin)
-        MPDB.compte = 0
-        MPDB.browse_folder(chemin,parentfolderID=None,recursive=xbmcplugin.getSetting(int(sys.argv[1]),'recursive')=="true",update=False,updatefunc = pupdate)
-        total = total + MPDB.compte
-        n=n+1
+    #n=0
+    #for chemin in picpath:
+    #pDialog.update(n*100/len(picpath), __language__(30203),chemin)
+    MPDB.compte = 0
+    #MPDB.browse_folder(chemin,parentfolderID=None,recursive=xbmcplugin.getSetting(int(sys.argv[1]),'recursive')=="true",update=False,updatefunc = pupdate)
+    MPDB.browse_folder(path,parentfolderID=None,recursive=xbmcplugin.getSetting(int(sys.argv[1]),'recursive')=="true",update=False,updatefunc = pupdate)
+    total = total + MPDB.compte
+    #n=n+1
 
     if xbmcplugin.getSetting(int(sys.argv[1]),'updateDB')=="true":
         # traitement des dossiers supprimés/renommés physiquement --> on supprime toutes les entrées de la base
@@ -563,10 +722,27 @@ def scan_my_pics():
 if __name__=="__main__":
 
     m=Main()
-
+    print 
     if not sys.argv[ 2 ]: #pas de paramètres : affichage du menu principal
-
-        ok = scan_my_pics()#scan lorsque le plugin n'a pas de paramètres
+##        #montage ?
+##        smbpath= xbmcplugin.getSetting(int(sys.argv[1]),"sharepath")
+##        
+##        print smbpath.replace("smb:","")
+##        print xbmcplugin.getSetting(int(sys.argv[1]),"sharelogin")
+##        print xbmcplugin.getSetting(int(sys.argv[1]),"sharepass")
+##        print smbpath.replace("smb:","").replace("/","\\")
+##        MPDB.mount(mountpoint="w:",path="\\\\diskstation\\photos",
+##                   login=xbmcplugin.getSetting(int(sys.argv[1]),"sharelogin"),
+##                   password=xbmcplugin.getSetting(int(sys.argv[1]),"sharepass"))
+        # initialisation de la base :
+        MPDB.pictureDB = pictureDB
+        #   - efface les tables et les recréés
+        MPDB.Make_new_base(pictureDB,
+                           ecrase= xbmcplugin.getSetting(int(sys.argv[1]),"initDB") == "true")
+        MPDB.AddRoot(xbmcplugin.getSetting(int(sys.argv[1]),'scanfolder'),
+                     1,#recursive
+                     1)#remove
+        ok = scan_my_pics(xbmcplugin.getSetting(int(sys.argv[1]),'scanfolder'))#scan lorsque le plugin n'a pas de paramètres
         if not ok: #on peut traiter un retour erroné du scan
             print "erreur lors du scan"
             
@@ -590,7 +766,7 @@ if __name__=="__main__":
         m.show_period()
     elif m.args.action=='scan':
         #un scan simple est demandé...
-        ok = scan_my_pics()
+        ok = scan_my_pics(xbmcplugin.getSetting(int(sys.argv[1]),'scanfolder'))
     elif m.args.action=='removeperiod':
         m.remove_period()
     elif m.args.action=='renameperiod':
@@ -605,6 +781,12 @@ if __name__=="__main__":
         m.del_pics_from_collection()
     elif m.args.action=='renamecollection':
         m.rename_collection()
+    elif m.args.action=='globalsearch':
+        m.global_search()
+    elif m.args.action=='addfolder':
+        m.add_folder_to_collection()
+    elif m.args.action=='rootfolders':
+        m.show_roots()
     else:
         m.show_home()
     del MPDB
