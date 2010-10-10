@@ -77,9 +77,8 @@ def main2():
     
     if options.rootpath:
         print urllib.unquote_plus(options.rootpath)
-        #browse_folder(urllib.unquote_plus(options.rootpath),parentfolderID=None,recursive=True,updatecontent=False,updatepics=False,updatefunc=dummy_update())
         scan = AddonScan()#xbmcgui.getCurrentWindowId()
-        scan.create( "Addon Scanner" )
+        scan.create( "MyPicture Database " )
         print options.recursive
         print options.update
         try:
@@ -93,7 +92,7 @@ def main2():
         listofpaths = MPDB.RootFolders()
         if listofpaths:
             scan = AddonScan()#xbmcgui.getCurrentWindowId()
-            scan.create( "Addon Scanner" )
+            scan.create( "MyPicture Database " )
             for path,recursive,remove in listofpaths:
                 try:
                     browse_folder(urllib.unquote_plus(path),parentfolderID=None,recursive=recursive==1,updatecontent=remove==1,updatepics=False,updatefunc=scan)
@@ -108,8 +107,8 @@ def main2():
     #xbmc.executebuiltin( "Dialog.Close(videoscan)" )
 
 
-global compte,comptenew,cptscanned
-compte=comptenew=cptscanned=0
+global compte,comptenew,cptscanned,cptdelete
+compte=comptenew=cptscanned=cptdelete=0
 def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,updatepics=False,updatefunc=None):
     """parcours le dossier racine 'dirname'
     - 'recursive' pour traverser récursivement les sous dossiers de 'dirname'
@@ -129,7 +128,7 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
         MPDB.log( pymsg )
         listdir=[]
         
-    global compte,comptenew,cptscanned
+    global compte,comptenew,cptscanned,cptdelete
     cpt=0
     #on liste les fichiers jpg du dossier
     listfolderfiles=[]
@@ -179,7 +178,7 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
                 if updatefunc:
                     updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),
                                       0,
-                                      "Adding file",
+                                      "MyPicture Database [Adding]",
                                       picfile)
                 #préparation d'un dictionnaire pour les champs et les valeurs
                 # c'est ce dictionnaire qui servira à  remplir la table fichiers
@@ -223,7 +222,7 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
                 if updatefunc:
                     updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),
                                       50,
-                                      "Passing :",
+                                      "MyPicture Database [Passing]",
                                       picfile)
                 pass
             if picfile in listDBdir:
@@ -234,11 +233,12 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
             co=0
             for f in listDBdir: #on parcours les images en DB orphelines
                 co=co+1
+                cptdelete=cptdelete+1
                 #if updatefunc: updatefunc.update(int(100 * float(co)%len(listDBdir)),"Removing from Database :",f)
                 if updatefunc:
                     updatefunc.update(int(100 * float(co)%len(listDBdir)),
                                       90,
-                                      "Removing from Database :",
+                                      "MyPicture Database [Removing]",
                                       f)
                 MPDB.DB_del_pic(dirname,f)
                 MPDB.log( "\t%s has been deleted from database because the file does not exists in this folder. "%f)#f.decode(sys_enc))
@@ -246,13 +246,6 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
             del co
             
     else:
-
-        #if updatefunc: updatefunc.update(0,"No pictures in this folder :",dirname)
-##        if updatefunc:
-##            updatefunc.update(0,
-##                              0,
-##                              "No pictures in this folder :",
-##                              dirname)
         MPDB.log( "Ce dossier ne contient pas d'images :")
         MPDB.log( dirname )
         MPDB.log( "" )
@@ -282,4 +275,4 @@ if __name__=="__main__":
 
     #1- récupérer le paramètre
     main2()
-    xbmc.executebuiltin( "Notification(MyPictures Database,%s pictures scanned / %s added)"%(cptscanned,comptenew) )
+    xbmc.executebuiltin( "Notification(MyPictures Database,%s scanned / %s added / %s removed)"%(cptscanned,comptenew,cptdelete) )
