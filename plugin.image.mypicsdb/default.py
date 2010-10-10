@@ -105,149 +105,6 @@ def unescape(text):
         return text # leave as is
     return re.sub("&#?\w+;", fixup, text)
 
-class dummy_update:
-    def __init__(self):
-        self.cancel=False
-        pass
-    def update(self,percent, line1=None, line2=None, line3=None):
-        log( "%s\t%s\n\t%s\n\t%s"%(percent,line1,line2,line3) )
-    def iscanceled(self):
-        return self.cancel
-    
-def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,updatepics=False,updatefunc=dummy_update):
-    """parcours le dossier racine 'dirname'
-    - 'recursive' pour traverser récursivement les sous dossiers de 'dirname'
-    - 'update' pour forcer le scan des images qu'elles soient déjà en base ou pas
-    - 'updatefunc' est une fonction appelée pour indiquer la progression. Les paramètres sont (pourcentage(int),[ line1(str),line2(str),line3(str) ] )
-"""
-    #######
-    # STEP 1 : list all files in directory
-    #######
-    try:
-        listdir = os.listdir(dirname)
-    except:
-        tb = sys.exc_info()[2]
-        tbinfo = traceback.format_tb(tb)[0]
-        pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
-                str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-        MPDB.log( pymsg )
-        listdir=[]
-        
-    global compte
-    cpt=0
-    #on liste les fichiers jpg du dossier
-    listfolderfiles=[]
-
-    #######
-    # STEP 2 : Keep only the files with extension...
-    #######
-    for f in listdir:
-        if os.path.splitext(f)[1].upper() in [".JPG",".TIF",".PNG",".GIF",".BMP",".JPEG"]:
-            listfolderfiles.append(f)
-
-   
-    #on récupère la liste des fichiers entrées en BDD pour le dossier en cours
-    listDBdir = MPDB.DB_listdir(dirname)# --> une requête pour tout le dossier
-
-    #######
-    # STEP 3 : If folder contains pictures, create folder in database
-    #######
-    #on ajoute dans la table des chemins le chemin en cours
-    PFid = MPDB.DB_folder_insert(os.path.basename(dirname) or os.path.dirname(dirname).split(os.path.sep)[-1],
-                            dirname,
-                            parentfolderID,
-                            listfolderfiles and "1" or "0"#i
-                            )
-    if listfolderfiles:#si le dossier contient des fichiers jpg...
-##        #on ajoute dans la table des chemins le chemin en cours
-##        PFid = DB_folder_insert(os.path.basename(dirname) or os.path.dirname(dirname).split(os.path.sep)[-1],
-##                                dirname,
-##                                parentfolderID,
-##                                i#"1" if listfolderfiles else "0"
-##                                )
-        #######
-        # STEP 4 : browse all pictures
-        #######
-        print listDBdir
-        #puis on parcours toutes les images du dossier en cours
-        for picfile in listfolderfiles:#... on parcours tous les jpg
-            cpt = cpt + 1
-            print picfile
-            if updatefunc.iscanceled(): return#dialog progress has been canceled
-            #on enlève l'image traitée de listdir
-            listdir.pop(listdir.index(picfile))
-            #picture is not yet inside database
-            if not (picfile in listDBdir) or updatepics:
-                updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),"Adding from %s to Database :"%dirname,picfile)
-                #préparation d'un dictionnaire pour les champs et les valeurs
-                # c'est ce dictionnaire qui servira à  remplir la table fichiers
-                ##picentry = { "strPath":dirname, "strFilename":picfile }
-                picentry = { "idFolder":PFid, "strPath":dirname.decode("utf8"),"strFilename":picfile.decode("utf8"),"UseIt":1 }
-
-                ###############################
-                #    getting  EXIF  infos     #
-                ###############################
-                #reading EXIF infos
-                #   (file fields are creating if needed)
-                try:
-                    exif = MPDB.get_exif(os.path.join(dirname,picfile).encode('utf8'))
-                except UnicodeDecodeError:
-                    exif = MPDB.get_exif(os.path.join(dirname,picfile))
-                #EXIF infos are added to a dictionnary
-                picentry.update(exif)
-
-                ###############################
-                #    getting  IPTC  infos     #
-                ###############################
-                iptc = MPDB.get_iptc(dirname,picfile)
-                #IPTC infos are added to a dictionnary
-                picentry.update(iptc)
-
-                ###############################
-                #  Insert infos in database   #
-                ###############################
-
-                #insertion des données dans la table
-                MPDB.DB_file_insert(dirname,picfile,picentry,updatepics)
-            else: # the file is already in DB, we are passing it
-                updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),"Already in Database :",picfile)
-                pass
-            if picfile in listDBdir:
-                listDBdir.pop(listDBdir.index(picfile))
-                
-        #Now if the database contain some more pictures assign for this folder, we need to delete them if 'update' setting is true
-        if listDBdir and updatecontent: #à l'issu si listdir contient encore des fichiers, c'est qu'ils sont en base mais que le fichier n'existe plus physiquement.
-            co=0
-            for f in listDBdir: #on parcours les images en DB orphelines
-                co=co+1
-                updatefunc.update(int(100 * float(co)%len(listDBdir)),"Removing from Database :",f)
-                MPDB.DB_del_pic(dirname,f)
-                MPDB.log( "\t%s has been deleted from database because the file does not exists in this folder. "%f)#f.decode(sys_enc))
-            MPDB.log("")
-            del co
-            
-    else:
-
-        updatefunc.update(0,"No pictures in this folder :",dirname)
-        MPDB.log( "Ce dossier ne contient pas d'images :")
-        MPDB.log( dirname )
-        MPDB.log( "" )
-    
-    if cpt:
-        MPDB.log( "%s nouvelles images trouvees dans %s"%(str(cpt),dirname) )
-        #unicode(info.data[k].encode("utf8").__str__(),"utf8")
-        compte=compte+cpt
-        cpt=0
-    if recursive: #gestion de la recursivité. On rappel cette même fonction pour chaque dossier rencontré
-        MPDB.log( "traitement des sous dossiers de :")
-        MPDB.log( dirname )
-        for item in listdir:
-            if os.path.isdir(os.path.join(dirname,item)):#un directory
-                browse_folder(os.path.join(dirname,item),PFid,recursive,updatecontent,updatepics,updatefunc)
-            else:
-                #listdir contenait un fichier mais pas un dossier
-                # inutilisé... on passe pour le moment
-                pass
 
 
 class _Info:
@@ -263,7 +120,6 @@ class Main:
         self.get_args()
 
     def get_args(self):
-        print sys.argv[2][1:].replace("&",", ")
         exec "self.args = _Info(%s)" % ( sys.argv[ 2 ][ 1 : ].replace( "&", ", " ), )
 
     def Title(self,title):
@@ -272,7 +128,6 @@ class Main:
     def addDir(self,name,params,action,iconimage,fanart=None,contextmenu=None,total=0,info="*",replacemenu=True):
         #params est une liste de tuples [(nomparametre,valeurparametre),]
         #contitution des paramètres
-        print params
         try:
             parameter="&".join([param+"="+repr(urllib.quote_plus(valeur.encode("utf-8"))) for param,valeur in params])
         except:
@@ -395,7 +250,6 @@ class Main:
 
         #on ajoute les dossiers 
         for idchildren, childrenfolder in childrenfolders:
-            #print "%s (%s pics)"%(childrenfolder,MPDB.countPicsFolder(idchildren))
             self.addDir(name      = "%s (%s %s)"%(childrenfolder.decode("utf8"),MPDB.countPicsFolder(idchildren),__language__(30050)), #libellé
                         params    = [("method","folders"),("folderid",str(idchildren)),("onlypics","non"),("viewmode","view")],#paramètres
                         action    = "showfolder",#action
@@ -573,12 +427,6 @@ class Main:
             MPDB.AddRoot(newroot,recursive,remove)
             xbmc.executebuiltin( "Notification(MyPictures Database,Folder added !)" )
             if dialog.yesno("My Pictures Database","Do you want to perform a scan now ?"):
-                #scan_my_pics(newroot,recursive,remove,showprogress=True)
-                print "RunScript(%s,--rootpath %s%s%s) "%( os.path.join( os.getcwd(), "scanpath.py"),
-                                                                          recursive==1 and " --remove" or "",
-                                                                          remove==1 and " --update" or "",
-                                                                          newroot + " "
-                                                                        )
 ##                xbmc.executebuiltin( "RunScript(%s,%s%s--rootpath %s) "%( os.path.join( os.getcwd(), "scanpath.py"),
 ##                                                                          recursive==1 and "--remove " or "",
 ##                                                                          remove==1 and "--update " or "",
@@ -599,11 +447,6 @@ class Main:
             dialog = xbmcgui.Dialog()
             if dialog.yesno("My Pictures Database","Do you want to perform a scan now ?"):
                 path,recursive,remove = MPDB.getRoot(urllib.unquote_plus(self.args.rootpath))
-                print "RunScript(%s,%s%s-p %s) "%( os.path.join( os.getcwd(), "scanpath.py"),
-                                                                          recursive==1 and "-r " or "",
-                                                                          remove==1 and "-u " or "",
-                                                                          urllib.quote_plus(path)
-                                                                        )
 ##                xbmc.executebuiltin( "RunScript(%s,%s%s-p %s) "%( os.path.join( os.getcwd(), "scanpath.py"),
 ##                                                                          recursive==1 and "-r " or "",
 ##                                                                          remove==1 and "-u " or "",
@@ -614,7 +457,6 @@ class Main:
                                                                           urllib.quote_plus(path)
                                                                         )
                                      )
-                #scan_my_pics(path,recursive,remove,showprogress=True)
                 #xbmc.executebuiltin( "Notification(My Pictures Database,Folder has been scanned)" )
         else:
             refresh=False
@@ -730,7 +572,7 @@ class Main:
         MPDB.delPicFromCollection(urllib.unquote_plus(self.args.collect),urllib.unquote_plus(self.args.path),urllib.unquote_plus(self.args.filename))
         xbmc.executebuiltin( "Container.Update(\"%s?action='showpics'&viewmode='view'&collect='%s'&method='collection'\" , replace)"%(sys.argv[0],self.args.collect) , )
 
-    def get_map(self):
+    def get_map(self): # TODO
         #1- récupère les données GPS de la photo
         #2- si il y a des coordonnées, on valide le menu contextuel
         pass
@@ -856,78 +698,12 @@ class Main:
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="photos" )
         xbmcplugin.endOfDirectory(int(sys.argv[1]))           
             
-def scan_all_folders(showprogress=True):
-    listofpaths = MPDB.RootFolders()
-    if listofpaths:
-        for path,recursive,remove in listofpaths:
-            #ok = scan_my_pics(xbmcplugin.getSetting(int(sys.argv[1]),'scanfolder'))#scan lorsque le plugin n'a pas de paramètres
-            ok = scan_my_pics(path,recursive,remove,showprogress)#scan lorsque le plugin n'a pas de paramètres
-            if not ok: #on peut traiter un retour erroné du scan
-                print "erreur lors du scan"
-                pass
-            else:#sinon on affiche le menu d'accueil
-                pass
-    else: #aucun path n'est configuré
-        dialog=xbmcgui.Dialog()
-        dialog.ok("My Pictures Database","Your database doesn't have any folders to scan","Please select a folder within 'Root paths' item")
-        
-global pDialog
-class mondialog:
-    def __init__(self):
-        self.cancel=False
-    def update(self,percent, line1="", line2="", line3=""):
-        pass
-    def iscanceled(self):
-        return self.cancel
-        
-def scan_my_pics(path=None,recursive=1,remove=1,showprogress=True):
-    global pictureDB,pDialog
-    if showprogress:
-        pDialog = xbmcgui.DialogProgress()
-        #ret = pDialog.create('MyPicsDB', __language__(30205),pictureDB)
-        ret = pDialog.create('MyPicsDB', 'Scanning%s for pics in'%recursive==1 and " recursively" or "", path)
-    else:
-        pDialog = mondialog()
-    
-    import time
-    t=time.time()
-    
-    # parcours récursif du dossier 'picpath'
-    total = 0
-    #n=0
-    #for chemin in picpath:
-    #pDialog.update(n*100/len(picpath), __language__(30203),chemin)
-    #MPDB.compte = 0
-    global compte
-    compte=0
-    #MPDB.browse_folder(chemin,parentfolderID=None,recursive=xbmcplugin.getSetting(int(sys.argv[1]),'recursive')=="true",update=False,updatefunc = pupdate)
-    #MPDB.browse_folder(path,parentfolderID=None,recursive=int(recursive)==1,updatecontent=int(remove)==1,updatepics=False,updatefunc = pDialog)#pupdate)
-    browse_folder(path,parentfolderID=None,recursive=int(recursive)==1,updatecontent=int(remove)==1,updatepics=False,updatefunc = pDialog)#pupdate)
-    #total = total + MPDB.compte
-    total = total + compte
-    #n=n+1
 
-    if remove=="1":
-        # traitement des dossiers supprimés/renommés physiquement --> on supprime toutes les entrées de la base
-        lp = MPDB.list_path()
-        i = 0
-        for path in lp:#on parcours tous les dossiers distinct en base de donnée
-            if not os.path.isdir(path): #si le chemin en base n'est pas réellement un dossier,...
-                #pDialog.update(i*100/len(lp), __language__(30204),path)
-                MPDB.DB_del_pic(path)#... on supprime toutes les entrées s'y rapportant
-                #print "%s n'est pas un chemin. Les entrées s'y rapportant dans la base sont supprimées."%path 
-            i=i+1
-    return True
     
+            
 
 if __name__=="__main__":
-#if True:
-    print "QSDFGHJKLM"
     m=Main()
-    print "argv"
-    print sys.argv
-    print "args"
-    print dir(m.args)
     if not sys.argv[ 2 ]: #pas de paramètres : affichage du menu principal
 ##        #montage ?
 ##        smbpath= xbmcplugin.getSetting(int(sys.argv[1]),"sharepath")
@@ -948,12 +724,13 @@ if __name__=="__main__":
             Addon.setSetting("initDB","false")
         #scan les répertoires lors du démarrage (selon setting)
         if Addon.getSetting('bootscan')=='true':
-            #scan_all_folders(showprogress=True)
             if not(xbmc.getInfoLabel( "Window.Property(DialogAddonScanIsAlive)" ) == "true"):
+                #si un scan n'est pas en cours, on lance le scan
                 xbmc.executebuiltin( "RunScript(%s,--database) "%os.path.join( os.getcwd(), "scanpath.py") )
-                xbmc.executebuiltin( "RunPlugin(\"%s?action='showhome'&viewmode='view'\")"%(sys.argv[0]) )
-                m.args["action"]="showhome"
-    if m.args.action=='showhome':
+                #puis on rafraichi le container sans remplacer le contenu, avec un paramètre pour dire d'afficher le menu
+                xbmc.executebuiltin( "Container.Update(\"%s?action='showhome'&viewmode='view'\" ,)"%(sys.argv[0]) , )
+                
+    elif m.args.action=='showhome':
         #display home menu
         m.show_home()
     #les sélections sur le menu d'accueil :
@@ -972,10 +749,6 @@ if __name__=="__main__":
     #affiche la sélection de période
     elif m.args.action=='showperiod':
         m.show_period()
-    #lance un scan
-    elif m.args.action=='scan':#TODO : voir si encore utile
-        #un scan simple est demandé...
-        scan_all_folders(showprogress=True) #ne changera rien au rendu du container, juste un scan des rootpath
     elif m.args.action=='removeperiod':
         m.remove_period()
     elif m.args.action=='renameperiod':
@@ -999,6 +772,4 @@ if __name__=="__main__":
     else:
         m.show_home()
     del MPDB
-##    m=Main()
-##    m.display()
     
