@@ -7,8 +7,9 @@
     <string id="30021">Retirer de la base les images manquantes</string>
     <string id="30022">Scan récursif (tous les sous dossiers sont scannés à la recherche d'images)</string>
     <string id="30023">Dossier à scanner</string>
-    <string id="30024">Effectuer le scan maintenant !</string>
+    <string id="30024">Effectuer le scan au démarrage</string>
     <string id="30025">Réinitialiser la base avant le scan</string>
+    <string id="30026">Utiliser l'image comme fanart pour les images</string>
     
     <string id="30050">images</string>
     

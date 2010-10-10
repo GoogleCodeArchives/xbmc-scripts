@@ -52,6 +52,7 @@ except:
     print "using sqlite3"
     pass
 
+
 global pictureDB
 pictureDB = os.path.join(DB_PATH,"MyPictures.db")
 sys_enc = sys.getfilesystemencoding()
@@ -62,7 +63,8 @@ lists_separator = "||"
     
 def log(msg):
     print str("MyPicsDB >> %s"%msg.__str__())
-    
+#net use z: \\remote\share\ login /USER:password
+#mount -t cifs //ntserver/download -o username=vivek,password=myPassword /mnt/ntserver
 def mount(mountpoint="z:",path="\\",login=None,password=""):
     import os
     print "net use %s %s %s /USER:%s"%(mountpoint,path,login,password)
@@ -145,7 +147,9 @@ def Make_new_base(DBpath,ecrase=True):
 
     #table 'files'
     try:
-        cn.execute("""CREATE TABLE files ( idFile integer primary key, idFolder integer, strPath text, strFilename text, UseIt integer )""")
+        cn.execute("""CREATE TABLE files ( idFile integer primary key, idFolder integer, strPath text, strFilename text, UseIt integer , Thumb text,
+                    CONSTRAINT UNI_FILE UNIQUE ("strPath","strFilename")
+                                   )""")
     except Exception,msg:
         if msg.args[0].startswith("table 'files' already exists"):
             #cette exception survient lorsque la table existe déjà.
@@ -337,11 +341,13 @@ def DB_file_insert(path,filename,dictionnary,update=False):
     insert into file database the dictionnary values into the dictionnary keys fields
     keys are DB fields ; values are DB values
     """
+    #mise à jour : on inscrit 
+##    get_thumb(path,filename)
 
     conn = sqlite.connect(pictureDB)
     cn=conn.cursor()
     #méthode dajout d'une ligne d'un coup
-    conn.text_factory = str#sqlite.OptimizedUnicode      
+    conn.text_factory = str#sqlite.OptimizedUnicode
     try:
         cn.execute( """INSERT INTO files('%s') values (%s)""" % ( "','".join(dictionnary.keys()), ",".join(["?"]*len(dictionnary.values())) ) ,
                                                                      dictionnary.values()
@@ -375,7 +381,7 @@ def DB_file_insert(path,filename,dictionnary,update=False):
                                                                                                                                                                                                filename))
                 except Exception,msg:
                     log("Error while adding KeywordsInFiles")
-                    print Exception,msg
+                    log("\t%s - %s"% (Exception,msg) )
                                                                                                                                                                                  
 ##    # TRAITEMENT DES FOLDERS
 ##    try:
@@ -431,16 +437,16 @@ def DB_del_pic(picpath,picfile=None):
     """Supprime le chemin/fichier de la base. Si aucun fichier n'est fourni, toutes les images du chemin sont supprimées de la base"""
     if picfile:
         #on supprime le fichier de la base
-        Request("""DELETE FROM files WHERE idFolder = (SELECT idFolder FROM folders WHERE FullPath=%s) AND strFilename=%s"""%(picpath,picfile))
+        Request("""DELETE FROM files WHERE idFolder = (SELECT idFolder FROM folders WHERE FullPath='%s') AND strFilename='%s'"""%(picpath,picfile))
         #puis maintenant on vérifie que le chemin dossier est toujours utile ou alors on le supprime
         Request("""DELETE FROM folders 
     WHERE 
       (SELECT DISTINCT idFolder FROM files 
           WHERE idFolder=(
-              SELECT DISTINCT idFolder FROM folders WHERE FullPath=%s
+              SELECT DISTINCT idFolder FROM folders WHERE FullPath='%s'
                          )
       )
-   or FullPath=%s""" %(picpath,picpath) )
+   or FullPath='%s'""" %(picpath,picpath) )
     else:
         idpath = Request("SELECT idFolder FROM folders WHERE FullPath = '%s'"%picpath)[0][0]#le premier du tuple à un élément
         log( idpath )
@@ -466,6 +472,8 @@ AND
 UseIt = 1
 AND
 idFolder = 6"""
+
+
 
 ###################################
 # Collection functions
@@ -532,7 +540,7 @@ def renPeriode(periodname,newname):
 
 def PicsForPeriode(periodname):
     """Get pics for the given period name"""
-    period = Request( """SELECT DateStart,DateEnd FROM Periodes WHERE PeriodeName=%s"""%periodname )
+    period = Request( """SELECT DateStart,DateEnd FROM Periodes WHERE PeriodeName='%s'"""%periodname )
     return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN %s AND %s ORDER BY "EXIF DateTimeOriginal" ASC"""%period )]
 
 def Searchfiles(column,searchterm,count=False):
@@ -556,26 +564,37 @@ def AddRoot(path,recursive,remove):
     "add the path root inside the database. Recursive is 0/1 for recursive scan, remove is 0/1 for removing files that are not physically in the place"
     Request( """INSERT INTO Rootpaths(path,recursive,remove) VALUES ("%s",%s,%s)"""%(path,recursive,remove) )
 
+def getRoot(path):
+    return [row for row in Request( """SELECT path,recursive,remove FROM Rootpaths WHERE path='%s'"""%path )][0]
+    
 def RemoveRoot(path):
     "remove the given rootpath, remove pics from this path, ..."
     #récupère l'id de ce chemin
     idpath = Request( """SELECT idFolder FROM folders WHERE FullPath = "%s";"""%path )[0][0]
-    log("removeroot")
-    log( idpath )
-    log(path)
+##    log("removeroot")
+##    log( idpath )
+##    log(path)
     Request( """DELETE FROM files WHERE idFolder='%s'"""%idpath)
     #1- récupère la liste des images de ce dossier
-    for idchild in all_children(idpath):
+    for idchild in all_children(idpath):#parcours tous les sous dossiers
         #supprime les keywordsinfiles
         Request( """DELETE FROM KeywordsInFiles WHERE idKW in (SELECT idKW FROM KeywordsInFiles WHERE idFile in (SELECT idFile FROM files WHERE idFolder='%s'))"""%idchild )
         #supprime les photos de files in collection
-        Request( """DELETE FROM FilesInCollections WHERE idFile in (SELECT idFile FROM files WHERE idFolder='%s')"""%idchild )
+        Request( """DELETE FROM FilesInCollections WHERE idFile in (SELECT idFile FROM files WHERE idFolder='%s')"""%idchild )        
         #2- supprime toutes les images
         Request( """DELETE FROM files WHERE idFolder='%s'"""%idchild)
+        #3 - supprime ce sous dossier
+        Request( """DELETE FROM folders WHERE idFolder='%s'"""%idchild)
     #3- supprime le dossier
     Request( """DELETE FROM folders WHERE idFolder='%s'"""%idpath)
     #4- supprime le rootpath
     Request( """DELETE FROM Rootpaths WHERE path="%s" """%path )
+    #5- supprime les 'périodes'
+    for periodname,datestart,dateend in ListPeriodes():
+        print Request( """SELECT count(*) FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN '%s' AND '%s'"""%(datestart,dateend) )[0][0]
+        print type(Request( """SELECT count(*) FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN '%s' AND '%s'"""%(datestart,dateend) )[0][0])
+        if Request( """SELECT count(*) FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN '%s' AND '%s'"""%(datestart,dateend) )[0][0]==0:
+            Request( """DELETE FROM Periodes WHERE PeriodeName='%s'"""%periodname )
 
 ##########################################
 ##########################################
@@ -584,144 +603,146 @@ def hook_directory ( filepath,filename,filecount, nbfiles ):
     import sys
     log( "%s/%s - %s"%(filecount,nbfiles,os.path.join(filepath,filename)) )
     
-def dummy_update(percent, line1=None, line2=None, line3=None):
-    log( "%s\t%s\n\t%s\n\t%s"%(percent,line1,line2,line3) )
+class dummy_update:
+    def __init__(self):
+        self.cancel=False
+        pass
+    def update(self,percent, line1=None, line2=None, line3=None):
+        log( "%s\t%s\n\t%s\n\t%s"%(percent,line1,line2,line3) )
+    def iscanceled(self):
+        return self.cancel
     
-def browse_folder(dirname,parentfolderID=None,recursive=True,update=False,updatefunc=dummy_update):
-    """parcours le dossier racine 'dirname'
-    - 'recursive' pour traverser récursivement les sous dossiers de 'dirname'
-    - 'update' pour forcer le scan des images qu'elles soient déjà en base ou pas
-    - 'updatefunc' est une fonction appelée pour indiquer la progression. Les paramètres sont (pourcentage(int),[ line1(str),line2(str),line3(str) ] )
-"""
-    try:
-        listdir = os.listdir(dirname)
-    except:
-        tb = sys.exc_info()[2]
-        tbinfo = traceback.format_tb(tb)[0]
-        pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
-                str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-        log( pymsg )
-        listdir=[]
-        
-    global compte
-    cpt=0
-    #on liste les fichiers jpg du dossier
-    listfolderfiles=[]
-##    import imghdr
-    for f in listdir:
-        if os.path.splitext(f)[1].upper() in [".JPG",".TIF",".PNG",".GIF",".BMP"]:
-            listfolderfiles.append(f)
-###other technic using imghdr but many jpg pictures are not handled..... why ??
-##        print ""
-##        print "** %s"%f
-##        try:
-##            if os.path.isfile(os.path.join(dirname,f)) and imghdr.what(os.path.join(dirname,f)) in ['jpeg','gif','tiff','bmp','png']:
-##                listfolderfiles.append(f)
-##                print imghdr.what(os.path.join(dirname,f))
+##def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,updatepics=False,updatefunc=dummy_update):
+##    """parcours le dossier racine 'dirname'
+##    - 'recursive' pour traverser récursivement les sous dossiers de 'dirname'
+##    - 'update' pour forcer le scan des images qu'elles soient déjà en base ou pas
+##    - 'updatefunc' est une fonction appelée pour indiquer la progression. Les paramètres sont (pourcentage(int),[ line1(str),line2(str),line3(str) ] )
+##"""
+##    #######
+##    # STEP 1 : list all files in directory
+##    #######
+##    try:
+##        listdir = os.listdir(dirname)
+##    except:
+##        tb = sys.exc_info()[2]
+##        tbinfo = traceback.format_tb(tb)[0]
+##        pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
+##                str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
+##        log( pymsg )
+##        listdir=[]
+##        
+##    global compte
+##    cpt=0
+##    #on liste les fichiers jpg du dossier
+##    listfolderfiles=[]
+##
+##    #######
+##    # STEP 2 : Keep only the files with extension...
+##    #######
+##    for f in listdir:
+##        if os.path.splitext(f)[1].upper() in [".JPG",".TIF",".PNG",".GIF",".BMP",".JPEG"]:
+##            listfolderfiles.append(f)
+##
+##   
+##    #on récupère la liste des fichiers entrées en BDD pour le dossier en cours
+##    listDBdir = DB_listdir(dirname)# --> une requête pour tout le dossier
+##
+##    #######
+##    # STEP 3 : If folder contains pictures, create folder in database
+##    #######
+##    #on ajoute dans la table des chemins le chemin en cours
+##    PFid = DB_folder_insert(os.path.basename(dirname) or os.path.dirname(dirname).split(os.path.sep)[-1],
+##                            dirname,
+##                            parentfolderID,
+##                            listfolderfiles and "1" or "0"#i
+##                            )
+##    if listfolderfiles:#si le dossier contient des fichiers jpg...
+##        #######
+##        # STEP 4 : browse all pictures
+##        #######
+##        print listDBdir
+##        #puis on parcours toutes les images du dossier en cours
+##        for picfile in listfolderfiles:#... on parcours tous les jpg
+##            cpt = cpt + 1
+##            print picfile
+##            if updatefunc.iscanceled(): return#dialog progress has been canceled
+##            #on enlève l'image traitée de listdir
+##            listdir.pop(listdir.index(picfile))
+##            #picture is not yet inside database
+##            if not (picfile in listDBdir) or updatepics:
+##                updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),"Adding from %s to Database :"%dirname,picfile)
+##                #préparation d'un dictionnaire pour les champs et les valeurs
+##                # c'est ce dictionnaire qui servira à  remplir la table fichiers
+##                ##picentry = { "strPath":dirname, "strFilename":picfile }
+##                picentry = { "idFolder":PFid, "strPath":dirname.decode("utf8"),"strFilename":picfile.decode("utf8"),"UseIt":1 }
+##
+##                ###############################
+##                #    getting  EXIF  infos     #
+##                ###############################
+##                #reading EXIF infos
+##                #   (file fields are creating if needed)
+##                try:
+##                    exif = get_exif(os.path.join(dirname,picfile).encode('utf8'))
+##                except UnicodeDecodeError:
+##                    exif = get_exif(os.path.join(dirname,picfile))
+##                #EXIF infos are added to a dictionnary
+##                picentry.update(exif)
+##
+##                ###############################
+##                #    getting  IPTC  infos     #
+##                ###############################
+##                iptc = get_iptc(dirname,picfile)
+##                #IPTC infos are added to a dictionnary
+##                picentry.update(iptc)
+##
+##                ###############################
+##                #  Insert infos in database   #
+##                ###############################
+##
+##                #insertion des données dans la table
+##                DB_file_insert(dirname,picfile,picentry,updatepics)
+##            else: # the file is already in DB, we are passing it
+##                updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),"Already in Database :",picfile)
+##                pass
+##            if picfile in listDBdir:
+##                listDBdir.pop(listDBdir.index(picfile))
+##                
+##        #Now if the database contain some more pictures assign for this folder, we need to delete them if 'update' setting is true
+##        if listDBdir and updatecontent: #à l'issu si listdir contient encore des fichiers, c'est qu'ils sont en base mais que le fichier n'existe plus physiquement.
+##            co=0
+##            for f in listDBdir: #on parcours les images en DB orphelines
+##                co=co+1
+##                updatefunc.update(int(100 * float(co)%len(listDBdir)),"Removing from Database :",f)
+##                DB_del_pic(dirname,f)
+##                log( "\t%s has been deleted from database because the file does not exists in this folder. "%f)#f.decode(sys_enc))
+##            log("")
+##            del co
+##            
+##    else:
+##
+##        updatefunc.update(0,"No pictures in this folder :",dirname)
+##        log( "Ce dossier ne contient pas d'images :")
+##        log( dirname )
+##        log( "" )
+##    
+##    if cpt:
+##        log( "%s nouvelles images trouvees dans %s"%(str(cpt),dirname) )
+##        #unicode(info.data[k].encode("utf8").__str__(),"utf8")
+##        compte=compte+cpt
+##        cpt=0
+##    if recursive: #gestion de la recursivité. On rappel cette même fonction pour chaque dossier rencontré
+##        log( "traitement des sous dossiers de :")
+##        log( dirname )
+##        for item in listdir:
+##            if os.path.isdir(os.path.join(dirname,item)):#un directory
+##                browse_folder(os.path.join(dirname,item),PFid,recursive,updatecontent,updatepics,updatefunc)
 ##            else:
-##                print imghdr.what(os.path.join(dirname,f))
-##        except:
-##            print "passing ...\n"
-##            pass
-    
-    #listfolderfiles = fnmatch.filter(listdir,"*.jpg")
-    #on récupère la liste des fichiers entrées en BDD pour le dossier en cours
-    listDBdir = DB_listdir(dirname)# --> une requête pour tout le dossier
-    if listfolderfiles: i="1"
-    else: i="0"
-    #"1" if listfolderfiles else "0"
-
-    #on ajoute dans la table des chemins le chemin en cours
-    PFid = DB_folder_insert(os.path.basename(dirname) or os.path.dirname(dirname).split(os.path.sep)[-1],
-                            dirname,
-                            parentfolderID,
-                            i#"1" if listfolderfiles else "0"
-                            )
-    #si le dossier contient des fichiers jpg...
-    if listfolderfiles:
-        #alors on parcours toutes les images du dossier en cours
-        for picfile in listfolderfiles:#... on parcours tous les jpg
-            #on enlève l'image traitée de listdir
-            listdir.pop(listdir.index(picfile))
-            #si l'image n'est pas déjà en base de donnée
-            if not picfile in listDBdir or update:
-                cpt = cpt + 1
-                updatefunc(int(100 * float(cpt)%len(listfolderfiles)),"Adding from %s to Database :"%dirname,picfile)
-                #préparation d'un dictionnaire pour les champs et les valeurs
-                # c'est ce dictionnaire qui servira à  remplir la table fichiers
-                ##picentry = { "strPath":dirname, "strFilename":picfile }
-                picentry = { "idFolder":PFid, "strPath":dirname.decode("utf8"),"strFilename":picfile.decode("utf8"),"UseIt":1 }
-
-                ###############################
-                # récupération des infos EXIF #
-                ###############################
-                #lecture des infos EXIF
-                #   (les colonnes nécessaires sont alors écrites)
-                try:
-                    exif = get_exif(os.path.join(dirname,picfile).encode('utf8'))
-                except UnicodeDecodeError:
-                    exif = get_exif(os.path.join(dirname,picfile))
-                #on ajoute les infos exif au dictionnaire
-                picentry.update(exif)
-
-                ###############################
-                # récupération des infos IPTC #
-                ###############################
-                iptc = get_iptc(dirname,picfile)
-                #on ajoute les infos iptc au dictionnaire
-                picentry.update(iptc)
-
-                ###############################
-                # Insertion en base de donnée #
-                ###############################
-
-                #insertion des données dans la table
-                DB_file_insert(dirname,picfile,picentry,update)
-            else: #file already in DB
-                updatefunc(int(100 * float(cpt)%len(listfolderfiles)),"Already in Database :",picfile)
-                pass
-            if picfile in listDBdir:
-                listDBdir.pop(listDBdir.index(picfile))
-                
-        #puis si la base contient encore des images pour ce dossier
-        if listDBdir and update: #à l'issu si listdir contient encore des fichiers, c'est qu'ils sont en base mais que le fichier n'existe plus physiquement.
-            co=0
-            for f in listDBdir: #on parcours les images en DB orphelines
-                compte=compte+1
-                updatefunc(int(100 * float(co)%len(listDBdir)),"Removing from Database :",f)
-                DB_del_pic(dirname,f)
-                log( u"\t%s a été supprimé de la base car le fichier n'existe pas dans ce dossier. "%f.decode(sys_enc))
-            log("")
-            del co
-            
-    else:
-
-        updatefunc(0,"No pictures in this folder :",dirname)
-        log( "Ce dossier ne contient pas d'images :")
-        log( dirname )
-        log( "" )
-    
-    if cpt:
-        log( "%s nouvelles images trouvees dans %s"%(str(cpt),dirname) )
-        #unicode(info.data[k].encode("utf8").__str__(),"utf8")
-        compte=compte+cpt
-        cpt=0
-    if recursive: #gestion de la recursivité. On rappel cette même fonction pour chaque dossier rencontré
-        log( "traitement des sous dossiers de :")
-        log( dirname )
-        for item in listdir:
-            if os.path.isdir(os.path.join(dirname,item)):#un directory
-                browse_folder(os.path.join(dirname,item),PFid,recursive,update,updatefunc)
-            else:
-                #listdir contenait un fichier mais pas un dossier
-                # inutilisé... on passe pour le moment
-                pass
-                
+##                #listdir contenait un fichier mais pas un dossier
+##                # inutilisé... on passe pour le moment
+##                pass
 
 
-        
 
-        
 
 def get_exif(picfile):
     """
@@ -909,7 +930,6 @@ def countPicsFolder(folderid):
     return cpt#Request("SELECT count(*) FROM files f,folders p WHERE f.idFolder=p.idFolder AND f.idFolder='%s'"%folderid)[0][0]
 
 def countPeriod(period,value):
-    print "countperiod(%s,%s)"%(period,value)
     #   lister les images pour une date donnée
     format = {"year":"%Y","month":"%Y-%m","date":"%Y-%m-%d","":"%Y"}[period]
     if period=="year" or period=="":
