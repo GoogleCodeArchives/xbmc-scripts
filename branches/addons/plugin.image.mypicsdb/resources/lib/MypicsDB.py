@@ -341,8 +341,6 @@ def DB_file_insert(path,filename,dictionnary,update=False):
     insert into file database the dictionnary values into the dictionnary keys fields
     keys are DB fields ; values are DB values
     """
-    #mise à jour : on inscrit 
-##    get_thumb(path,filename)
 
     conn = sqlite.connect(pictureDB)
     cn=conn.cursor()

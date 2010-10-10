@@ -46,7 +46,10 @@ import MypicsDB as MPDB
 global pictureDB
 pictureDB = os.path.join(DB_PATH,"MyPictures.db")
                                
-        
+files_fields_description={"strFilename":__language__(30300),
+                          "strPath":__language__(30301),
+                          "Thumb":__language__(30302)
+                          }
 
 def clean2(s): # remove \\uXXX
     """credit : sfaxman"""
@@ -252,6 +255,8 @@ class _Info:
         self.__dict__.update( kwargs )
     def has_key(key):
         return key in self.__dict__
+    def __setitem__(self,key,value):
+        self.__dict__[key]=value
 
 class Main:
     def __init__(self):
@@ -284,7 +289,7 @@ class Main:
         #menu contextuel
         if contextmenu :
             liz.addContextMenuItems(contextmenu,replacemenu)
-        ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True,totalItems=total)
+        ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)#,totalItems=total)
         return ok
     
     def addPic(self,picname,picpath,info="*",fanart=None,contextmenu=None,replacemenu=True):
@@ -541,7 +546,7 @@ class Main:
             compte = MPDB.Searchfiles(colname,motrecherche,count=True)
             if compte:
                 result = True
-                self.addDir(name      = u"%s résultats pour '%s' dans '%s'"%(compte,motrecherche.decode("utf8"),colname),
+                self.addDir(name      = u"%s résultats pour '%s' dans '%s'"%(compte,motrecherche.decode("utf8"),files_fields_description.has_key(colname) and files_fields_description[colname] or colname),
                             params    = [("method","search"),("field",u"%s"%colname.decode("utf8")),("searchterm",u"%s"%motrecherche.decode("utf8")),("viewmode","view")],#paramètres
                             action    = "showpics",#action
                             iconimage = os.path.join(PIC_PATH,"search.png"),#icone
@@ -916,9 +921,13 @@ def scan_my_pics(path=None,recursive=1,remove=1,showprogress=True):
     
 
 if __name__=="__main__":
-
+#if True:
+    print "QSDFGHJKLM"
     m=Main()
-
+    print "argv"
+    print sys.argv
+    print "args"
+    print dir(m.args)
     if not sys.argv[ 2 ]: #pas de paramètres : affichage du menu principal
 ##        #montage ?
 ##        smbpath= xbmcplugin.getSetting(int(sys.argv[1]),"sharepath")
@@ -934,13 +943,17 @@ if __name__=="__main__":
         MPDB.pictureDB = pictureDB
         #   - efface les tables et les recréés
         MPDB.Make_new_base(pictureDB,
-                           ecrase= xbmcplugin.getSetting(int(sys.argv[1]),"initDB") == "true")
-        if xbmcplugin.getSetting(int(sys.argv[1]),"initDB") == "true":
+                           ecrase= Addon.getSetting("initDB") == "true")
+        if Addon.getSetting("initDB") == "true":
             Addon.setSetting("initDB","false")
         #scan les répertoires lors du démarrage (selon setting)
-        if xbmcplugin.getSetting(int(sys.argv[1]),'bootscan')=='true':
+        if Addon.getSetting('bootscan')=='true':
             #scan_all_folders(showprogress=True)
-            xbmc.executebuiltin( "RunScript(%s,--database) "%os.path.join( os.getcwd(), "scanpath.py") )
+            if not(xbmc.getInfoLabel( "Window.Property(DialogAddonScanIsAlive)" ) == "true"):
+                xbmc.executebuiltin( "RunScript(%s,--database) "%os.path.join( os.getcwd(), "scanpath.py") )
+                xbmc.executebuiltin( "RunPlugin(\"%s?action='showhome'&viewmode='view'\")"%(sys.argv[0]) )
+                m.args["action"]="showhome"
+    if m.args.action=='showhome':
         #display home menu
         m.show_home()
     #les sélections sur le menu d'accueil :
