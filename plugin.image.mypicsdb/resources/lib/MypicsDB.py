@@ -35,6 +35,7 @@ import time
 import fnmatch
 import os.path
 import traceback
+import sha
 
 #traitement EXIF
 import EXIF
@@ -63,6 +64,7 @@ lists_separator = "||"
     
 def log(msg):
     print str("MyPicsDB >> %s"%msg.__str__())
+
 #net use z: \\remote\share\ login /USER:password
 #mount -t cifs //ntserver/download -o username=vivek,password=myPassword /mnt/ntserver
 def mount(mountpoint="z:",path="\\",login=None,password=""):
@@ -147,7 +149,7 @@ def Make_new_base(DBpath,ecrase=True):
 
     #table 'files'
     try:
-        cn.execute("""CREATE TABLE files ( idFile integer primary key, idFolder integer, strPath text, strFilename text, UseIt integer , Thumb text,
+        cn.execute("""CREATE TABLE files ( idFile integer primary key, idFolder integer, strPath text, strFilename text, UseIt integer , sha text, Thumb text,
                     CONSTRAINT UNI_FILE UNIQUE ("strPath","strFilename")
                                    )""")
     except Exception,msg:
@@ -380,7 +382,7 @@ def DB_file_insert(path,filename,dictionnary,update=False):
                 except Exception,msg:
                     log("Error while adding KeywordsInFiles")
                     log("\t%s - %s"% (Exception,msg) )
-                                                                                                                                                                                 
+
 ##    # TRAITEMENT DES FOLDERS
 ##    try:
 ##        haspic = "1" if True else "0"
@@ -455,6 +457,29 @@ def DB_del_pic(picpath,picfile=None):
         Request( "DELETE FROM folders WHERE idFolder in ('%s')"%"','".join([str(i) for i in deletelist]) )
 
     return
+
+def fileSHA ( filepath ) :
+    #found here : http://sebsauvage.net/python/doublesdetector.py
+    #thanks sebsauvage for all its snippets !
+    """ Compute SHA (Secure Hash Algorythm) of a file.
+        Input : filepath : full path and name of file (eg. 'c:\windows\emm386.exe')
+        Output : string : contains the hexadecimal representation of the SHA of the file.
+                          returns '0' if file could not be read (file not found, no read rights...)
+    """
+    try:
+        file = open(filepath,'rb')
+        digest = sha.new()
+        data = file.read(65536)
+        while len(data) != 0:
+            digest.update(data)
+            data = file.read(65536)
+        file.close()
+    except:
+        print_exc()
+        return '0'
+    else:
+        return digest.hexdigest()
+
 
 def DB_deltree(picpath):
     pass
