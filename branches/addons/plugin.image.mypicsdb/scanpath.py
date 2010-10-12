@@ -41,7 +41,7 @@ env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win3
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
 
 
-import getopt
+
 import xbmc,xbmcgui
 import urllib
 from traceback import print_exc,format_tb
@@ -163,12 +163,10 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
         #######
         # STEP 4 : browse all pictures
         #######
-        print listDBdir
         #puis on parcours toutes les images du dossier en cours
         for picfile in listfolderfiles:#... on parcours tous les jpg
             cptscanned = cptscanned+1
             cpt = cpt + 1
-            print picfile
             ###if updatefunc and updatefunc.iscanceled(): return#dialog progress has been canceled
             #on enlève l'image traitée de listdir
             listdir.pop(listdir.index(picfile))
@@ -176,14 +174,15 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
             if not (picfile in listDBdir) or updatepics:
                 #if updatefunc: updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),"Adding from %s to Database :"%dirname,picfile)
                 if updatefunc:
-                    updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),
-                                      0,
+                    #updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),
+                    updatefunc.update(cptscanned-(cptscanned/100)*100,
+                                      cptscanned/100,
                                       "MyPicture Database [Adding]",
                                       picfile)
                 #préparation d'un dictionnaire pour les champs et les valeurs
                 # c'est ce dictionnaire qui servira à  remplir la table fichiers
                 ##picentry = { "strPath":dirname, "strFilename":picfile }
-                picentry = { "idFolder":PFid, "strPath":dirname.decode("utf8"),"strFilename":picfile.decode("utf8"),"UseIt":1 }
+                picentry = { "idFolder":PFid, "strPath":dirname.decode("utf8"),"strFilename":picfile.decode("utf8"),"UseIt":1,"sha":MPDB.fileSHA(os.path.join(dirname,picfile)) }
 
                 ### chemin de la miniature
                 thumbnails = Thumbnails()
@@ -220,8 +219,9 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
             else: # the file is already in DB, we are passing it
                 #if updatefunc: updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),"Already in Database :",picfile)
                 if updatefunc:
-                    updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),
-                                      50,
+                    #updatefunc.update(int(100 * float(cpt)/len(listfolderfiles)),
+                    updatefunc.update(cptscanned-(cptscanned/100)*100,
+                                      cptscanned/100,
                                       "MyPicture Database [Passing]",
                                       picfile)
                 pass
@@ -236,8 +236,9 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
                 cptdelete=cptdelete+1
                 #if updatefunc: updatefunc.update(int(100 * float(co)%len(listDBdir)),"Removing from Database :",f)
                 if updatefunc:
-                    updatefunc.update(int(100 * float(co)%len(listDBdir)),
-                                      90,
+                    #updatefunc.update(int(100 * float(co)/len(listDBdir)),
+                    updatefunc.update(cptscanned-(cptscanned/100)*100,
+                                      cptscanned/100,
                                       "MyPicture Database [Removing]",
                                       f)
                 MPDB.DB_del_pic(dirname,f)

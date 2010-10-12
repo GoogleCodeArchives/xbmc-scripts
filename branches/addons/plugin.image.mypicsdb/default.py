@@ -8,7 +8,7 @@ TODO :
   - 'add to collections' context menu from any folder in sort by folders view
   - test if a 'collection' or 'period' or 'keyword' view doesn't contain any pictures : remove these from the database when deleting pictures
   - update in scan from library is not good : 2 options : 1- update to remove not found pictures ; 2- update to rescan exif/iptc datas and update files database with new metas
-  - 
+  - Scan : need to fix parameters sending. Right now, recursive or update things are not handled (everything is recursive and updating for new/deleted pics)
 """
 import os,sys
 try:
@@ -287,13 +287,18 @@ class Main:
         total = len(listkw)
         for kw in listkw:
             #on alimente le plugin en mots clés
-            self.addDir(name      = "%s (%s %s)"%(kw,MPDB.countKW(kw),__language__(30050)), #libellé
-                        params    = [("method","keyword"),("kw",kw),("viewmode","view")],#paramètres
-                        action    = "showpics",#action
-                        iconimage = os.path.join(PIC_PATH,"keywords.png"),#icone
-                        fanart    = os.path.join(PIC_PATH,"fanart-keyword.png"),
-                        contextmenu   = [( "Tout ajouter à la collection...","XBMC.RunPlugin(\"%s?action='addfolder'&method='keyword'&kw='%s'&viewmode='scan'\")"%(sys.argv[0],kw))],#menucontextuel
-                        total = total)#nb total d'éléments
+            nb = MPDB.countKW(kw)
+            if nb:
+                self.addDir(name      = "%s (%s %s)"%(kw,nb,__language__(30050)), #libellé
+                            params    = [("method","keyword"),("kw",kw),("viewmode","view")],#paramètres
+                            action    = "showpics",#action
+                            iconimage = os.path.join(PIC_PATH,"keywords.png"),#icone
+                            fanart    = os.path.join(PIC_PATH,"fanart-keyword.png"),
+                            contextmenu   = [( "Tout ajouter à la collection...","XBMC.RunPlugin(\"%s?action='addfolder'&method='keyword'&kw='%s'&viewmode='scan'\")"%(sys.argv[0],kw)),
+                                             ("Zip these pictures","XBMC.RunPlugin(\"%s?action='showpics'&method='keyword'&viewmode='zip'&name='%s'&kw='%s'\")"%(sys.argv[0],kw,kw) ),
+                                             ("Export these pictures to...","XBMC.RunPlugin(\"%s?action='showpics'&method='keyword'&viewmode='export'&name='%s'&kw='%s'\")"%(sys.argv[0],kw,kw) )
+                                             ],#menucontextuel
+                            total = total)#nb total d'éléments
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s : %s"%(__language__(30103),urllib.unquote_plus(self.args.kw.encode("utf-8"))) )
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -373,8 +378,10 @@ class Main:
                         iconimage = os.path.join(PIC_PATH,"collection.png"),#icone
                         fanart    = os.path.join(PIC_PATH,"fanart-collection.png"),
                         contextmenu   = [(__language__(30158),"XBMC.RunPlugin(\"%s?action='removecollection'&viewmode='view'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8")) ),
-                                         (__language__(30159),"XBMC.RunPlugin(\"%s?action='renamecollection'&viewmode='view'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8")) )
-                                         ] )#menucontextuel
+                                         (__language__(30159),"XBMC.RunPlugin(\"%s?action='renamecollection'&viewmode='view'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8")) ),
+                                         ("Zip these pictures","XBMC.RunPlugin(\"%s?action='showpics'&method='collection'&viewmode='zip'&name='%s'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8"),collection[0].decode("utf8")) ),
+                                         ("Export these pictures to...","XBMC.RunPlugin(\"%s?action='showpics'&method='collection'&viewmode='export'&name='%s'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8"),collection[0].decode("utf8")) ) 
+                                         ] )#menucontextuel 
             
         xbmcplugin.addSortMethod( int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE )
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s"%(__language__(30105)))
@@ -663,8 +670,106 @@ class Main:
         #on teste l'argumen 'viewmode'
             #si viewmode = view : on liste les images
             #si viewmode = scan : on liste les photos qu'on retourne
+            #si viewmode = zip  : on liste les photos qu'on zip
         if self.args.viewmode=="scan":
             return filelist
+        if self.args.viewmode=="zip":
+            import zipfile
+            destination = os.path.join(DATA_PATH,'archive.zip')
+            #destination="archive.zip"
+            fzip = zipfile.ZipFile(destination,'w')
+            for (path,filename) in filelist:
+                #fichier à ajouter dans le zip
+                picture = os.path.join(path,filename)
+                #f.write(os.path.join(path,filename),os.path.join( os.path.dirname(os.path.join(DATA_PATH,filename)).replace("\\","/"),filename))
+                arcroot = path.replace( os.path.dirname( picture ), "" )
+                # arcname struture du fichier a zipper and replace le os sep de windows par celui de unix
+                arcname = os.path.join( arcroot, filename ).replace( "\\", "/" )
+##                for file in files:
+                print "picture"
+                print picture
+                print "arcname"
+                print arcname
+                print "arcroot"
+                print arcroot
+                print "-"
+                print 
+                if picture == destination:
+                    # sert à rien de zipper le zip lui même :D
+                    continue
+                # maitenant que j'ai mes deux noms ont les ecrit
+                try:
+                    fzip.write( picture, "/"+arcname)#, zipfile.ZIP_STORED )
+                    #fzip.writestr(arcname,open(picture,'r').read())
+                    print "Compressing  %s . . ." % picture
+                except:
+                    print "medre! c'est quoi le probleme!!!"
+                    error += 1
+                    print "Error  %s" % arcname
+                    print_exc()
+            fzip.close()
+##            import zipaddon
+##            path,filename=filelist[0]
+##            zipaddon.ZipAddon(path)
+            xbmc.executebuiltin( "Notification(My Picture Database,%s files are in a Zip !!)"%len(filelist) )
+            return
+        if self.args.viewmode=="export":
+            #1- ask for destination
+            dialog = xbmcgui.Dialog()
+            dstpath = dialog.browse(3, "Select the destination","files" ,"", True, False, "")
+            #pour créer un dossier dans la destination, on peut utiliser le nom  self.args.name
+            if dstpath == "":
+                return
+            #3- use the  name to export to that folder
+            #   a- ask the user if subfolder has to be created
+            #   a-1/ yes : show the keyboard for a possible value for a folder name (using m.args.name as base name)
+            #               repeat as long as input value is not correct for a folder name or dialog has been canceled
+            #   a-2/ no : simply go on with copy ...
+            ok = dialog.yesno("MyPictures Database","Do you want to create a subfolder for exported pictures ?","(%s)"%self.args.name)
+            if ok:
+                dirok=False
+                while not dirok:
+                    kb = xbmc.Keyboard(self.args.name, 'Input subfolder name', False)
+                    kb.doModal()
+                    
+                    if (kb.isConfirmed()):
+                        subfolder = kb.getText()
+                        try:
+                            os.mkdir(os.path.join(dstpath,subfolder))
+                            dstpath = os.path.join(dstpath,subfolder)
+                            dirok = True
+                        except Exception,msg:
+                            print_exc()
+                            dialog.ok("MyPictures Database","Error#%s : %s"%msg.args)
+                    else:
+                        xbmc.executebuiltin( "Notification(MyPictures Database,Files copy canceled ! )" )
+                        return
+
+            
+            #browse(type, heading, shares[, mask, useThumbs, treatAsFolder, default])
+            import shutil
+            pDialog = xbmcgui.DialogProgress()
+            ret = pDialog.create('MyPictureDB', 'Copying files...')
+            i=0.0
+            cpt=0
+            for path,filename in filelist:
+                pDialog.update(int(100*i/len(filelist)),"Copying '%s' to :"%os.path.join(path,filename),dstpath)
+                i=i+1.0
+                #2- does the destination have the file ? shall we overwrite it ?
+                if os.path.isfile(os.path.join(dstpath,filename)):
+                    ok = dialog.yesno("MyPictures Database","File %s already exists in"%filename,dstpath,"Overwrite it ?")
+                    if not ok:
+                        continue
+                print "copying :"
+                print os.path.join(path,filename)
+                shutil.copy(os.path.join(path,filename), dstpath)
+                cpt = cpt+1
+            pDialog.update(100,"Copying Finished !",dstpath)
+            xbmc.sleep(1000)
+            xbmc.executebuiltin( "Notification(MyPictures Database,%s files copied to %s )"%(cpt,dstpath) )
+            dialog.browse(2, "Pictures exported","files" ,"", True, False, dstpath)
+            return
+        
         #alimentation de la liste
         for path,filename in filelist:
             #création du menu contextuel selon les situasions
@@ -686,7 +791,9 @@ class Main:
                 
             #3 - montrer où est localisé physiquement la photo
                 ## ATTENTION ne fonctionne pas, retourne le message suivant : Unable to locate window with id 126.  Check skin files
-            context.append( ( "Localiser sur le disque","XBMC.ActivateWindow(112)" ) )#126
+            #context.append( ( "Localiser sur le disque","XBMC.ActivateWindow(filebrowser)" ) )#126
+            context.append( ("localiser sur le disque","XBMC.RunPlugin(\"%s?action='locate'&filepath='%s'&viewmode='view'\" ,)"%(sys.argv[0],os.path.join(urllib.quote_plus(path),
+                                                                                                                                                          urllib.quote_plus(filename)))))
             #4 - les infos de la photo
             #context.append( ( "paramètres de l'addon","XBMC.ActivateWindow(virtualkeyboard)" ) )
             self.addPic(filename,
@@ -769,6 +876,10 @@ if __name__=="__main__":
         m.add_folder_to_collection()
     elif m.args.action=='rootfolders':
         m.show_roots()
+    elif m.args.action=='locate':
+        dialog = xbmcgui.Dialog()
+        print urllib.unquote_plus(m.args.filepath)
+        dstpath = dialog.browse(2, "The file is located here :","files" ,"", True, False, urllib.unquote_plus(m.args.filepath)) 
     else:
         m.show_home()
     del MPDB
