@@ -30,10 +30,14 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
 
 
 import urllib
+import urllib2
 import re
 import xbmcplugin,xbmcgui,xbmc,xbmcaddon
 import os.path
-import traceback
+import tarfile
+import time
+
+from traceback import print_exc
 
 Addon = xbmcaddon.Addon(id='plugin.image.mypicsdb')
 __language__ = Addon.getLocalizedString
@@ -200,35 +204,49 @@ class Main:
             nextperiod="month"
             allperiod =""
             action="showdate"
+            periodformat="%Y"
+            displaydate="%Y"
+            thisdateformat=""
+            displaythisdate=""
         elif self.args.period=="month":
             listperiod=MPDB.get_months(self.args.value)
             nextperiod="date"
             allperiod="year"
             action="showdate"
+            periodformat="%Y-%m"
+            displaydate="%m/%Y"
+            thisdateformat="%Y"
+            displaythisdate="%Y"
         elif self.args.period=="date":
             listperiod=MPDB.get_dates(self.args.value)
             nextperiod="date"
             allperiod = "month"
             action="showpics"
+            periodformat="%Y-%m-%d"
+            displaydate="%d/%m/%Y"
+            thisdateformat="%Y-%m"
+            displaythisdate="%m/%Y"
         else:
             listperiod=[]
             nextperiod=None
         
         if not None in listperiod:
-            self.addDir(name      = __language__(30100)%(self.args.value,MPDB.countPeriod(allperiod,self.args.value)), #libellé#"All the period %s (%s pics)"%(self.args.value,MPDB.countPeriod(allperiod,self.args.value)), #libellé
+            #print self.args.value
+            #print time.strftime("%d/%m/%Y",time.strptime(self.args.value,"%Y-%m-%d"))
+            self.addDir(name      = __language__(30100)%(time.strftime(displaythisdate,time.strptime(self.args.value,thisdateformat)),MPDB.countPeriod(allperiod,self.args.value)), #libellé#"All the period %s (%s pics)"%(self.args.value,MPDB.countPeriod(allperiod,self.args.value)), #libellé
                         params    = [("method","date"),("period",allperiod),("value",self.args.value),("viewmode","view")],#paramètres
                         action    = "showpics",#action
                         iconimage = os.path.join(PIC_PATH,"dates.png"),#icone
                         fanart    = os.path.join(PIC_PATH,"fanart-date.png"),
-                        contextmenu   = [("Tout ajouter à la collection...","XBMC.RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")"%(sys.argv[0],allperiod,self.args.value))])#menucontextuel
+                        contextmenu   = [("Add all to the collection...","XBMC.RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")"%(sys.argv[0],allperiod,self.args.value))])#menucontextuel
             total=len(listperiod)
             for period in listperiod:
                 if period:
                     if action=="showpics":
-                        context = [("Tout ajouter à la collection...","XBMC.RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")"%(sys.argv[0],nextperiod,period))]
+                        context = [("Add all to the collection...","XBMC.RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")"%(sys.argv[0],nextperiod,period))]
                     else:
-                        context = None
-                    self.addDir(name      = "%s (%s %s)"%(period,MPDB.countPeriod(self.args.period,period),__language__(30050)), #libellé
+                        context = [("Add all to the collection...","XBMC.RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")"%(sys.argv[0],self.args.period,period))]
+                    self.addDir(name      = "%s (%s %s)"%(time.strftime(displaydate,time.strptime(period,periodformat)),MPDB.countPeriod(self.args.period,period),__language__(30050)), #libellé
                                 params    = [("method","date"),("period",nextperiod),("value",period),("viewmode","view")],#paramètres
                                 action    = action,#action
                                 iconimage = os.path.join(PIC_PATH,"dates.png"),#icone
@@ -261,10 +279,14 @@ class Main:
         #maintenant, on liste les photos si il y en a, du dossier en cours
         picsfromfolder = [row for row in MPDB.Request("SELECT p.FullPath,f.strFilename FROM files f,folders p WHERE f.idFolder=p.idFolder AND f.idFolder='%s'"%self.args.folderid)]
         for path,filename in picsfromfolder:
-            self.addPic(filename,path,contextmenu=[( __language__(30152),"XBMC.RunPlugin(\"%s?action='addtocollection'&viewmode='view'&path='%s'&filename='%s'\")"%(sys.argv[0],
+            context = [( __language__(30152),"XBMC.RunPlugin(\"%s?action='addtocollection'&viewmode='view'&path='%s'&filename='%s'\")"%(sys.argv[0],
                                                                                                                          urllib.quote_plus(path),
                                                                                                                          urllib.quote_plus(filename))
-                              ),("Don't use this picture","",)],
+                              ),("Don't use this picture","",)]
+            coords = MPDB.getGPS(path,filename)
+            if coords:
+                context.append( ("Geographic localisation","XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),urllib.quote_plus(filename))))
+            self.addPic(filename,path,contextmenu=context,
                         fanart = os.path.join(PIC_PATH,"fanart-folder.png")
                         )
                             #("Add to Collection","XBMC.RunPlugin(%s?method='folders'&folderid='2'&onlypics='non'&action='showfolder'&name='2005-05+%%2823+images%%29')"%sys.argv[0])
@@ -314,12 +336,21 @@ class Main:
         if self.args.period=="setperiod":
             dateofpics = MPDB.get_pics_dates()#the choice of the date is made with pictures in database (datetime of pics are used)
             dialog = xbmcgui.Dialog()
-            rets = dialog.select(__language__(30107),dateofpics)#choose the start date
+            rets = dialog.select(__language__(30107),["[[input a date]]"] + dateofpics)#choose the start date
             if not rets==-1:#is not canceled
-                datestart = dateofpics[rets]
-                retf = dialog.select(__language__(30108),dateofpics[rets:])#choose the end date (all dates before startdate are ignored to preserve begin/end)
-                if not rets==-1:#if end date is not canceled...
-                    dateend = dateofpics[rets+retf]
+                if rets==0: #input manually the date
+                    datestart = "2005-01-01"
+                    deb=0
+                else:
+                    datestart = dateofpics[rets-1]
+                    deb=rets-1
+            
+                retf = dialog.select(__language__(30108),["[[input a date]]"] + dateofpics[deb:])#choose the end date (all dates before startdate are ignored to preserve begin/end)
+                if not retf==-1:#if end date is not canceled...
+                    if retf==0:#choix d'un date de fin manuelle ou choix précédent de la date de début manuelle
+                        dateend = "2010-12-31"
+                    else:
+                        dateend = dateofpics[deb+retf-1]
                     #now input the title for the period
                     kb = xbmc.Keyboard(__language__(30109)%(datestart,dateend), __language__(30110), False)
                     kb.doModal()
@@ -329,13 +360,14 @@ class Main:
                         titreperiode = __language__(30109)%(datestart,dateend)
                     #add the new period inside the database
                     MPDB.addPeriode(titreperiode,"datetime('%s')"%datestart,"datetime('%s')"%dateend)
+
             update=True
         else:
             update=False
 
         #search for inbase periods and show periods
         for periodname,dbdatestart,dbdateend in MPDB.ListPeriodes():
-            datestart,dateend = MPDB.Request("SELECT strftime('%%Y-%%m-%%d',datetime('%s')),strftime('%%Y-%%m-%%d',datetime('%s','+1 day'))"%(dbdatestart,dbdateend))[0]
+            datestart,dateend = MPDB.Request("SELECT strftime('%%Y-%%m-%%d',datetime('%s')),strftime('%%Y-%%m-%%d',datetime('%s','+1 day','-1.0 seconds'))"%(dbdatestart,dbdateend))[0]
             self.addDir(name      = "%s (%s)"%(periodname.decode("utf8"),__language__(30113)%(datestart,dateend)), #libellé
                         params    = [("method","date"),("period","period"),("datestart",datestart),("dateend",dateend),("viewmode","view")],#paramètres
                         action    = "showpics",#action
@@ -428,15 +460,15 @@ class Main:
             dialog = xbmcgui.Dialog()
             newroot = dialog.browse(0, 'Dossier à scanner', 'pictures')
             if not newroot: return
-            recursive = dialog.yesno("My Pictures Database","Parcourir ce dossier récursivement") and 1 or 0
-            remove = dialog.yesno("My Pictures Database","Remove files from database if pictures does not exists") and 1 or 0
+            recursive = dialog.yesno("My Pictures Database","Browse recursively this folder") and 1 or 0
+            update = dialog.yesno("My Pictures Database","Remove files from database if pictures does not exists") and 1 or 0
             #ajoute le rootfolder dans la base
-            MPDB.AddRoot(newroot,recursive,remove)
+            MPDB.AddRoot(newroot,recursive,update)
             xbmc.executebuiltin( "Notification(MyPictures Database,Folder added !)" )
             if dialog.yesno("My Pictures Database","Do you want to perform a scan now ?"):
 ##                xbmc.executebuiltin( "RunScript(%s,%s%s--rootpath %s) "%( os.path.join( os.getcwd(), "scanpath.py"),
-##                                                                          recursive==1 and "--remove " or "",
-##                                                                          remove==1 and "--update " or "",
+##                                                                          recursive==1 and "--recursive " or "",
+##                                                                          update==1 and "--update " or "",
 ##                                                                          newroot
 ##                                                                        )
 ##                                     )
@@ -453,10 +485,10 @@ class Main:
         elif self.args.do=="rootclic":
             dialog = xbmcgui.Dialog()
             if dialog.yesno("My Pictures Database","Do you want to perform a scan now ?"):
-                path,recursive,remove = MPDB.getRoot(urllib.unquote_plus(self.args.rootpath))
+                path,recursive,update = MPDB.getRoot(urllib.unquote_plus(self.args.rootpath))
 ##                xbmc.executebuiltin( "RunScript(%s,%s%s-p %s) "%( os.path.join( os.getcwd(), "scanpath.py"),
 ##                                                                          recursive==1 and "-r " or "",
-##                                                                          remove==1 and "-u " or "",
+##                                                                          update==1 and "-u " or "",
 ##                                                                          urllib.quote_plus(path)
 ##                                                                        )
 ##                                     )
@@ -474,10 +506,10 @@ class Main:
                     iconimage = os.path.join(PIC_PATH,"newsettings.png"),#icone
                     fanart    = os.path.join(PIC_PATH,"fanart-setting.png"),
                     contextmenu   = None)#menucontextuel
-        for path,recursive,remove in MPDB.RootFolders():
+        for path,recursive,update in MPDB.RootFolders():
             srec = recursive==1 and "ON" or "OFF"
-            srem = remove==1 and "ON" or "OFF"
-            self.addDir(name      = path+" [recursive="+srec+" , update="+srem+"]",
+            supd = update==1 and "ON" or "OFF"
+            self.addDir(name      = path+" [recursive="+srec+" , update="+supd+"]",
                         params    = [("do","rootclic"),("rootpath",path),("viewmode","view"),],#paramètres
                         action    = "rootfolders",#action
                         iconimage = os.path.join(PIC_PATH,"settings.png"),#icone
@@ -487,7 +519,68 @@ class Main:
         xbmcplugin.addSortMethod( int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE )
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="search")
         xbmcplugin.endOfDirectory( int(sys.argv[1]),updateListing=refresh)
-            
+
+    def show_map(self):
+        """get a google map for the given place (place is a string for an address, or a couple of gps lat/lon datas"""
+        #google geolocalisation 
+        static_url = "http://maps.google.com/maps/api/staticmap?"
+        param_dic = {#location parameters (http://gmaps-samples.googlecode.com/svn/trunk/geocoder/singlegeocode.html)
+                     "center":"",       #(required if markers not present)
+                     "zoom":"5",         # 0 to 21+ (req if no markers
+                     #map parameters
+                     "size":"640x480",  #widthxheight (required)
+                     "format":"jpg-baseline",    #"png8","png","png32","gif","jpg","jpg-baseline" (opt)
+                     "maptype":"hybrid",      #"roadmap","satellite","hybrid","terrain" (opt)             
+                     "language":"",
+                     #Feature Parameters:
+                     "markers" :"color:red|label:P|%s",#(opt)
+                                        #markers=color:red|label:P|lyon|12%20rue%20madiraa|marseille|Lille
+                                        #&markers=color:blue|label:P|Australie
+                     "path" : "",       #(opt)
+                     "visible" : "",    #(opt)
+                     #Reporting Parameters:
+                     "sensor" : "false" #is there a gps on system ? (req)
+                     }
+        pDialog = xbmcgui.DialogProgress()
+        
+        ret = pDialog.create('MyPictureDB', 'Getting map from google for coordinates :',self.args.place)
+        pDialog.update(0,"Creating connection...")
+
+        param_dic["markers"]=param_dic["markers"]%self.args.place
+        request_headers = { 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; fr; rv:1.9.2.10) Gecko/20100914 Firefox/3.6.10' }
+        request = urllib2.Request(static_url+urllib.urlencode(param_dic), None, request_headers)
+        urlfile = urllib2.urlopen(request)
+        print urlfile.info()
+        extension = urlfile.info().getheader("Content-Type","").split("/")[1]
+        filesize = int(urlfile.info().getheader("Content-Length",""))
+        try:
+            f=open(os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension),"wb")
+        except:
+            print_exc()
+        for i in range(1+(filesize/10)):
+            f.write(urlfile.read(10))
+            pDialog.update(int(100*(float(i*10)/filesize)),"Downloading file...","%0.2f%%"%(100*(float(i*10)/filesize)))
+        urlfile.close()
+        pDialog.close()
+        try:
+            f.close()
+        except:
+            print_exc()
+            pass
+        HTTP_API_url = "http://%s/xbmcCmds/xbmcHttp?command="%xbmc.getIPAddress()
+        html = urllib.urlopen(HTTP_API_url + "AddToSlideshow('%s')" % os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension) )
+        html = urllib.urlopen(HTTP_API_url + "ExecBuiltIn(SlideShow(,,notrandom))")
+        response = xbmc.executeJSONRPC('''{ "jsonrpc": "2.0", "method": "XBMC.StartSlideshow", "parameter": "%s", "id": "1" }'''%os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension))
+        
+        print "response"
+        print response
+##        html = urllib.urlopen(HTTP_API_url + "ClearSlideshow")
+##        html = urllib.urlopen(HTTP_API_url + "AddToSlideshow('%s')" % urllib.quote(os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension)) )
+##        print html.read()
+        #xbmc.executebuiltin( "ActivateWindow(12007)" )
+        #xbmc.executebuiltin( "SlideShow('%s',,notrandom)"% os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension))
+        #xbmc.executebuiltin( "Notification(%s,Maps downloaded to %s)"%("MyPictures DB",os.path.join(DATA_PATH,"maps.jpg")))
+        
     ##################################
     #traitement des menus contextuels
     ##################################
@@ -496,14 +589,30 @@ class Main:
         xbmc.executebuiltin( "Container.Update(\"%s?action='showperiod'&viewmode='view'&period=''\" , replace)"%sys.argv[0]  )
         
     def rename_period(self):
+        #TODO : améliorer la saisie des dates
+        #TODO : test if 'datestart' is before 'dateend'
         datestart,dateend = MPDB.Request( """SELECT DateStart,DateEnd FROM Periodes WHERE PeriodeName='%s'"""%self.args.periodname )[0]
+        kb = xbmc.Keyboard(time.strftime("%Y-%m-%d",time.strptime(datestart,"%Y-%m-%d %H:%M:%S")), "Input start date for period", False)
+        #change the datestart
+        kb.doModal()
+        if (kb.isConfirmed()):
+            datestart = kb.getText()
+        else:
+            datestart = datestart
+        kb = xbmc.Keyboard(time.strftime("%Y-%m-%d",time.strptime(dateend,"%Y-%m-%d %H:%M:%S")), "Input end date for period", False)
+        kb.doModal()
+        if (kb.isConfirmed()):
+            dateend = kb.getText()
+        else:
+            dateend = dateend
+        #change the dateend
         kb = xbmc.Keyboard(self.args.periodname, __language__(30110), False)
         kb.doModal()
         if (kb.isConfirmed()):
             titreperiode = kb.getText()
         else:
             titreperiode = self.args.periodname
-        MPDB.renPeriode(self.args.periodname,titreperiode)
+        MPDB.renPeriode(self.args.periodname,titreperiode,datestart,dateend)
         xbmc.executebuiltin( "Container.Update(\"%s?action='showperiod'&viewmode='view'&period=''\" , replace)"%sys.argv[0]  )
 
     def addTo_collection(self):
@@ -552,12 +661,10 @@ class Main:
             namecollection = listcollection[rets]
         #3 associe en base l'id du fichier avec l'id de la collection
         filelist = self.show_pics() #on récupère les photos correspondantes à la vue
-        c=0
         for path,filename in filelist: #on les ajoute une par une
-            c=c+1
             MPDB.addPicToCollection( namecollection,path,filename )
         xbmc.executebuiltin( "Notification(%s,%s %s)"%(__language__(30000).encode("utf8"),
-                                                       "%s photos ajoutées dans :"%c,
+                                                       "%s pictures added in :"%len(filelist),
                                                        namecollection)
                              )
         
@@ -603,38 +710,25 @@ class Main:
         if self.args.method == "folder":#NON UTILISE : l'affichage par dossiers affiche de lui même les photos
             pass
 
+        # we are showing pictures for a DATE selection
         elif self.args.method == "date":
             #   lister les images pour une date donnée
             picfanart = os.path.join(PIC_PATH,"fanart-date.png")
             format = {"year":"%Y","month":"%Y-%m","date":"%Y-%m-%d","":"%Y","period":"%Y-%m-%d"}[self.args.period]
             if self.args.period=="year" or self.args.period=="":
                 if self.args.value:
-                    filelist = MPDB.search_between_dates( (self.args.value,format) , ( str( int(self.args.value) +1 ),format) )
+                    filelist = MPDB.pics_for_period('year',self.args.value)
                 else:
                     filelist = MPDB.search_all_dates()
                     
-            elif self.args.period=="month":
-                a,m=self.args.value.split("-")
-                if m=="12":
-                    aa=int(a)+1
-                    mm=1
-                else:
-                    aa=a
-                    mm=int(m)+1
-                filelist = MPDB.search_between_dates( ("%s-%s"%(a,m),format) , ( "%s-%s"%(aa,mm),format) )
-                
-            elif self.args.period=="date":
-                #BUG CONNU : trouver un moyen de trouver le jour suivant en prenant en compte le nb de jours par mois
-                a,m,j=self.args.value.split("-")              
-                filelist = MPDB.search_between_dates( ("%s-%s-%s"%(a,m,j),format) , ( "%s-%s-%s"%(a,m,int(j)+1),format) )
-                
+            elif self.args.period in ["month","date"]:
+                filelist = MPDB.pics_for_period(self.args.period,self.args.value)
+
             elif self.args.period=="period":
                 picfanart = os.path.join(PIC_PATH,"fanart-period.png")
                 filelist = MPDB.search_between_dates(DateStart=(urllib.unquote_plus(self.args.datestart),format),
                                                      DateEnd=(urllib.unquote_plus(self.args.dateend),format))
-                         
-            else:
-                #pas de periode, alors toutes les photos du 01/01 de la plus petite année, au 31/12 de la plus grande année
+            else:#period not recognized, show whole pics : TODO check if useful and if it can not be optimized for something better
                 listyears=MPDB.get_years()
                 amini=min(listyears)
                 amaxi=max(listyears)
@@ -642,7 +736,8 @@ class Main:
                     filelist = MPDB.search_between_dates( ("%s"%(amini),format) , ( "%s"%(amaxi),format) )
                 else:
                     filelist = []
-                    
+
+        # we are showing pictures for a KEYWORD selection
         elif self.args.method == "keyword":
             #   lister les images correspondant au mot clé
             picfanart = os.path.join(PIC_PATH,"fanart-keyword.png")
@@ -651,6 +746,7 @@ class Main:
             else:
                 filelist = MPDB.search_keyword(urllib.unquote_plus(self.args.kw).decode("utf8"))
 
+        # we are showing pictures for a FOLDER selection
         elif self.args.method == "folders":
             #   lister les images du dossier self.args.folderid et ses sous-dossiers
             # BUG CONNU : cette requête ne récupère que les photos du dossier choisi, pas les photos 'filles' des sous dossiers
@@ -673,46 +769,50 @@ class Main:
             #si viewmode = zip  : on liste les photos qu'on zip
         if self.args.viewmode=="scan":
             return filelist
+        
         if self.args.viewmode=="zip":
-            import zipfile
-            destination = os.path.join(DATA_PATH,'archive.zip')
-            #destination="archive.zip"
-            fzip = zipfile.ZipFile(destination,'w')
+            destination = os.path.join(DATA_PATH,urllib.unquote_plus(self.args.name)+".tar.gz")
+            if os.path.isfile(destination):
+                dialog = xbmcgui.Dialog()
+                ok = dialog.yesno("MyPictures Database","Archive '%s' already exists in"%os.path.basename(destination),os.path.dirname(destination), "Overwrite ?")
+                if not ok:
+                    #todo, ask for another name and if cancel, cancel the zip process as well
+                    xbmc.executebuiltin( "Notification(My Picture Database,Archiving pictures canceled.,File already exists)" )
+                    return
+                else:
+                    pass #user is ok to overwrite, let's go on
+            tar = tarfile.open(destination,"w:gz")#open a tar file using gz compression
+            error = 0
+            pDialog = xbmcgui.DialogProgress()
+            ret = pDialog.create('MyPictures Database', 'Adding file to archive :','')
+            compte=0
+            msg=""
             for (path,filename) in filelist:
-                #fichier à ajouter dans le zip
+                compte=compte+1
                 picture = os.path.join(path,filename)
-                #f.write(os.path.join(path,filename),os.path.join( os.path.dirname(os.path.join(DATA_PATH,filename)).replace("\\","/"),filename))
                 arcroot = path.replace( os.path.dirname( picture ), "" )
-                # arcname struture du fichier a zipper and replace le os sep de windows par celui de unix
                 arcname = os.path.join( arcroot, filename ).replace( "\\", "/" )
-##                for file in files:
-                print "picture"
-                print picture
-                print "arcname"
-                print arcname
-                print "arcroot"
-                print arcroot
-                print "-"
-                print 
-                if picture == destination:
-                    # sert à rien de zipper le zip lui même :D
+                if picture == destination: # sert à rien de zipper le zip lui même :D
                     continue
-                # maitenant que j'ai mes deux noms ont les ecrit
+                pDialog.update(int(100*(compte/float(len(filelist)))),"Creating connection...",'Adding file to archive :',picture)
                 try:
-                    fzip.write( picture, "/"+arcname)#, zipfile.ZIP_STORED )
-                    #fzip.writestr(arcname,open(picture,'r').read())
+                    tar.add( picture , arcname)
                     print "Compressing  %s . . ." % picture
                 except:
-                    print "medre! c'est quoi le probleme!!!"
+                    print "tar.gz compression error :"
                     error += 1
                     print "Error  %s" % arcname
                     print_exc()
-            fzip.close()
-##            import zipaddon
-##            path,filename=filelist[0]
-##            zipaddon.ZipAddon(path)
-            xbmc.executebuiltin( "Notification(My Picture Database,%s files are in a Zip !!)"%len(filelist) )
+                if pDialog.iscanceled():
+                    msg = "Zip file has been canceled !"
+                    break
+            tar.close()
+            if not msg:
+                if error: msg = "%s Errors while zipping %s files"%(error,len(filelist))
+                else: msg = "%s files successfully Zipped !!"%len(filelist)
+            xbmc.executebuiltin( "Notification(My Picture Database,%s)"%msg )
             return
+        
         if self.args.viewmode=="export":
             #1- ask for destination
             dialog = xbmcgui.Dialog()
@@ -756,13 +856,12 @@ class Main:
                 pDialog.update(int(100*i/len(filelist)),"Copying '%s' to :"%os.path.join(path,filename),dstpath)
                 i=i+1.0
                 #2- does the destination have the file ? shall we overwrite it ?
+                #TODO : rename a file if it already exists, rather than asking to overwrite it
                 if os.path.isfile(os.path.join(dstpath,filename)):
                     ok = dialog.yesno("MyPictures Database","File %s already exists in"%filename,dstpath,"Overwrite it ?")
                     if not ok:
                         continue
-                print "copying :"
-                print os.path.join(path,filename)
-                shutil.copy(os.path.join(path,filename), dstpath)
+                shutil.copy(os.path.join(path.decode("utf8"),filename.decode("utf8")), dstpath.decode("utf8"))
                 cpt = cpt+1
             pDialog.update(100,"Copying Finished !",dstpath)
             xbmc.sleep(1000)
@@ -792,9 +891,15 @@ class Main:
             #3 - montrer où est localisé physiquement la photo
                 ## ATTENTION ne fonctionne pas, retourne le message suivant : Unable to locate window with id 126.  Check skin files
             #context.append( ( "Localiser sur le disque","XBMC.ActivateWindow(filebrowser)" ) )#126
-            context.append( ("localiser sur le disque","XBMC.RunPlugin(\"%s?action='locate'&filepath='%s'&viewmode='view'\" ,)"%(sys.argv[0],os.path.join(urllib.quote_plus(path),
+            context.append( ("locate on disk","XBMC.RunPlugin(\"%s?action='locate'&filepath='%s'&viewmode='view'\" ,)"%(sys.argv[0],os.path.join(urllib.quote_plus(path),
                                                                                                                                                           urllib.quote_plus(filename)))))
-            #4 - les infos de la photo
+
+            #4 - si la photo contient des données GPS, la localiser sur une carte
+            coords = MPDB.getGPS(path,filename)
+            if coords:
+                context.append( ("Geographic localisation","XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),urllib.quote_plus(filename))))
+                                 
+            #5 - les infos de la photo
             #context.append( ( "paramètres de l'addon","XBMC.ActivateWindow(virtualkeyboard)" ) )
             self.addPic(filename,
                         path,
@@ -879,7 +984,9 @@ if __name__=="__main__":
     elif m.args.action=='locate':
         dialog = xbmcgui.Dialog()
         print urllib.unquote_plus(m.args.filepath)
-        dstpath = dialog.browse(2, "The file is located here :","files" ,"", True, False, urllib.unquote_plus(m.args.filepath)) 
+        dstpath = dialog.browse(2, "The file is located here :","files" ,"", True, False, urllib.unquote_plus(m.args.filepath))
+    elif m.args.action=='geolocate':
+        m.show_map()
     else:
         m.show_home()
     del MPDB
