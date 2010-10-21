@@ -81,8 +81,11 @@ def main2():
         scan.create( "MyPicture Database " )
         print options.recursive
         print options.update
+        scan.update(0,0,"MyPicture Database [Preparing]","please wait...")
+        count_files(urllib.unquote_plus(options.rootpath))
         try:
-            browse_folder(urllib.unquote_plus(options.rootpath),parentfolderID=None,recursive=options.recursive,updatecontent=options.update,updatepics=False,updatefunc=scan)
+            #browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None)
+            browse_folder(urllib.unquote_plus(options.rootpath),parentfolderID=None,recursive=options.recursive,updatecontent=options.update,rescan=True,updatefunc=scan)
         except:
             print_exc()
         scan.close()
@@ -93,23 +96,38 @@ def main2():
         if listofpaths:
             scan = AddonScan()#xbmcgui.getCurrentWindowId()
             scan.create( "MyPicture Database " )
-            for path,recursive,remove in listofpaths:
+            scan.update(0,0,"MyPicture Database [Preparing]","please wait...")
+            for path,recursive,update in listofpaths:
+                count_files(urllib.unquote_plus(path))
                 try:
-                    browse_folder(urllib.unquote_plus(path),parentfolderID=None,recursive=recursive==1,updatecontent=remove==1,updatepics=False,updatefunc=scan)
+                    #browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None)
+                    browse_folder(urllib.unquote_plus(path),parentfolderID=None,recursive=recursive==1,updatecontent=update==1,rescan=False,updatefunc=scan)
                 except:
                     print_exc()
             scan.close()
             
 
-        
-    #win.removeControl(label) 
-    # close dialog video scan
-    #xbmc.executebuiltin( "Dialog.Close(videoscan)" )
 
 
 global compte,comptenew,cptscanned,cptdelete
 compte=comptenew=cptscanned=cptdelete=0
-def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,updatepics=False,updatefunc=None):
+global totalfiles,totalfolders
+totalfiles=totalfolders=0
+
+def processDirectory ( args, dirname, filenames ):
+    global totalfolders,totalfiles
+    totalfolders=totalfolders+1
+    for filename in filenames:
+        if os.path.splitext(filename)[1].upper() in [".JPG",".TIF",".PNG",".GIF",".BMP",".JPEG"]:
+            totalfiles=totalfiles+1
+
+def count_files ( path ):
+    global totalfiles,totalfolders
+    totalfiles=totalfolders=0
+    os.path.walk(path, processDirectory, None )
+    print totalfiles,totalfolders
+    
+def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None):
     """parcours le dossier racine 'dirname'
     - 'recursive' pour traverser récursivement les sous dossiers de 'dirname'
     - 'update' pour forcer le scan des images qu'elles soient déjà en base ou pas
@@ -171,13 +189,13 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
             #on enlève l'image traitée de listdir
             listdir.pop(listdir.index(picfile))
             #picture is not yet inside database
-            if not (picfile in listDBdir) or updatepics:
+            if not (picfile in listDBdir) or rescan:
                 #if updatefunc: updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),"Adding from %s to Database :"%dirname,picfile)
                 if updatefunc:
                     #updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),
-                    updatefunc.update(cptscanned-(cptscanned/100)*100,
-                                      cptscanned/100,
-                                      "MyPicture Database [Adding]",
+                    updatefunc.update(int(100*float(cptscanned)/float(totalfiles)),#cptscanned-(cptscanned/100)*100,
+                                      cptscanned/100,#TODO : compter les dossiers parcourus pour la 2ieme barre
+                                      "MyPicture Database [Adding] (%0.2f%%)"%(100*float(cptscanned)/float(totalfiles)),
                                       picfile)
                 #préparation d'un dictionnaire pour les champs et les valeurs
                 # c'est ce dictionnaire qui servira à  remplir la table fichiers
@@ -212,7 +230,7 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
                 ###############################
 
                 #insertion des données dans la table
-                MPDB.DB_file_insert(dirname,picfile,picentry,updatepics)
+                MPDB.DB_file_insert(dirname,picfile,picentry,rescan)
 
                 #comptage
                 comptenew=comptenew+1
@@ -220,9 +238,9 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
                 #if updatefunc: updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),"Already in Database :",picfile)
                 if updatefunc:
                     #updatefunc.update(int(100 * float(cpt)/len(listfolderfiles)),
-                    updatefunc.update(cptscanned-(cptscanned/100)*100,
+                    updatefunc.update(int(100*float(cptscanned)/float(totalfiles)),#cptscanned-(cptscanned/100)*100,
                                       cptscanned/100,
-                                      "MyPicture Database [Passing]",
+                                      "MyPicture Database [Passing] (%0.2f%%)"%(100*float(cptscanned)/float(totalfiles)),
                                       picfile)
                 pass
             if picfile in listDBdir:
@@ -230,21 +248,17 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
                 
         #Now if the database contain some more pictures assign for this folder, we need to delete them if 'update' setting is true
         if listDBdir and updatecontent: #à l'issu si listdir contient encore des fichiers, c'est qu'ils sont en base mais que le fichier n'existe plus physiquement.
-            co=0
             for f in listDBdir: #on parcours les images en DB orphelines
-                co=co+1
                 cptdelete=cptdelete+1
-                #if updatefunc: updatefunc.update(int(100 * float(co)%len(listDBdir)),"Removing from Database :",f)
                 if updatefunc:
-                    #updatefunc.update(int(100 * float(co)/len(listDBdir)),
-                    updatefunc.update(cptscanned-(cptscanned/100)*100,
+                    updatefunc.update(int(100*float(cptscanned)/float(totalfiles)),#cptscanned-(cptscanned/100)*100,
                                       cptscanned/100,
                                       "MyPicture Database [Removing]",
                                       f)
                 MPDB.DB_del_pic(dirname,f)
                 MPDB.log( "\t%s has been deleted from database because the file does not exists in this folder. "%f)#f.decode(sys_enc))
             MPDB.log("")
-            del co
+
             
     else:
         MPDB.log( "Ce dossier ne contient pas d'images :")
@@ -261,7 +275,8 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
         MPDB.log( dirname )
         for item in listdir:
             if os.path.isdir(os.path.join(dirname,item)):#un directory
-                browse_folder(os.path.join(dirname,item),PFid,recursive,updatecontent,updatepics,updatefunc)
+                #browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None)
+                browse_folder(os.path.join(dirname,item),PFid,recursive,updatecontent,rescan,updatefunc)
             else:
                 #listdir contenait un fichier mais pas un dossier
                 # inutilisé... on passe pour le moment

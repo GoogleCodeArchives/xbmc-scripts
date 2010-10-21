@@ -53,7 +53,7 @@ except:
     print "using sqlite3"
     pass
 
-
+from traceback import print_exc
 global pictureDB
 pictureDB = os.path.join(DB_PATH,"MyPictures.db")
 sys_enc = sys.getfilesystemencoding()
@@ -297,26 +297,27 @@ def addColumn(table,colheader,format="text"):
 ##    return retour
 
 
-def DB_exists(picpath,picfile): # NOT USED ! ! ! 
+def DB_exists(picpath,picfile): 
     """
     Check wether or not a file exists in the DB
     """
     conn = sqlite.connect(pictureDB)
     cn=conn.cursor()
     try:
-        cn.execute("""SELECT strPath, strFilename FROM "main"."files" WHERE strPath = (?) AND strFilename = (?);""",(picpath,picfile,) )
+        cn.execute("""SELECT strPath, strFilename FROM "main"."files" WHERE strPath = (?) AND strFilename = (?);""",(picpath.decode("utf8"),picfile.decode("utf8"),) )
     except Exception,msg:
         log( "EXCEPTION >> DB_exists %s,%s"%(picpath,picfile) )
         log( "\t%s - %s"%(Exception,msg) )
         log( "~~~~" )
         log( "" )
-        raise Exception, msg
-
-    cn.close()    
+        raise Exception, msg   
     if len(cn.fetchmany())==0:
-        return False
+        
+        retour= False
     else:
-        return True    
+        retour= True
+    cn.close()
+    return retour
 
 def DB_listdir(path):
     """
@@ -348,6 +349,10 @@ def DB_file_insert(path,filename,dictionnary,update=False):
     cn=conn.cursor()
     #méthode dajout d'une ligne d'un coup
     conn.text_factory = str#sqlite.OptimizedUnicode
+    if update :#si update alors on doit updater et non pas insert
+        if DB_exists(path,filename):
+            print "file exists in database and rescan is set to true..."
+            Request("""DELETE FROM files WHERE idFolder = (SELECT idFolder FROM folders WHERE FullPath='%s') AND strFilename='%s'"""%(str(path),str(filename)))
     try:
         cn.execute( """INSERT INTO files('%s') values (%s)""" % ( "','".join(dictionnary.keys()), ",".join(["?"]*len(dictionnary.values())) ) ,
                                                                      dictionnary.values()
@@ -557,8 +562,8 @@ def delPeriode(periodname):
     Request( """DELETE FROM Periodes WHERE PeriodeName="%s" """%periodname )
     return
 
-def renPeriode(periodname,newname):
-    Request( """UPDATE Periodes SET PeriodeName = "%s" WHERE PeriodeName="%s" """%(newname,periodname) )
+def renPeriode(periodname,newname,newdatestart,newdateend):
+    Request( """UPDATE Periodes SET PeriodeName = "%s",DateStart = datetime("%s") , DateEnd = datetime("%s") WHERE PeriodeName="%s" """%(newname,newdatestart,newdateend,periodname) )
     return
 
 def PicsForPeriode(periodname):
@@ -573,7 +578,21 @@ def Searchfiles(column,searchterm,count=False):
         return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE files.'%s' LIKE "%%%s%%";"""%(column,searchterm))]
 ###
 def getGPS(filepath,filename):
-    return Request( """SELECT files.'GPS GPSLatitude' as lat,files.'GPS GPSLongitude' as lon FROM files WHERE lat NOT NULL AND lon NOT NULL AND strPath="%s" AND strFilename="%s";"""%(filepath,filename) )
+    coords = Request( """SELECT files.'GPS GPSLatitudeRef',files.'GPS GPSLatitude' as lat,files.'GPS GPSLongitudeRef',files.'GPS GPSLongitude' as lon FROM files WHERE lat NOT NULL AND lon NOT NULL AND strPath="%s" AND strFilename="%s";"""%(filepath,filename) )
+    try:
+        coords=coords[0]
+    except IndexError:
+        return None
+    if not coords: return None
+    latR,lat,lonR,lon=coords
+        
+    lD,lM,lS = lat.replace(" ","").replace("[","").replace("]","").split(",")
+    LD,LM,LS = lon.replace(" ","").replace("[","").replace("]","").split(",")
+    exec("LS=%s"%LS)
+    exec("lS=%s"%lS)
+    latitude =  (int(lD)+(int(lM)/60.0)+(int(lS)/3600.0)) * (latR=="S" and -1 or 1)
+    longitude = (int(LD)+(int(LM)/60.0)+(int(LS)/3600.0)) * (lonR=="W" and -1 or 1)
+    return (latitude,longitude)
 
 ######################################"
 #  Fonctions pour les dossiers racines
@@ -626,7 +645,7 @@ def hook_directory ( filepath,filename,filecount, nbfiles ):
     import sys
     log( "%s/%s - %s"%(filecount,nbfiles,os.path.join(filepath,filename)) )
     
-class dummy_update:
+class dummy_update:#TODO : check if this is usefull
     def __init__(self):
         self.cancel=False
         pass
@@ -634,137 +653,6 @@ class dummy_update:
         log( "%s\t%s\n\t%s\n\t%s"%(percent,line1,line2,line3) )
     def iscanceled(self):
         return self.cancel
-    
-##def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,updatepics=False,updatefunc=dummy_update):
-##    """parcours le dossier racine 'dirname'
-##    - 'recursive' pour traverser récursivement les sous dossiers de 'dirname'
-##    - 'update' pour forcer le scan des images qu'elles soient déjà en base ou pas
-##    - 'updatefunc' est une fonction appelée pour indiquer la progression. Les paramètres sont (pourcentage(int),[ line1(str),line2(str),line3(str) ] )
-##"""
-##    #######
-##    # STEP 1 : list all files in directory
-##    #######
-##    try:
-##        listdir = os.listdir(dirname)
-##    except:
-##        tb = sys.exc_info()[2]
-##        tbinfo = traceback.format_tb(tb)[0]
-##        pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
-##                str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-##        log( pymsg )
-##        listdir=[]
-##        
-##    global compte
-##    cpt=0
-##    #on liste les fichiers jpg du dossier
-##    listfolderfiles=[]
-##
-##    #######
-##    # STEP 2 : Keep only the files with extension...
-##    #######
-##    for f in listdir:
-##        if os.path.splitext(f)[1].upper() in [".JPG",".TIF",".PNG",".GIF",".BMP",".JPEG"]:
-##            listfolderfiles.append(f)
-##
-##   
-##    #on récupère la liste des fichiers entrées en BDD pour le dossier en cours
-##    listDBdir = DB_listdir(dirname)# --> une requête pour tout le dossier
-##
-##    #######
-##    # STEP 3 : If folder contains pictures, create folder in database
-##    #######
-##    #on ajoute dans la table des chemins le chemin en cours
-##    PFid = DB_folder_insert(os.path.basename(dirname) or os.path.dirname(dirname).split(os.path.sep)[-1],
-##                            dirname,
-##                            parentfolderID,
-##                            listfolderfiles and "1" or "0"#i
-##                            )
-##    if listfolderfiles:#si le dossier contient des fichiers jpg...
-##        #######
-##        # STEP 4 : browse all pictures
-##        #######
-##        print listDBdir
-##        #puis on parcours toutes les images du dossier en cours
-##        for picfile in listfolderfiles:#... on parcours tous les jpg
-##            cpt = cpt + 1
-##            print picfile
-##            if updatefunc.iscanceled(): return#dialog progress has been canceled
-##            #on enlève l'image traitée de listdir
-##            listdir.pop(listdir.index(picfile))
-##            #picture is not yet inside database
-##            if not (picfile in listDBdir) or updatepics:
-##                updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),"Adding from %s to Database :"%dirname,picfile)
-##                #préparation d'un dictionnaire pour les champs et les valeurs
-##                # c'est ce dictionnaire qui servira à  remplir la table fichiers
-##                ##picentry = { "strPath":dirname, "strFilename":picfile }
-##                picentry = { "idFolder":PFid, "strPath":dirname.decode("utf8"),"strFilename":picfile.decode("utf8"),"UseIt":1 }
-##
-##                ###############################
-##                #    getting  EXIF  infos     #
-##                ###############################
-##                #reading EXIF infos
-##                #   (file fields are creating if needed)
-##                try:
-##                    exif = get_exif(os.path.join(dirname,picfile).encode('utf8'))
-##                except UnicodeDecodeError:
-##                    exif = get_exif(os.path.join(dirname,picfile))
-##                #EXIF infos are added to a dictionnary
-##                picentry.update(exif)
-##
-##                ###############################
-##                #    getting  IPTC  infos     #
-##                ###############################
-##                iptc = get_iptc(dirname,picfile)
-##                #IPTC infos are added to a dictionnary
-##                picentry.update(iptc)
-##
-##                ###############################
-##                #  Insert infos in database   #
-##                ###############################
-##
-##                #insertion des données dans la table
-##                DB_file_insert(dirname,picfile,picentry,updatepics)
-##            else: # the file is already in DB, we are passing it
-##                updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),"Already in Database :",picfile)
-##                pass
-##            if picfile in listDBdir:
-##                listDBdir.pop(listDBdir.index(picfile))
-##                
-##        #Now if the database contain some more pictures assign for this folder, we need to delete them if 'update' setting is true
-##        if listDBdir and updatecontent: #à l'issu si listdir contient encore des fichiers, c'est qu'ils sont en base mais que le fichier n'existe plus physiquement.
-##            co=0
-##            for f in listDBdir: #on parcours les images en DB orphelines
-##                co=co+1
-##                updatefunc.update(int(100 * float(co)%len(listDBdir)),"Removing from Database :",f)
-##                DB_del_pic(dirname,f)
-##                log( "\t%s has been deleted from database because the file does not exists in this folder. "%f)#f.decode(sys_enc))
-##            log("")
-##            del co
-##            
-##    else:
-##
-##        updatefunc.update(0,"No pictures in this folder :",dirname)
-##        log( "Ce dossier ne contient pas d'images :")
-##        log( dirname )
-##        log( "" )
-##    
-##    if cpt:
-##        log( "%s nouvelles images trouvees dans %s"%(str(cpt),dirname) )
-##        #unicode(info.data[k].encode("utf8").__str__(),"utf8")
-##        compte=compte+cpt
-##        cpt=0
-##    if recursive: #gestion de la recursivité. On rappel cette même fonction pour chaque dossier rencontré
-##        log( "traitement des sous dossiers de :")
-##        log( dirname )
-##        for item in listdir:
-##            if os.path.isdir(os.path.join(dirname,item)):#un directory
-##                browse_folder(os.path.join(dirname,item),PFid,recursive,updatecontent,updatepics,updatefunc)
-##            else:
-##                #listdir contenait un fichier mais pas un dossier
-##                # inutilisé... on passe pour le moment
-##                pass
-
-
 
 
 def get_exif(picfile):
@@ -787,7 +675,9 @@ def get_exif(picfile):
                 #"EXIF DigitalZoomRatio",
                 "EXIF DateTimeDigitized",
                 "GPS GPSLatitude",
+                "GPS GPSLatitudeRef",
                 "GPS GPSLongitude",
+                "GPS GPSLongitudeRef",
                 #"EXIF ExifVersion"]
                   ]
     #ouverture du fichier
@@ -957,26 +847,12 @@ def countPeriod(period,value):
     format = {"year":"%Y","month":"%Y-%m","date":"%Y-%m-%d","":"%Y"}[period]
     if period=="year" or period=="":
         if value:
-            filelist = search_between_dates( (value,format) , ( str( int(value) +1 ),format) )
+            #filelist = search_between_dates( (value,format) , ( str( int(value) +1 ),format) )
+            filelist = pics_for_period('year',value)
         else:
             filelist = search_all_dates()
-            
-    elif period=="month":
-        a,m=value.split("-")
-        if m=="12":
-            aa=int(a)+1
-            mm=1
-        else:
-            aa=a
-            mm=int(m)+1
-        print mm,aa
-        print
-        filelist = search_between_dates( ("%s-%s"%(a,m),format) , ( "%s-%s"%(aa,mm),format) )
-        
-    elif period=="date":
-        #BUG CONNU : trouver un moyen de trouver le jour suivant en prenant en compte le nb de jours par mois
-        a,m,j=value.split("-")              
-        filelist = search_between_dates( ("%s-%s-%s"%(a,m,j),format) , ( "%s-%s-%s"%(a,m,int(j)+1),format) )
+    elif period in ["month","date"]:
+        filelist = pics_for_period(period,value)
         
     else:
         #pas de periode, alors toutes les photos du 01/01 de la plus petite année, au 31/12 de la plus grande année
@@ -1039,11 +915,6 @@ def all_children(rootid):
     return enfants
     
         
-def search_year(year):
-    """retourne les photos de l'année fournie"""
-    #TODO : utiliser un format date pour la variable year, et tester sa validité
-    retour = search_between_dates((year,"%Y"),(str(int(year)+1),"%Y"))
-    return retour
 
 #def search_between_dates(datestart='2007-01-01 00:00:01',dateend='2008-01-01 00:00:01'):
 def search_between_dates(DateStart=("2007","%Y"),DateEnd=("2008","%Y")):
@@ -1055,7 +926,21 @@ def search_between_dates(DateStart=("2007","%Y"),DateEnd=("2008","%Y")):
     #SELECT strPath,strFilename FROM files WHERE strftime('%Y-%m-%d %H:%M:%S', "EXIF DateTimeOriginal") BETWEEN strftime('%Y-%m-%d %H:%M:%S','2007-01-01 00:00:01') AND strftime('%Y-%m-%d %H:%M:%S','2007-12-31 23:59:59') ORDER BY "EXIF DateTimeOriginal" ASC
     request = """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN datetime('%s') AND datetime('%s') ORDER BY "EXIF DateTimeOriginal" ASC"""%(DS,DE)
     return [row for row in Request(request)]
-   
+
+def pics_for_period(periodtype,date):
+    print periodtype,date
+    try:
+        sdate,modif1,modif2 = {'year' :['%s-01-01'%date,'start of year','+1 years'],
+                               'month':['%s-01'%date,'start of month','+1 months'],
+                               'date' :[date,'start of day','+1 days']}[periodtype]
+    except:
+        print_exc()
+        log ("pics_for_period ( periodtype = ['date'|'month'|'year'] , date = corresponding to the period (year|year-month|year-month-day)")
+        
+    request = """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN datetime('%s','%s') AND datetime('%s','%s','%s') ORDER BY "EXIF DateTimeOriginal" ASC;"""%(sdate,modif1,
+                                                                                                                                                                                                  sdate,modif1,modif2)
+    return [row for row in Request(request)]
+
 def get_years():
     #print "\n".join(get_years())
     return [t for (t,) in Request("""SELECT DISTINCT strftime("%Y","EXIF DateTimeOriginal") FROM files where "EXIF DateTimeOriginal" NOT NULL ORDER BY "EXIF DateTimeOriginal" ASC""")]
@@ -1065,10 +950,12 @@ def get_months(year):
 def get_dates(year_month):
     #print "\n".join(get_dates("2006-07"))
     return [t for (t,) in Request("""SELECT distinct strftime("%%Y-%%m-%%d","EXIF DateTimeOriginal") FROM files where strftime("%%Y-%%m","EXIF DateTimeOriginal") = '%s' ORDER BY "EXIF DateTimeOriginal" ASC"""%year_month)]
-def search_all_dates():
+def search_all_dates():# TODO check if it is really usefull (check 'get_pics_dates' to see if it is not the same)
+    """return all files from database sorted by 'EXIF DateTimeOriginal' """
     return [t for t in Request("""SELECT strPath,strFilename FROM files ORDER BY "EXIF DateTimeOriginal" ASC""")]
 def get_pics_dates():
-    return [t for (t,) in Request("""SELECT distinct strftime("%Y-%m-%d","EXIF DateTimeOriginal") FROM files where "EXIF DateTimeOriginal"  not null ORDER BY "EXIF DateTimeOriginal" ASC""")]
+    """return all different dates from 'EXIF DateTimeOriginal'"""
+    return [t for (t,) in Request("""SELECT DISTINCT strftime("%Y-%m-%d","EXIF DateTimeOriginal") FROM files WHERE "EXIF DateTimeOriginal"  NOT NULL ORDER BY "EXIF DateTimeOriginal" ASC""")]
 #Quelques requêtes SQLite
 #
 """
@@ -1140,7 +1027,6 @@ if __name__=="__main__":
     print
     print "Les photos entre le 2006-07-13 00:00:01 et le 2007-06-30 23:59:59"
     c = search_between_dates(("2006-07-13 00:00:01","%Y-%m-%d %H:%M:%S"),("2007-06-30 23:59:59","%Y-%m-%d %H:%M:%S"))
-    c=search_year("2007")
     c=search_between_dates(("2006-07","%Y-%m"),("2006-08","%Y-%m"))
     c=search_between_dates(("2006-06-26","%Y-%m-%d"),("2006-08-15","%Y-%m-%d"))
     for path,filename in c:
