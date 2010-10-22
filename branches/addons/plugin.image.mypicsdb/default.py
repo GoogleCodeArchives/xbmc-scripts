@@ -162,6 +162,15 @@ class Main:
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=os.path.join(picpath,picname),listitem=liz,isFolder=False)
         
     def show_home(self):
+        # last month
+        self.addDir("last month",[("method","lastmonth"),("period",""),("value",""),("viewmode","view")],
+                    "showpics",os.path.join(PIC_PATH,"dates.png"),
+                    fanart=os.path.join(PIC_PATH,"fanart-date.png"))
+        # last year
+        self.addDir("last 100",[("method","last100"),("period",""),("value",""),("viewmode","view")],
+                    "showpics",os.path.join(PIC_PATH,"dates.png"),
+                    fanart=os.path.join(PIC_PATH,"fanart-date.png"))
+        
         # par années
         self.addDir(unescape(__language__(30101)),[("period","year"),("value",""),("viewmode","view")],
                     "showdate",os.path.join(PIC_PATH,"dates.png"),
@@ -762,6 +771,13 @@ class Main:
         elif self.args.method == "search":
             picfanart = os.path.join(PIC_PATH,"fanart-collection.png")
             filelist = MPDB.Searchfiles(urllib.unquote_plus(self.args.field),urllib.unquote_plus(self.args.searchterm),count=False)
+
+        elif self.args.method == "lastmonth":
+            picfanart = os.path.join(PIC_PATH,"fanart-date.png")
+            filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN datetime('now','-1 months') AND datetime('now') ORDER BY "EXIF DateTimeOriginal" ASC""")]
+        elif self.args.method == "last100":#TODO
+            picfanart = os.path.join(PIC_PATH,"fanart-date.png")
+            filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN datetime('now','-1 years') AND datetime('now') ORDER BY "EXIF DateTimeOriginal" ASC""")]
 
         #on teste l'argumen 'viewmode'
             #si viewmode = view : on liste les images
