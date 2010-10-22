@@ -936,7 +936,7 @@ if __name__=="__main__":
             Addon.setSetting("initDB","false")
         #scan les répertoires lors du démarrage (selon setting)
         if Addon.getSetting('bootscan')=='true':
-            if not(xbmc.getInfoLabel( "Window.Property(DialogAddonScanIsAlive)" ) == "true"):
+            if not(xbmc.getInfoLabel( "Window.Property(DialogAddonScan.IsAlive)" ) == "true"):
                 #si un scan n'est pas en cours, on lance le scan
                 xbmc.executebuiltin( "RunScript(%s,--database) "%os.path.join( os.getcwd(), "scanpath.py") )
                 #puis on rafraichi le container sans remplacer le contenu, avec un paramètre pour dire d'afficher le menu
