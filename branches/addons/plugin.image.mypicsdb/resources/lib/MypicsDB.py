@@ -149,7 +149,7 @@ def Make_new_base(DBpath,ecrase=True):
 
     #table 'files'
     try:
-        cn.execute("""CREATE TABLE files ( idFile integer primary key, idFolder integer, strPath text, strFilename text, UseIt integer , sha text, Thumb text,
+        cn.execute("""CREATE TABLE files ( idFile integer primary key, idFolder integer, strPath text, strFilename text, DateAdded DATETIME, UseIt integer , sha text, Thumb text,
                     CONSTRAINT UNI_FILE UNIQUE ("strPath","strFilename")
                                    )""")
     except Exception,msg:

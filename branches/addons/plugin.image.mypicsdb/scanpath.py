@@ -58,6 +58,7 @@ from traceback import print_exc
 from DialogAddonScan import AddonScan
 from file_item import Thumbnails  
 
+listext = [".JPG",".TIF",".PNG",".GIF",".BMP",".JPEG"]
 
 def main2():
     #get active window
@@ -118,7 +119,7 @@ def processDirectory ( args, dirname, filenames ):
     global totalfolders,totalfiles
     totalfolders=totalfolders+1
     for filename in filenames:
-        if os.path.splitext(filename)[1].upper() in [".JPG",".TIF",".PNG",".GIF",".BMP",".JPEG"]:
+        if os.path.splitext(filename)[1].upper() in listext:
             totalfiles=totalfiles+1
 
 def count_files ( path ):
@@ -155,7 +156,7 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
     # STEP 2 : Keep only the files with extension...
     #######
     for f in listdir:
-        if os.path.splitext(f)[1].upper() in [".JPG",".TIF",".PNG",".GIF",".BMP",".JPEG"]:
+        if os.path.splitext(f)[1].upper() in listext:
             listfolderfiles.append(f)
 
    
@@ -200,7 +201,7 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
                 #préparation d'un dictionnaire pour les champs et les valeurs
                 # c'est ce dictionnaire qui servira à  remplir la table fichiers
                 ##picentry = { "strPath":dirname, "strFilename":picfile }
-                picentry = { "idFolder":PFid, "strPath":dirname.decode("utf8"),"strFilename":picfile.decode("utf8"),"UseIt":1,"sha":MPDB.fileSHA(os.path.join(dirname,picfile)) }
+                picentry = { "idFolder":PFid, "strPath":dirname.decode("utf8"),"strFilename":picfile.decode("utf8"),"UseIt":1,"sha":MPDB.fileSHA(os.path.join(dirname,picfile)),"DateAdded":time.strftime("%Y-%m-%d %H:%M:%S") }
 
                 ### chemin de la miniature
                 thumbnails = Thumbnails()

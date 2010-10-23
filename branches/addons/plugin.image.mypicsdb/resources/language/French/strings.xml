@@ -2,17 +2,30 @@
 <strings>
     <string id="30000">MyPicture Database</string>
     <string id="30001">Base de donnée</string>
+    <!-- Date formats : use the date formatting you found in this : http://docs.python.org/library/time.html#time.strftime -->
+    <string id="30002">%a %d/%m/%Y</string>      <!-- date format -->
+    <string id="30003">%m/%Y</string>         <!-- month format -->
+    <string id="30004">%Y</string>            <!-- year format -->
+    <string id="30005">Lu.|Ma.|Me.|Je.|Ve.|Sa.|Di.</string>
+    <string id="30006"></string>
 
     <string id="30020">Dossier images</string>
     <string id="30021">Retirer de la base les images manquantes</string>
     <string id="30022">Scan récursif (tous les sous dossiers sont scannés à la recherche d'images)</string>
-    <string id="30023">Dossier à scanner</string>
-    <string id="30024">Effectuer le scan au démarrage</string>
-    <string id="30025">Réinitialiser la base avant le scan</string>
-    <string id="30026">Utiliser l'image comme fanart pour les images</string>
+
+    <string id="30024">Effectuer le scan au démarrage</string><!-- setting -->
+    <string id="30025">Réinitialiser la base avant le scan</string><!-- setting -->
+    <string id="30026">Utiliser l'image comme fanart pour les images</string><!-- setting -->
+    
     
     <string id="30050">images</string>
     
+    <string id="30060">Géolocalisation</string>
+    <string id="30061">Archiver ces images</string>
+    <string id="30062">Exporter ces images vers...</string>
+    
+    <string id="30098">Recherche globale</string>
+    <string id="30099">Chemins des dossiers images</string>
     <string id="30100">Toute la période %s (%s images)</string>
     <string id="30101">Parcourir par Dates</string>
     <string id="30102">Parcourir par Dossiers</string>
@@ -27,9 +40,12 @@
     <string id="30111">Supprimer cette période</string>
     <string id="30112">Editer cette période</string>
     <string id="30113">Du %s au %s</string>
-    <string id="30114"></string>
-    <string id="30115"></string>
-    <string id="30116"></string>
+    <string id="30114">Saisir manuellement une date</string>
+    <string id="30115">Mot à rechercher</string>
+    <string id="30116">%s résultats pour %s dans %s</string> <!-- %s replaced respectively by : number of results, searched term, field where found -->
+    <string id="30116">La recherche pour %s n'a retourné aucun résultat dans toute la base</string> <!-- %s replaced by searched term-->
+    
+    
     
     <string id="30150">Collections</string>
     <string id="30151">Retirer de la collection</string>
@@ -43,7 +59,16 @@
     <string id="30159">Renommer cette collection</string>
     <string id="30160">Créer une nouvelle collection</string>
     
-    <string id="30201">Aucun dossier à scanner n'est configuré !</string>
+    <string id="30201">Dossier à scanner</string>
+    <string id="30202">Parcourir ce dossier de manière récursive</string>
+    <string id="30203">Supprimer les entrées de la base si les images n'existe pas</string>
+    <string id="30204">Chemin ajouté !</string>
+    <string id="30205">Chemin supprimé !</string>
+    <string id="30206">Effectuer un scan maintenant</string>
+    <string id="30207">Supprimer ce chemin de la base</string>
+    <string id="30208">Ajouter un chemin à la base</string>
+    
+<!--    <string id="30201">Aucun dossier à scanner n'est configuré !</string>
     <string id="30202">Veuillez éditer les paramètres du plugin pour configurer un chemin</string>
     <string id="30203">Parcours du chemin :</string>
     <string id="30204">Suppression des chemins inexistants</string>
@@ -54,12 +79,12 @@
     <string id="30209"></string>
     <string id="30210"></string>
     <string id="30211"></string>
-    <string id="30212"></string>
+    <string id="30212"></string>     -->
     
     <string id="30300">nom de fichier</string>
     <string id="30301">chemin</string>
     <string id="30302">chemin (miniature)</string>
-    <string id="30303"></string>
+    <string id="30303">Téléchargement de la carte...</string>
     <string id="30304"></string>
     <string id="30305"></string>
     <string id="30306"></string>
