@@ -209,6 +209,9 @@ class Main:
         #value  = "2009"|"12/2009"|"25/12/2009"
         action="showdate"
         weekdayname = __language__(30005).split("|")
+        monthname = __language__(30006).split("|")
+        fullweekdayname = __language__(30007).split("|")
+        fullmonthname = __language__(30008).split("|")
         if self.args.period=="year":
             listperiod=MPDB.get_years()
             nextperiod="month"
@@ -224,7 +227,7 @@ class Main:
             allperiod="year"
             action="showdate"
             periodformat="%Y-%m"
-            displaydate=__language__(30003)#%m/%Y
+            displaydate=__language__(30003)#%b %Y
             thisdateformat="%Y"
             displaythisdate=__language__(30004)#%Y
         elif self.args.period=="date":
@@ -233,9 +236,9 @@ class Main:
             allperiod = "month"
             action="showpics"
             periodformat="%Y-%m-%d"
-            displaydate=__language__(30002)#"%a %d/%m/%Y"
+            displaydate=__language__(30002)#"%a %d %b %Y"
             thisdateformat="%Y-%m"
-            displaythisdate=__language__(30003)#"%m/%Y"
+            displaythisdate=__language__(30003)#"%b %Y"
         else:
             listperiod=[]
             nextperiod=None
@@ -243,7 +246,11 @@ class Main:
         if not None in listperiod:
             #print self.args.value
             #print time.strftime("%d/%m/%Y",time.strptime(self.args.value,"%Y-%m-%d"))
-            self.addDir(name      = __language__(30100)%(time.strftime(displaythisdate,time.strptime(self.args.value,thisdateformat)),MPDB.countPeriod(allperiod,self.args.value)), #libellé#"All the period %s (%s pics)"%(self.args.value,MPDB.countPeriod(allperiod,self.args.value)), #libellé
+            dptd = displaythisdate
+            dptd = dptd.replace("%b",monthname[time.strptime(self.args.value,thisdateformat).tm_mon - 1])    #replace %b marker by short month name
+            dptd = dptd.replace("%B",fullmonthname[time.strptime(self.args.value,thisdateformat).tm_mon - 1])#replace %B marker by long month name
+            nameperiode = time.strftime(dptd.encode("utf8"),time.strptime(self.args.value,thisdateformat))
+            self.addDir(name      = __language__(30100)%(nameperiode.decode("utf8"),MPDB.countPeriod(allperiod,self.args.value)), #libellé#"All the period %s (%s pics)"%(self.args.value,MPDB.countPeriod(allperiod,self.args.value)), #libellé
                         params    = [("method","date"),("period",allperiod),("value",self.args.value),("viewmode","view")],#paramètres
                         action    = "showpics",#action
                         iconimage = os.path.join(PIC_PATH,"dates.png"),#icone
@@ -256,8 +263,10 @@ class Main:
                         context = [(__language__(30152),"XBMC.RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")"%(sys.argv[0],nextperiod,period))]
                     else:
                         context = [(__language__(30152),"XBMC.RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")"%(sys.argv[0],self.args.period,period))]
-                 
-                    self.addDir(name      = "%s (%s %s)"%(time.strftime(displaydate.replace("%a",weekdayname[time.strptime(period,periodformat).tm_wday]).encode("utf8"),time.strptime(period,periodformat)).decode("utf8"),MPDB.countPeriod(self.args.period,period),__language__(30050).encode("utf8")), #libellé
+                    
+                    self.addDir(name      = "%s (%s %s)"%(time.strftime(self.prettydate(displaydate,time.strptime(period,periodformat)).encode("utf8"),time.strptime(period,periodformat)).decode("utf8"),
+                                                          MPDB.countPeriod(self.args.period,period),
+                                                          __language__(30050).encode("utf8")), #libellé
                                 params    = [("method","date"),("period",nextperiod),("value",period),("viewmode","view")],#paramètres
                                 action    = action,#action
                                 iconimage = os.path.join(PIC_PATH,"dates.png"),#icone
@@ -296,7 +305,8 @@ class Main:
                               ),("Don't use this picture","",)]
             coords = MPDB.getGPS(path,filename)
             if coords:
-                context.append( (__language__(30060),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),urllib.quote_plus(filename))))
+                #géolocalisation
+                context.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),urllib.quote_plus(filename))))
             self.addPic(filename,path,contextmenu=context,
                         fanart = os.path.join(PIC_PATH,"fanart-folder.png")
                         )
@@ -346,21 +356,22 @@ class Main:
         #If We previously choose to add a new period, this test will ask user for setting the period :
         if self.args.period=="setperiod":
             dateofpics = MPDB.get_pics_dates()#the choice of the date is made with pictures in database (datetime of pics are used)
+            nameddates = [time.strftime(self.prettydate(__language__(30002),time.strptime(date,"%Y-%m-%d")).encode("utf8"),time.strptime(date,"%Y-%m-%d")) for date in dateofpics]
             dialog = xbmcgui.Dialog()
-            rets = dialog.select(__language__(30107),["[[%s]]"%__language__(30114)] + dateofpics)#choose the start date
+            rets = dialog.select(__language__(30107),["[[%s]]"%__language__(30114)] + nameddates)#dateofpics)#choose the start date
             if not rets==-1:#is not canceled
                 if rets==0: #input manually the date
-                    d = dialog.numeric(1, "Input start date for period" ,time.strftime("%d/%m/%Y",time.strptime(dateofpics[0],"%Y-%m-%d")) )
+                    d = dialog.numeric(1, __language__(30117) ,time.strftime("%d/%m/%Y",time.strptime(dateofpics[0],"%Y-%m-%d")) )
                     datestart = time.strftime("%Y-%m-%d",time.strptime(d.replace(" ","0"),"%d/%m/%Y"))
                     deb=0
                 else:
                     datestart = dateofpics[rets-1]
                     deb=rets-1
             
-                retf = dialog.select(__language__(30108),["[[%s]]"%__language__(30114)] + dateofpics[deb:])#choose the end date (all dates before startdate are ignored to preserve begin/end)
+                retf = dialog.select(__language__(30108),["[[%s]]"%__language__(30114)] + nameddates[deb:])#dateofpics[deb:])#choose the end date (all dates before startdate are ignored to preserve begin/end)
                 if not retf==-1:#if end date is not canceled...
                     if retf==0:#choix d'un date de fin manuelle ou choix précédent de la date de début manuelle
-                        d = dialog.numeric(1, "Input start date for period" ,time.strftime("%d/%m/%Y",time.strptime(dateofpics[-1],"%Y-%m-%d")) )
+                        d = dialog.numeric(1, __language__(30118) ,time.strftime("%d/%m/%Y",time.strptime(dateofpics[-1],"%Y-%m-%d")) )
                         dateend = time.strftime("%Y-%m-%d",time.strptime(d.replace(" ","0"),"%d/%m/%Y"))
                         deb=0
                     else:
@@ -381,8 +392,11 @@ class Main:
 
         #search for inbase periods and show periods
         for periodname,dbdatestart,dbdateend in MPDB.ListPeriodes():
-            datestart,dateend = MPDB.Request("SELECT strftime('%%Y-%%m-%%d',datetime('%s')),strftime('%%Y-%%m-%%d',datetime('%s','+1 day','-1.0 seconds'))"%(dbdatestart,dbdateend))[0]
-            self.addDir(name      = "%s (%s)"%(periodname.decode("utf8"),__language__(30113)%(time.strftime(__language__(30002),time.strptime(datestart,"%Y-%m-%d")),time.strftime(__language__(30002),time.strptime(dateend,"%Y-%m-%d")))), #libellé
+            datestart,dateend = MPDB.Request("SELECT strftime('%%Y-%%m-%%d',datetime('%s')),strftime('%%Y-%%m-%%d',datetime('%s','+1 days','-1.0 seconds'))"%(dbdatestart,dbdateend))[0]
+            self.addDir(name      = "%s (%s)"%(periodname.decode("utf8"),
+                                               __language__(30113)%(time.strftime(self.prettydate(__language__(30002),time.strptime(datestart,"%Y-%m-%d")).encode("utf8"),time.strptime(datestart,"%Y-%m-%d")).decode("utf8"),
+                                                                    time.strftime(self.prettydate(__language__(30002),time.strptime(dateend  ,"%Y-%m-%d")).encode("utf8"),time.strptime(dateend  ,"%Y-%m-%d")).decode("utf8")
+                                                                    )), #libellé
                         params    = [("method","date"),("period","period"),("datestart",datestart),("dateend",dateend),("viewmode","view")],#paramètres
                         action    = "showpics",#action
                         iconimage = os.path.join(PIC_PATH,"period.png"),#icone
@@ -526,13 +540,17 @@ class Main:
         for path,recursive,update in MPDB.RootFolders():
             srec = recursive==1 and "ON" or "OFF"
             supd = update==1 and "ON" or "OFF"
+        
             self.addDir(name      = path+" [recursive="+srec+" , update="+supd+"]",
                         params    = [("do","rootclic"),("rootpath",path),("viewmode","view"),],#paramètres
                         action    = "rootfolders",#action
                         iconimage = os.path.join(PIC_PATH,"settings.png"),#icone
                         fanart    = os.path.join(PIC_PATH,"fanart-setting.png"),
-                        contextmenu   = [(__language__(30206),"Notification(TODO : scan folder,scan this folder now !)"),
-                                         (__language__(30207),"Container.Update(\"%s?action='rootfolders'&do='delroot'&delpath='%s'&viewmode='view'\",replace)"%(sys.argv[0],urllib.quote_plus(path.decode("utf8"))))])#menucontextuel
+                        #menucontextuel
+                        contextmenu   = [( __language__(30206),"Notification(TODO : scan folder,scan this folder now !)" ),
+                                         ( __language__(30207),"Container.Update(\"%s?action='rootfolders'&do='delroot'&delpath='%s'&viewmode='view'\","%(sys.argv[0],urllib.quote_plus(path.decode("utf8"))))
+                                         ]
+                        )
         xbmcplugin.addSortMethod( int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE )
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="search")
         xbmcplugin.endOfDirectory( int(sys.argv[1]),updateListing=refresh)
@@ -560,7 +578,7 @@ class Main:
                      }
         pDialog = xbmcgui.DialogProgress()
         
-        ret = pDialog.create(__language__(30000), 'Getting map from google for coordinates :',self.args.place)
+        ret = pDialog.create(__language__(30000),__language__(30221),self.args.place)
         pDialog.update(0,"Creating connection...")
 
         param_dic["markers"]=param_dic["markers"]%self.args.place
@@ -576,7 +594,7 @@ class Main:
             print_exc()
         for i in range(1+(filesize/10)):
             f.write(urlfile.read(10))
-            pDialog.update(int(100*(float(i*10)/filesize)),__language__(30303),"%0.2f%%"%(100*(float(i*10)/filesize)))
+            pDialog.update(int(100*(float(i*10)/filesize)),__language__(30221),"%0.2f%%"%(100*(float(i*10)/filesize)))
         urlfile.close()
         pDialog.close()
         try:
@@ -597,7 +615,16 @@ class Main:
         #xbmc.executebuiltin( "ActivateWindow(12007)" )
         #xbmc.executebuiltin( "SlideShow('%s',,notrandom)"% os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension))
         #xbmc.executebuiltin( "Notification(%s,Maps downloaded to %s)"%("MyPictures DB",os.path.join(DATA_PATH,"maps.jpg")))
-        
+
+    def prettydate(self,dateformat,datetuple):
+        "Replace %a %A %b %B date string formater (see strftime format) by the day/month names for the given date tuple given"
+        dateformat = dateformat.replace("%a",__language__(30005).split("|")[datetuple.tm_wday])      #replace %a marker by short day name
+        dateformat = dateformat.replace("%A",__language__(30007).split("|")[datetuple.tm_wday])      #replace %A marker by long day name
+        dateformat = dateformat.replace("%b",__language__(30006).split("|")[datetuple.tm_mon - 1])   #replace %b marker by short month name
+        dateformat = dateformat.replace("%B",__language__(30008).split("|")[datetuple.tm_mon - 1])   #replace %B marker by long month name
+        return dateformat
+
+    
     ##################################
     #traitement des menus contextuels
     ##################################
@@ -606,25 +633,13 @@ class Main:
         xbmc.executebuiltin( "Container.Update(\"%s?action='showperiod'&viewmode='view'&period=''\" , replace)"%sys.argv[0]  )
         
     def rename_period(self):
-        #TODO : améliorer la saisie des dates
         #TODO : test if 'datestart' is before 'dateend'
         datestart,dateend = MPDB.Request( """SELECT DateStart,DateEnd FROM Periodes WHERE PeriodeName='%s'"""%self.args.periodname )[0]
-##        kb = xbmc.Keyboard(time.strftime("%Y-%m-%d",time.strptime(datestart,"%Y-%m-%d %H:%M:%S")), "Input start date for period", False)
-##        #change the datestart
-##        kb.doModal()
-##        if (kb.isConfirmed()):
-##            datestart = kb.getText()
-##        else:
-##            datestart = datestart
+
         dialog = xbmcgui.Dialog()
         d = dialog.numeric(1, "Input start date for period" ,time.strftime("%d/%m/%Y",time.strptime(datestart,"%Y-%m-%d %H:%M:%S")) )
         datestart = time.strftime("%Y-%m-%d",time.strptime(d.replace(" ","0"),"%d/%m/%Y"))
-##        kb = xbmc.Keyboard(time.strftime("%Y-%m-%d",time.strptime(dateend,"%Y-%m-%d %H:%M:%S")), "Input end date for period", False)
-##        kb.doModal()
-##        if (kb.isConfirmed()):
-##            dateend = kb.getText()
-##        else:
-##            dateend = dateend
+
         d = dialog.numeric(1, "Input end date for period" ,time.strftime("%d/%m/%Y",time.strptime(dateend,"%Y-%m-%d %H:%M:%S")) )
         dateend = time.strftime("%Y-%m-%d",time.strptime(d.replace(" ","0"),"%d/%m/%Y"))
         
@@ -687,7 +702,7 @@ class Main:
         for path,filename in filelist: #on les ajoute une par une
             MPDB.addPicToCollection( namecollection,path,filename )
         xbmc.executebuiltin( "Notification(%s,%s %s)"%(__language__(30000).encode("utf8"),
-                                                       "%s pictures added in :"%len(filelist),
+                                                       __language__(30161).encode("utf8")%len(filelist),
                                                        namecollection)
                              )
         
@@ -713,20 +728,6 @@ class Main:
         #1- récupère les données GPS de la photo
         #2- si il y a des coordonnées, on valide le menu contextuel
         pass
-##>>> gps="[53, 1, 60073/2071]"
-##>>> exec("gpslist=%s"%gps)
-##>>> gpslist
-##[53, 1, 29]
-##>>> print "%s° %s' %s\""%tuple(gpslist)
-##53° 1' 29"
-##print "%s, %s"%(toGPS("[16, 15, 61307/1888]"),toGPS("[145, 23, 170571/3125]"))
-##def toGPS(iptcGPS):
-##    exec("gpslist=%s"%iptcGPS)
-##    return "%s° %s' %s\""%tuple(gpslist)
-##html = urllib.urlopen("http://maps.google.fr/mobile?q=-16%C2%B0+15%27+32%22%2C+145%C2%B0+23%27+54%22").read()
-##re.findall(r"""<img src="(http://mt0\.google\.com/vt/data=[^"]+)" width="\d+" height="\d+" alt="carte"/>""",html)
-##re.findall(r"""<img class=".*?" src="(http://mt0\.google\.com/vt/data=[^"]+)" width="\d+" height="\d+" alt="carte"/>""",html) #celle ci si on utilise un header firefox
-##f=open("carte.jpg","wb").write(urllib.urlopen("http://mt0.google.com/vt/data=DGISkzGkvSKtpmptuxGtSlAxye35anR50gV8p99SMBV7lhz5_SO6d2GJtFS6x5v99bmP4fyMNtom1qmOLUz5lAEhA5p2Pag4B-8CXugaRH-y82_kkw").read())
     
     def show_pics(self):
         picfanart = None
@@ -804,7 +805,7 @@ class Main:
             destination = os.path.join(DATA_PATH,urllib.unquote_plus(self.args.name)+".tar.gz")
             if os.path.isfile(destination):
                 dialog = xbmcgui.Dialog()
-                ok = dialog.yesno("MyPictures Database","Archive '%s' already exists in"%os.path.basename(destination),os.path.dirname(destination), "Overwrite ?")
+                ok = dialog.yesno(__language__(30000),"Archive '%s' already exists in"%os.path.basename(destination),os.path.dirname(destination), "Overwrite ?")
                 if not ok:
                     #todo, ask for another name and if cancel, cancel the zip process as well
                     xbmc.executebuiltin( "Notification(My Picture Database,Archiving pictures canceled.,File already exists)" )
@@ -814,7 +815,7 @@ class Main:
             tar = tarfile.open(destination,"w:gz")#open a tar file using gz compression
             error = 0
             pDialog = xbmcgui.DialogProgress()
-            ret = pDialog.create('MyPictures Database', 'Adding file to archive :','')
+            ret = pDialog.create(__language__(30000), 'Adding file to archive :','')
             compte=0
             msg=""
             for (path,filename) in filelist:
@@ -827,7 +828,7 @@ class Main:
                 pDialog.update(int(100*(compte/float(len(filelist)))),"Creating connection...",'Adding file to archive :',picture)
                 try:
                     tar.add( picture , arcname)
-                    print "Compressing  %s . . ." % picture
+                    print "Archiving  %s . . ." % picture
                 except:
                     print "tar.gz compression error :"
                     error += 1
@@ -840,7 +841,7 @@ class Main:
             if not msg:
                 if error: msg = "%s Errors while zipping %s files"%(error,len(filelist))
                 else: msg = "%s files successfully Zipped !!"%len(filelist)
-            xbmc.executebuiltin( "Notification(My Picture Database,%s)"%msg )
+            xbmc.executebuiltin( "Notification(%s,%s)"%(__language__(30000),msg) )
             return
         
         if self.args.viewmode=="export":
@@ -872,14 +873,14 @@ class Main:
                             print_exc()
                             dialog.ok("MyPictures Database","Error#%s : %s"%msg.args)
                     else:
-                        xbmc.executebuiltin( "Notification(MyPictures Database,Files copy canceled ! )" )
+                        xbmc.executebuiltin( "Notification(%s,Files copy canceled ! )"%__language__(30000) )
                         return
 
             
             #browse(type, heading, shares[, mask, useThumbs, treatAsFolder, default])
-            import shutil
+            from shutil import copy
             pDialog = xbmcgui.DialogProgress()
-            ret = pDialog.create('MyPictureDB', 'Copying files...')
+            ret = pDialog.create(__language__(30000), 'Copying files...')
             i=0.0
             cpt=0
             for path,filename in filelist:
@@ -888,14 +889,14 @@ class Main:
                 #2- does the destination have the file ? shall we overwrite it ?
                 #TODO : rename a file if it already exists, rather than asking to overwrite it
                 if os.path.isfile(os.path.join(dstpath,filename)):
-                    ok = dialog.yesno("MyPictures Database","File %s already exists in"%filename,dstpath,"Overwrite it ?")
+                    ok = dialog.yesno(__language__(30000),"File %s already exists in"%filename,dstpath,"Overwrite it ?")
                     if not ok:
                         continue
-                shutil.copy(os.path.join(path.decode("utf8"),filename.decode("utf8")), dstpath.decode("utf8"))
+                copy(os.path.join(path.decode("utf8"),filename.decode("utf8")), dstpath.decode("utf8"))
                 cpt = cpt+1
             pDialog.update(100,"Copying Finished !",dstpath)
             xbmc.sleep(1000)
-            xbmc.executebuiltin( "Notification(MyPictures Database,%s files copied to %s )"%(cpt,dstpath) )
+            xbmc.executebuiltin( "Notification(%s,%s files copied to %s )"%(__language__(30000),cpt,dstpath) )
             dialog.browse(2, "Pictures exported","files" ,"", True, False, dstpath)
             return
         
@@ -919,15 +920,14 @@ class Main:
                                 )
                 
             #3 - montrer où est localisé physiquement la photo
-                ## ATTENTION ne fonctionne pas, retourne le message suivant : Unable to locate window with id 126.  Check skin files
-            #context.append( ( "Localiser sur le disque","XBMC.ActivateWindow(filebrowser)" ) )#126
-            context.append( ("locate on disk","XBMC.RunPlugin(\"%s?action='locate'&filepath='%s'&viewmode='view'\" ,)"%(sys.argv[0],os.path.join(urllib.quote_plus(path),
+            context.append( (__language__(30060),"XBMC.RunPlugin(\"%s?action='locate'&filepath='%s'&viewmode='view'\" ,)"%(sys.argv[0],os.path.join(urllib.quote_plus(path),
                                                                                                                                                           urllib.quote_plus(filename)))))
 
             #4 - si la photo contient des données GPS, la localiser sur une carte
             coords = MPDB.getGPS(path,filename)
             if coords:
-                context.append( ("Geographic localisation","XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),urllib.quote_plus(filename))))
+                #géolocalisation
+                context.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),urllib.quote_plus(filename))))
                                  
             #5 - les infos de la photo
             #context.append( ( "paramètres de l'addon","XBMC.ActivateWindow(virtualkeyboard)" ) )
@@ -957,6 +957,8 @@ if __name__=="__main__":
 ##        MPDB.mount(mountpoint="w:",path="\\\\diskstation\\photos",
 ##                   login=xbmcplugin.getSetting(int(sys.argv[1]),"sharelogin"),
 ##                   password=xbmcplugin.getSetting(int(sys.argv[1]),"sharepass"))
+        #set the debugging for the library
+        MPDB.DEBUGGING = False
         # initialisation de la base :
         MPDB.pictureDB = pictureDB
         #   - efface les tables et les recréés

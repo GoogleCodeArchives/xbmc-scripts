@@ -30,7 +30,7 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
 env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
 
-
+DEBUGGING = True
 import time
 import fnmatch
 import os.path
@@ -60,10 +60,12 @@ sys_enc = sys.getfilesystemencoding()
 
 lists_separator = "||"
 
-
+class MyPictureDB(Exception):
+    pass
     
 def log(msg):
-    print str("MyPicsDB >> %s"%msg.__str__())
+    if DEBUGGING:
+        print str("MyPicsDB >> %s"%msg.__str__())
 
 #net use z: \\remote\share\ login /USER:password
 #mount -t cifs //ntserver/download -o username=vivek,password=myPassword /mnt/ntserver
@@ -363,6 +365,8 @@ def DB_file_insert(path,filename,dictionnary,update=False):
         log( "%s - %s"%(Exception,msg) )
         log( """INSERT INTO files('%s') values (%s)""" % ( "','".join(dictionnary.keys()) , ",".join(["?"]*len(dictionnary.values())) ) )
         log( "" )
+        raise MyPictureDB
+    
     # TRAITEMENT DES MOTS CLES (base keywords)
     if dictionnary.has_key("keywords"):
         kwl = dictionnary["keywords"].split(lists_separator)
@@ -923,8 +927,21 @@ def search_between_dates(DateStart=("2007","%Y"),DateEnd=("2008","%Y")):
     log(DateEnd)
     DS = time.strftime("%Y-%m-%d %H:%M:%S",time.strptime(DateStart[0],DateStart[1]))#time.mktime(time.strptime(DateStart[0],DateStart[1]))
     DE = time.strftime("%Y-%m-%d %H:%M:%S",time.strptime(DateEnd[0],DateEnd[1]))#time.mktime(time.strptime(DateEnd[0],DateEnd[1]))
+    if DateEnd[1]=="%Y-%m-%d":
+        Emodifier = "'start of day','+1 days'"
+        Smodifier = ""
+    elif DateEnd[1]=="%Y-%m":
+        Emodifier = "'start of month','+1 months'"
+        Smodifier = ""
+    elif DateEnd[1]=="%Y":
+        Emodifier = "'start of year','+1 years'"
+        Smodifier = ""
+    else:
+        Emodifier = ""
+        Smodifier = ""
+    
     #SELECT strPath,strFilename FROM files WHERE strftime('%Y-%m-%d %H:%M:%S', "EXIF DateTimeOriginal") BETWEEN strftime('%Y-%m-%d %H:%M:%S','2007-01-01 00:00:01') AND strftime('%Y-%m-%d %H:%M:%S','2007-12-31 23:59:59') ORDER BY "EXIF DateTimeOriginal" ASC
-    request = """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN datetime('%s') AND datetime('%s') ORDER BY "EXIF DateTimeOriginal" ASC"""%(DS,DE)
+    request = """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN datetime('%s',%s) AND datetime('%s',%s) ORDER BY "EXIF DateTimeOriginal" ASC"""%(DS,Smodifier,DE,Emodifier)
     return [row for row in Request(request)]
 
 def pics_for_period(periodtype,date):
