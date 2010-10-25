@@ -231,14 +231,16 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
                 ###############################
 
                 #insertion des données dans la table
-                MPDB.DB_file_insert(dirname,picfile,picentry,rescan)
+                try:
+                    MPDB.DB_file_insert(dirname,picfile,picentry,rescan)
+                    #comptage
+                    comptenew=comptenew+1
+                except MPDB.MyPictureDB:
+                    pass
 
-                #comptage
-                comptenew=comptenew+1
+                
             else: # the file is already in DB, we are passing it
-                #if updatefunc: updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),"Already in Database :",picfile)
                 if updatefunc:
-                    #updatefunc.update(int(100 * float(cpt)/len(listfolderfiles)),
                     updatefunc.update(int(100*float(cptscanned)/float(totalfiles)),#cptscanned-(cptscanned/100)*100,
                                       cptscanned/100,
                                       "MyPicture Database [Passing] (%0.2f%%)"%(100*float(cptscanned)/float(totalfiles)),
