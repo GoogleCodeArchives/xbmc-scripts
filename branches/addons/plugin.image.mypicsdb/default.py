@@ -301,12 +301,14 @@ class Main:
         for path,filename in picsfromfolder:
             context = [( __language__(30152),"XBMC.RunPlugin(\"%s?action='addtocollection'&viewmode='view'&path='%s'&filename='%s'\")"%(sys.argv[0],
                                                                                                                          urllib.quote_plus(path),
-                                                                                                                         urllib.quote_plus(filename))
-                              ),("Don't use this picture","",)]
+                                                                                                                         urllib.quote_plus(filename))  ) ]
+            #context.append( ("Don't use this picture","") )
             coords = MPDB.getGPS(path,filename)
             if coords:
                 #géolocalisation
-                context.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),urllib.quote_plus(filename))))
+                context.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&path='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),
+                                                                                                                                                       urllib.quote_plus(path),
+                                                                                                                                                       urllib.quote_plus(filename))))
             self.addPic(filename,path,contextmenu=context,
                         fanart = os.path.join(PIC_PATH,"fanart-folder.png")
                         )
@@ -557,58 +559,67 @@ class Main:
 
     def show_map(self):
         """get a google map for the given place (place is a string for an address, or a couple of gps lat/lon datas"""
-        #google geolocalisation 
-        static_url = "http://maps.google.com/maps/api/staticmap?"
-        param_dic = {#location parameters (http://gmaps-samples.googlecode.com/svn/trunk/geocoder/singlegeocode.html)
-                     "center":"",       #(required if markers not present)
-                     "zoom":"5",         # 0 to 21+ (req if no markers
-                     #map parameters
-                     "size":"640x480",  #widthxheight (required)
-                     "format":"jpg-baseline",    #"png8","png","png32","gif","jpg","jpg-baseline" (opt)
-                     "maptype":"hybrid",      #"roadmap","satellite","hybrid","terrain" (opt)             
-                     "language":"",
-                     #Feature Parameters:
-                     "markers" :"color:red|label:P|%s",#(opt)
-                                        #markers=color:red|label:P|lyon|12%20rue%20madiraa|marseille|Lille
-                                        #&markers=color:blue|label:P|Australie
-                     "path" : "",       #(opt)
-                     "visible" : "",    #(opt)
-                     #Reporting Parameters:
-                     "sensor" : "false" #is there a gps on system ? (req)
-                     }
-        pDialog = xbmcgui.DialogProgress()
-        
-        ret = pDialog.create(__language__(30000),__language__(30221),self.args.place)
-        pDialog.update(0,"Creating connection...")
+##        #google geolocalisation 
+##        static_url = "http://maps.google.com/maps/api/staticmap?"
+##        param_dic = {#location parameters (http://gmaps-samples.googlecode.com/svn/trunk/geocoder/singlegeocode.html)
+##                     "center":"",       #(required if markers not present)
+##                     "zoom":"12",         # 0 to 21+ (req if no markers
+##                     #map parameters
+##                     "size":"640x640",  #widthxheight (required)
+##                     "format":"png32",    #"png8","png","png32","gif","jpg","jpg-baseline" (opt)
+##                     "maptype":"hybrid",      #"roadmap","satellite","hybrid","terrain" (opt)             
+##                     "language":"",
+##                     #Feature Parameters:
+##                     "markers" :"color:red|label:P|%s",#(opt)
+##                                        #markers=color:red|label:P|lyon|12%20rue%20madiraa|marseille|Lille
+##                                        #&markers=color:blue|label:P|Australie
+##                     "path" : "",       #(opt)
+##                     "visible" : "",    #(opt)
+##                     #Reporting Parameters:
+##                     "sensor" : "false" #is there a gps on system ? (req)
+##                     }
+##        pDialog = xbmcgui.DialogProgress()
+##        ret = pDialog.create(__language__(30000),__language__(30221),self.args.place)
+##        pDialog.update(0,"Creating connection...")
+##
+##        param_dic["markers"]=param_dic["markers"]%self.args.place
+##        request_headers = { 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; fr; rv:1.9.2.10) Gecko/20100914 Firefox/3.6.10' }
+##        request = urllib2.Request(static_url+urllib.urlencode(param_dic), None, request_headers)
+##        urlfile = urllib2.urlopen(request)
+##        print urlfile.info()
+##        #DATA_PATH = "c:\\Users\\alexsolex\\Pictures\\"
+##        extension = urlfile.info().getheader("Content-Type","").split("/")[1]
+##        filesize = int(urlfile.info().getheader("Content-Length",""))
+##        try:
+##            f=open(os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension),"wb")
+##        except:
+##            print_exc()
+##        for i in range(1+(filesize/10)):
+##            f.write(urlfile.read(10))
+##            pDialog.update(int(100*(float(i*10)/filesize)),__language__(30221),"%0.2f%%"%(100*(float(i*10)/filesize)))
+##        urlfile.close()
+##        pDialog.close()
+##        try:
+##            f.close()
+##        except:
+##            print_exc()
+##            pass
+##        HTTP_API_url = "http://%s/xbmcCmds/xbmcHttp?command="%xbmc.getIPAddress()
+##        html = urllib.urlopen(HTTP_API_url + "ClearSlideshow" )
+##        html = urllib.urlopen(HTTP_API_url + "AddToSlideshow(%s)" % urllib.quote_plus(os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension)) )
+##        print html.url
+##        html = urllib.urlopen(HTTP_API_url + "ExecBuiltIn(ActivateWindow(12007))" )
+        import geomaps
+        showmap = geomaps.main(DATA_PATH = DATA_PATH, place =self.args.place, picfile = os.path.join(urllib.unquote_plus(self.args.path),urllib.unquote_plus(self.args.filename)))
+        #showmap.set_map(os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension))
+        #showmap.set_pic( os.path.join(urllib.unquote_plus(self.args.path),urllib.unquote_plus(self.args.filename)) )
+        showmap.doModal()
+        del showmap
 
-        param_dic["markers"]=param_dic["markers"]%self.args.place
-        request_headers = { 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; fr; rv:1.9.2.10) Gecko/20100914 Firefox/3.6.10' }
-        request = urllib2.Request(static_url+urllib.urlencode(param_dic), None, request_headers)
-        urlfile = urllib2.urlopen(request)
-        print urlfile.info()
-        extension = urlfile.info().getheader("Content-Type","").split("/")[1]
-        filesize = int(urlfile.info().getheader("Content-Length",""))
-        try:
-            f=open(os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension),"wb")
-        except:
-            print_exc()
-        for i in range(1+(filesize/10)):
-            f.write(urlfile.read(10))
-            pDialog.update(int(100*(float(i*10)/filesize)),__language__(30221),"%0.2f%%"%(100*(float(i*10)/filesize)))
-        urlfile.close()
-        pDialog.close()
-        try:
-            f.close()
-        except:
-            print_exc()
-            pass
-        HTTP_API_url = "http://%s/xbmcCmds/xbmcHttp?command="%xbmc.getIPAddress()
-        html = urllib.urlopen(HTTP_API_url + "AddToSlideshow('%s')" % os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension) )
-        html = urllib.urlopen(HTTP_API_url + "ExecBuiltIn(SlideShow(,,notrandom))")
-        response = xbmc.executeJSONRPC('''{ "jsonrpc": "2.0", "method": "XBMC.StartSlideshow", "parameter": "%s", "id": "1" }'''%os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension))
-        
-        print "response"
-        print response
+##        response = xbmc.executeJSONRPC('''{ "jsonrpc": "2.0", "method": "XBMC.StartSlideshow", "parameter": "%s", "id": "1" }'''%os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension))
+##        
+##        print "response"
+##        print response
 ##        html = urllib.urlopen(HTTP_API_url + "ClearSlideshow")
 ##        html = urllib.urlopen(HTTP_API_url + "AddToSlideshow('%s')" % urllib.quote(os.path.join(DATA_PATH,urllib.unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension)) )
 ##        print html.read()
@@ -927,7 +938,9 @@ class Main:
             coords = MPDB.getGPS(path,filename)
             if coords:
                 #géolocalisation
-                context.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),urllib.quote_plus(filename))))
+                context.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&path='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),
+                                                                                                                                                       urllib.quote_plus(path),
+                                                                                                                                                       urllib.quote_plus(filename))))
                                  
             #5 - les infos de la photo
             #context.append( ( "paramètres de l'addon","XBMC.ActivateWindow(virtualkeyboard)" ) )
