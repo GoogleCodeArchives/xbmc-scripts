@@ -14,6 +14,7 @@ Todo :
     
 """
 import os,sys
+from os.path import join, exists, isfile, isdir
 try:
     import xbmc
     makepath=xbmc.translatePath(os.path.join)
@@ -31,11 +32,10 @@ env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win3
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
 
 DEBUGGING = True
-import time
-import fnmatch
-import os.path
-import traceback
-import sha
+#import time
+#import fnmatch
+#import os.path
+from time import strftime,strptime
 
 #traitement EXIF
 import EXIF
@@ -55,7 +55,7 @@ except:
 
 from traceback import print_exc
 global pictureDB
-pictureDB = os.path.join(DB_PATH,"MyPictures.db")
+pictureDB = join(DB_PATH,"MyPictures.db")
 sys_enc = sys.getfilesystemencoding()
 
 lists_separator = "||"
@@ -72,7 +72,7 @@ def log(msg):
 def mount(mountpoint="z:",path="\\",login=None,password=""):
     import os
     print "net use %s %s %s /USER:%s"%(mountpoint,path,login,password)
-    if not os.path.exists(mountpoint):
+    if not exists(mountpoint):
         log( "Mounting %s as %s..."%(path,mountpoint) )
         if login:
             os.system("net use %s %s %s /USER:%s"%(mountpoint,path,login,password))
@@ -80,10 +80,10 @@ def mount(mountpoint="z:",path="\\",login=None,password=""):
             os.system("net use %s %s"%(mountpoint,path))
     else:
         log( "%s is already mounted !"%mountpoint )
-    return os.path.exists(mountpoint)
+    return exists(mountpoint)
 
 def Make_new_base(DBpath,ecrase=True):
-##    if not(os.path.isfile(DBpath)):
+##    if not(isfile(DBpath)):
 ##        f=open("DBpath","w")
 ##        f.close()
     log( "Creating a new picture database\n%s\n"%DBpath)
@@ -475,6 +475,7 @@ def fileSHA ( filepath ) :
         Output : string : contains the hexadecimal representation of the SHA of the file.
                           returns '0' if file could not be read (file not found, no read rights...)
     """
+    import sha
     try:
         file = open(filepath,'rb')
         digest = sha.new()
@@ -647,7 +648,7 @@ def RemoveRoot(path):
 
 def hook_directory ( filepath,filename,filecount, nbfiles ):
     import sys
-    log( "%s/%s - %s"%(filecount,nbfiles,os.path.join(filepath,filename)) )
+    log( "%s/%s - %s"%(filecount,nbfiles,join(filepath,filename)) )
     
 class dummy_update:#TODO : check if this is usefull
     def __init__(self):
@@ -701,14 +702,13 @@ def get_exif(picfile):
                 tagvalue=None
                 for datetimeformat in ["%Y:%m:%d %H:%M:%S","%Y.%m.%d %H.%M.%S","%Y-%m-%d %H:%M:%S"]:
                     try:
-                        tagvalue = time.strftime("%Y-%m-%d %H:%M:%S",time.strptime(tags[tag].__str__(),datetimeformat))
+                        tagvalue = strftime("%Y-%m-%d %H:%M:%S",strptime(tags[tag].__str__(),datetimeformat))
                         break
                     except:
                         log( "Datetime (%s) did not match for '%s' format... trying an other one..."%(tags[tag].__str__(),datetimeformat) )
                 if not tagvalue:
                     log( "ERROR : the datetime format is not recognize (%s)"%tags[tag].__str__() )
-                #tagvalue = time.mktime(time.strptime(tags[tag].__str__(),"%Y:%m:%d %H:%M:%S"))
-                #tagvalue = tags[tag].__str__()
+                
             else:
                 tagvalue = tags[tag].__str__()
             try:
@@ -730,20 +730,20 @@ def get_iptc(path,filename):
     Get IPTC datas from picfile and return a dictionnary where keys are DB fields and values are DB values
     """
     try:
-        info = IPTCInfo(os.path.join(path,filename))
+        info = IPTCInfo(join(path,filename))
     except Exception,msg:
         if not type(msg.args[0])==type(int()):
             if msg.args[0].startswith("No IPTC data found."):
                 #print "No IPTC data found."
                 return {}
             else:
-                log( "EXCEPTION >> get_iptc %s"%os.path.join(path,filename) )
+                log( "EXCEPTION >> get_iptc %s"%join(path,filename) )
                 log( "%s - %s"%(Exception,msg) )
                 log( "~~~~" )
                 log( "" )
                 return {}
         else:
-            log( "EXCEPTION >> get_iptc %s"%os.path.join(path,filename) )
+            log( "EXCEPTION >> get_iptc %s"%join(path,filename) )
             log( "%s - %s"%(Exception,msg) )
             log( "~~~~" )
             log( "" )
@@ -925,20 +925,20 @@ def search_between_dates(DateStart=("2007","%Y"),DateEnd=("2008","%Y")):
     """Cherche les photos qui ont été prises entre 'datestart' et 'dateend'."""
     log(DateStart)
     log(DateEnd)
-    DS = time.strftime("%Y-%m-%d %H:%M:%S",time.strptime(DateStart[0],DateStart[1]))#time.mktime(time.strptime(DateStart[0],DateStart[1]))
-    DE = time.strftime("%Y-%m-%d %H:%M:%S",time.strptime(DateEnd[0],DateEnd[1]))#time.mktime(time.strptime(DateEnd[0],DateEnd[1]))
+    DS = strftime("%Y-%m-%d %H:%M:%S",strptime(DateStart[0],DateStart[1]))
+    DE = strftime("%Y-%m-%d %H:%M:%S",strptime(DateEnd[0],DateEnd[1]))
     if DateEnd[1]=="%Y-%m-%d":
-        Emodifier = "'start of day','+1 days'"
-        Smodifier = ""
+        Emodifier = "'start of day','+1 days','-1 minutes'"
+        Smodifier = "'start of day'"
     elif DateEnd[1]=="%Y-%m":
-        Emodifier = "'start of month','+1 months'"
-        Smodifier = ""
+        Emodifier = "'start of month','+1 months','-1 minutes'"
+        Smodifier = "'start of month'"
     elif DateEnd[1]=="%Y":
-        Emodifier = "'start of year','+1 years'"
-        Smodifier = ""
+        Emodifier = "'start of year','+1 years',-1 minutes'"
+        Smodifier = "'start of year'"
     else:
-        Emodifier = ""
-        Smodifier = ""
+        Emodifier = "''"
+        Smodifier = "''"
     
     #SELECT strPath,strFilename FROM files WHERE strftime('%Y-%m-%d %H:%M:%S', "EXIF DateTimeOriginal") BETWEEN strftime('%Y-%m-%d %H:%M:%S','2007-01-01 00:00:01') AND strftime('%Y-%m-%d %H:%M:%S','2007-12-31 23:59:59') ORDER BY "EXIF DateTimeOriginal" ASC
     request = """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN datetime('%s',%s) AND datetime('%s',%s) ORDER BY "EXIF DateTimeOriginal" ASC"""%(DS,Smodifier,DE,Emodifier)
@@ -949,11 +949,10 @@ def pics_for_period(periodtype,date):
     try:
         sdate,modif1,modif2 = {'year' :['%s-01-01'%date,'start of year','+1 years'],
                                'month':['%s-01'%date,'start of month','+1 months'],
-                               'date' :[date,'start of day','+1 days']}[periodtype]
+                               'date' :['%s'%date,'start of day','+1 days']}[periodtype]
     except:
         print_exc()
-        log ("pics_for_period ( periodtype = ['date'|'month'|'year'] , date = corresponding to the period (year|year-month|year-month-day)")
-        
+        log ("pics_for_period ( periodtype = ['date'|'month'|'year'] , date = corresponding to the period (year|year-month|year-month-day)")    
     request = """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN datetime('%s','%s') AND datetime('%s','%s','%s') ORDER BY "EXIF DateTimeOriginal" ASC;"""%(sdate,modif1,
                                                                                                                                                                                                   sdate,modif1,modif2)
     return [row for row in Request(request)]
@@ -998,7 +997,7 @@ ORDER BY "EXIF DateTimeOriginal" ASC
 """select * from folders where ParentFolder = 78"""
 if __name__=="__main__":
     # initialisation de la base :
-    pictureDB = os.path.join(DATA_PATH,"MyPictures.db")
+    pictureDB = join(DATA_PATH,"MyPictures.db")
     #   - efface les tables et les recréés
     Make_new_base(pictureDB,ecrase=True)
     #mount(mountpoint="y:",path="\\\\192.168.0.1\\photos",login="titi",password="toto")
@@ -1006,8 +1005,8 @@ if __name__=="__main__":
     picpath = [r"Y:"]
     #picpath = [r"C:\Users\alexsolex\Documents\python\images_test"]
     #picpath=[home]
-    
-    t=time.time()
+    from time import time
+    t=time()
     
     # parcours récursif du dossier 'picpath'
     global compte
@@ -1018,11 +1017,11 @@ if __name__=="__main__":
         browse_folder(chemin,parentfolderID=None,recursive=True,update=False)
         log( "  - %s nouvelles images trouvées dans le répertoire %s et ses sous-dossiers."%(compte,chemin) )
         total = total + compte
-    log( u"%s images ajoutées à la base en %s secondes!".encode("utf8")%(total,str(time.time()-t)) )
+    log( u"%s images ajoutées à la base en %s secondes!".encode("utf8")%(total,str(time()-t)) )
 
     # traitement des dossiers supprimés/renommés physiquement --> on supprime toutes les entrées de la base
     for path in list_path():#on parcours tous les dossiers distinct en base de donnée
-        if not os.path.isdir(path): #si le chemin en base n'est pas réellement un dossier,...
+        if not isdir(path): #si le chemin en base n'est pas réellement un dossier,...
             DB_del_pic(path)#... on supprime toutes les entrées s'y rapportant
             print "%s n'est pas un chemin. Les entrées s'y rapportant dans la base sont supprimées."%path
     print
@@ -1036,8 +1035,8 @@ if __name__=="__main__":
     print "Les photos correspondants au mot clef 'Animaux'"
     c = search_keyword(u"Musée".encode("utf8"))
     for path,filename in c:
-        fichier = os.path.join(path,filename)
-        if os.path.isfile(fichier):
+        fichier = join(path,filename)
+        if isfile(fichier):
             print "\t%s"%fichier
         else:
             print "'%s' n'est pas un fichier valide"%fichier        
@@ -1047,8 +1046,8 @@ if __name__=="__main__":
     c=search_between_dates(("2006-07","%Y-%m"),("2006-08","%Y-%m"))
     c=search_between_dates(("2006-06-26","%Y-%m-%d"),("2006-08-15","%Y-%m-%d"))
     for path,filename in c:
-        fichier = os.path.join(path,filename)
-        if os.path.isfile(fichier):
+        fichier = join(path,filename)
+        if isfile(fichier):
             print "\t%s"%fichier
         else:
             print "'%s' n'est pas un fichier valide"%fichier
@@ -1080,9 +1079,9 @@ if __name__=="__main__":
 ##    print
 ##    print "Ajout des fichiers dans le diaporama..."
 ##    for path,filename in c:
-##        fichier = os.path.join(path,filename)
+##        fichier = join(path,filename)
 ##        print "\t%s"%fichier
-##        if os.path.isfile(fichier):
+##        if isfile(fichier):
 ##            html = urllib.urlopen(HTTP_API_url + "AddToSlideshow(%s)" % fichier).read()
 ##            print html
 ##        else:
