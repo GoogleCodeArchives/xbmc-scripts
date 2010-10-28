@@ -43,7 +43,7 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
 
 
 import xbmc,xbmcgui
-import urllib
+from urllib import unquote_plus
 from traceback import print_exc,format_tb
 if sys.modules.has_key("MypicsDB"):
     del sys.modules["MypicsDB"]
@@ -52,7 +52,7 @@ import MypicsDB as MPDB
 global pictureDB
 pictureDB = os.path.join(DB_PATH,"MyPictures.db")
 
-import time 
+from time import strftime
 from traceback import print_exc
  
 from DialogAddonScan import AddonScan
@@ -75,18 +75,18 @@ def main2():
     print options
     print args
     print dir(parser)
-    
+    dateadded = strftime("%Y-%m-%d %H:%M:%S")#pour inscrire la date de scan des images dans la base
     if options.rootpath:
-        print urllib.unquote_plus(options.rootpath)
+        print unquote_plus(options.rootpath)
         scan = AddonScan()#xbmcgui.getCurrentWindowId()
         scan.create( "MyPicture Database " )
         print options.recursive
         print options.update
         scan.update(0,0,"MyPicture Database [Preparing]","please wait...")
-        count_files(urllib.unquote_plus(options.rootpath))
+        count_files(unquote_plus(options.rootpath))
         try:
             #browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None)
-            browse_folder(urllib.unquote_plus(options.rootpath),parentfolderID=None,recursive=options.recursive,updatecontent=options.update,rescan=True,updatefunc=scan)
+            browse_folder(unquote_plus(options.rootpath),parentfolderID=None,recursive=options.recursive,updatecontent=options.update,rescan=True,updatefunc=scan,dateadded = dateadded )
         except:
             print_exc()
         scan.close()
@@ -98,11 +98,12 @@ def main2():
             scan = AddonScan()#xbmcgui.getCurrentWindowId()
             scan.create( "MyPicture Database " )
             scan.update(0,0,"MyPicture Database [Preparing]","please wait...")
+            
             for path,recursive,update in listofpaths:
-                count_files(urllib.unquote_plus(path))
+                count_files(unquote_plus(path))
                 try:
                     #browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None)
-                    browse_folder(urllib.unquote_plus(path),parentfolderID=None,recursive=recursive==1,updatecontent=update==1,rescan=False,updatefunc=scan)
+                    browse_folder(unquote_plus(path),parentfolderID=None,recursive=recursive==1,updatecontent=update==1,rescan=False,updatefunc=scan,dateadded = dateadded)
                 except:
                     print_exc()
             scan.close()
@@ -128,12 +129,13 @@ def count_files ( path ):
     os.path.walk(path, processDirectory, None )
     print totalfiles,totalfolders
     
-def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None):
+def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None,dateadded = strftime("%Y-%m-%d %H:%M:%S")):
     """parcours le dossier racine 'dirname'
     - 'recursive' pour traverser récursivement les sous dossiers de 'dirname'
     - 'update' pour forcer le scan des images qu'elles soient déjà en base ou pas
     - 'updatefunc' est une fonction appelée pour indiquer la progression. Les paramètres sont (pourcentage(int),[ line1(str),line2(str),line3(str) ] )
 """
+    
     #######
     # STEP 1 : list all files in directory
     #######
@@ -201,7 +203,7 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
                 #préparation d'un dictionnaire pour les champs et les valeurs
                 # c'est ce dictionnaire qui servira à  remplir la table fichiers
                 ##picentry = { "strPath":dirname, "strFilename":picfile }
-                picentry = { "idFolder":PFid, "strPath":dirname.decode("utf8"),"strFilename":picfile.decode("utf8"),"UseIt":1,"sha":MPDB.fileSHA(os.path.join(dirname,picfile)),"DateAdded":time.strftime("%Y-%m-%d %H:%M:%S") }
+                picentry = { "idFolder":PFid, "strPath":dirname.decode("utf8"),"strFilename":picfile.decode("utf8"),"UseIt":1,"sha":MPDB.fileSHA(os.path.join(dirname,picfile)),"DateAdded":strftime("%Y-%m-%d %H:%M:%S") }
 
                 ### chemin de la miniature
                 thumbnails = Thumbnails()
@@ -279,7 +281,7 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
         for item in listdir:
             if os.path.isdir(os.path.join(dirname,item)):#un directory
                 #browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None)
-                browse_folder(os.path.join(dirname,item),PFid,recursive,updatecontent,rescan,updatefunc)
+                browse_folder(os.path.join(dirname,item),PFid,recursive,updatecontent,rescan,updatefunc,dateadded)
             else:
                 #listdir contenait un fichier mais pas un dossier
                 # inutilisé... on passe pour le moment
