@@ -13,27 +13,24 @@ TODO :
 import os,sys
 from os.path import join,isfile,basename,dirname
 
-try:
-    import xbmc
-    makepath=xbmc.translatePath(join)
-except:
-    makepath=join
+
+import xbmc
+
+
 home = os.getcwd().replace(';','')
 #these few lines are taken from AppleMovieTrailers script
 # Shared resources
-BASE_RESOURCE_PATH = makepath( home, "resources" )
+BASE_RESOURCE_PATH = join( home, "resources" )
 DATA_PATH = xbmc.translatePath( "special://profile/addon_data/plugin.image.mypicsdb/")
-PIC_PATH = makepath( BASE_RESOURCE_PATH, "images")
+PIC_PATH = join( BASE_RESOURCE_PATH, "images")
 DB_PATH = xbmc.translatePath( "special://database/")
 sys.path.append( join( BASE_RESOURCE_PATH, "lib" ) )
-# append the proper platforms folder to our path, xbox is the same as win32
-env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
-sys.path.append( join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
-
+print "data_path"
+print DATA_PATH
 
 from urllib import quote_plus,unquote_plus
-import xbmcplugin,xbmcgui,xbmc,xbmcaddon
-#import os.path
+import xbmcplugin,xbmcgui,xbmcaddon
+
 from time import strftime,strptime
 
 from traceback import print_exc
@@ -157,10 +154,21 @@ class Main:
         ok=True
         liz=xbmcgui.ListItem(picname,info)
         liz.setLabel2(info)
+        coords = MPDB.getGPS(picpath,picname)
+##        picturepath = join(picpath.encode("utf8"),picname.encode("utf8"))
+##        infolabels = { "picturepath": picturepath, "overlay": xbmcgui.ICON_OVERLAY_TRAINED, "title": "test" }
+##        liz.setInfo( "Pictures", infolabels )
         if contextmenu:
+            if coords:
+                #géolocalisation
+                contextmenu.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&path='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),
+                                                                                                                                                           quote_plus(picpath),
+                                                                                                                                                           quote_plus(picname)
+                                                                                                                                                           )))
             liz.addContextMenuItems(contextmenu,replacemenu)
         if fanart:
             liz.setProperty( "Fanart_Image", fanart )
+
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=join(picpath,picname),listitem=liz,isFolder=False)
         
     def show_home(self):
@@ -307,12 +315,12 @@ class Main:
                                                                                                                          quote_plus(filename))  )
                             )
             #context.append( ("Don't use this picture","") )
-            coords = MPDB.getGPS(path,filename)
-            if coords:
-                #géolocalisation
-                context.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&path='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),
-                                                                                                                                                       quote_plus(path),
-                                                                                                                                                       quote_plus(filename))))
+##            coords = MPDB.getGPS(path,filename)
+##            if coords:
+##                #géolocalisation
+##                context.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&path='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),
+##                                                                                                                                                       quote_plus(path),
+##                                                                                                                                                       quote_plus(filename))))
             self.addPic(filename,path,contextmenu=context,
                         fanart = join(PIC_PATH,"fanart-folder.png")
                         )
@@ -494,35 +502,39 @@ class Main:
             dialog = xbmcgui.Dialog()
             newroot = dialog.browse(0, __language__(30201), 'pictures')
             if not newroot: return
-            recursive = dialog.yesno(__language__(30000),__language__(30202)) and 1 or 0 #browse recursively this folder ?
-            update = dialog.yesno(__language__(30000),__language__(30203)) and 1 or 0 # Remove files from database if pictures does not exists?
-            #ajoute le rootfolder dans la base
-            MPDB.AddRoot(newroot,recursive,update)
-            xbmc.executebuiltin( "Notification(%s,%s)"%(__language__(30000).encode("utf8"),__language__(30204).encode("utf8")) )
-            if dialog.yesno(__language__(30000),__language__(30206)):#do a scan now ?
-##                xbmc.executebuiltin( "RunScript(%s,%s%s--rootpath %s) "%( join( os.getcwd(), "scanpath.py"),
-##                                                                          recursive==1 and "--recursive " or "",
-##                                                                          update==1 and "--update " or "",
-##                                                                          newroot
-##                                                                        )
-##                                     )
-                xbmc.executebuiltin( "RunScript(%s,--rootpath=%s) "%( join( os.getcwd(), "scanpath.py"),
-                                                                          newroot
-                                                                        )
-                                     )
+            if str(self.args.exclude)=="1":
+                MPDB.AddRoot(newroot,0,0,1)
+            else:
+                recursive = dialog.yesno(__language__(30000),__language__(30202)) and 1 or 0 #browse recursively this folder ?
+                update = dialog.yesno(__language__(30000),__language__(30203)) and 1 or 0 # Remove files from database if pictures does not exists?
+                #ajoute le rootfolder dans la base
+                MPDB.AddRoot(newroot,recursive,update,0)#TODO : traiter le exclude (=0 pour le moment) pour gérer les chemins à exclure
+                xbmc.executebuiltin( "Notification(%s,%s)"%(__language__(30000).encode("utf8"),__language__(30204).encode("utf8")) )
+                if dialog.yesno(__language__(30000),__language__(30206)):#do a scan now ?
+    ##                xbmc.executebuiltin( "RunScript(%s,%s%s--rootpath %s) "%( join( os.getcwd(), "scanpath.py"),
+    ##                                                                          recursive==1 and "--recursive " or "",
+    ##                                                                          update==1 and "--update " or "",
+    ##                                                                          newroot
+    ##                                                                        )
+    ##                                     )
+                    xbmc.executebuiltin( "RunScript(%s,--rootpath=%s) "%( join( os.getcwd(), "scanpath.py"),
+                                                                              newroot
+                                                                            )
+                                         )
 
                 #xbmc.executebuiltin( "Notification(My Pictures Database,Folder has been scanned)" )
         elif self.args.do=="delroot":
             try:
                 MPDB.RemoveRoot( unquote_plus(self.args.delpath) )
-            except IndexError:
-                pass
+            except IndexError,msg:
+                print IndexError,msg#pass
             #TODO : this notification does not work with é letters in the string....
             #xbmc.executebuiltin( "Notification(%s,%s)"%(__language__(30000),__language__(30205)))#+":".encode("utf8")+unquote_plus(self.args.delpath)) )
         elif self.args.do=="rootclic":
-            dialog = xbmcgui.Dialog()
-            if dialog.yesno(__language__(30000),__language__(30206)):#do a scan now ?
-                path,recursive,update = MPDB.getRoot(unquote_plus(self.args.rootpath))
+            #dialog = xbmcgui.Dialog()
+            #if dialog.yesno(__language__(30000),__language__(30206)):#do a scan now ?
+            if str(self.args.exclude)=="0":
+                path,recursive,update,exclude = MPDB.getRoot(unquote_plus(self.args.rootpath))
 ##                xbmc.executebuiltin( "RunScript(%s,%s%s-p %s) "%( join( os.getcwd(), "scanpath.py"),
 ##                                                                          recursive==1 and "-r " or "",
 ##                                                                          update==1 and "-u " or "",
@@ -534,6 +546,8 @@ class Main:
                                                                         )
                                      )
                 #xbmc.executebuiltin( "Notification(My Pictures Database,Folder has been scanned)" )
+            else:#clic sur un chemin à exclure...
+                pass
         elif self.args.do=="scanall":
             xbmc.executebuiltin( "RunScript(%s,--database)"% join( os.getcwd(), "scanpath.py") )
             return
@@ -541,11 +555,18 @@ class Main:
             refresh=False
         rootfolders = MPDB.RootFolders()
         self.addDir(name      = __language__(30208),#add a root path
-                    params    = [("do","addroot"),("viewmode","view"),],#paramètres
+                    params    = [("do","addroot"),("viewmode","view"),("exclude","0")],#paramètres
                     action    = "rootfolders",#action
                     iconimage = join(PIC_PATH,"newsettings.png"),#icone
                     fanart    = join(PIC_PATH,"fanart-setting.png"),
                     contextmenu   = None)#menucontextuel
+        if len(rootfolders):
+            self.addDir(name      = "Add a folder to EXCLUDE",#add a folder to exclude
+                        params    = [("do","addroot"),("viewmode","view"),("exclude","1")],#paramètres
+                        action    = "rootfolders",#action
+                        iconimage = join(PIC_PATH,"newsettings.png"),#icone
+                        fanart    = join(PIC_PATH,"fanart-setting.png"),
+                        contextmenu   = None)#menucontextuel            
         if len(rootfolders) > 1:
             self.addDir(name      = "Scan all roots paths",#scan all distinct root paths
                         params    = [("do","scanall"),("viewmode","view"),],#paramètres
@@ -553,20 +574,31 @@ class Main:
                         iconimage = join(PIC_PATH,"settings.png"),#icone
                         fanart    = join(PIC_PATH,"fanart-setting.png"),
                         contextmenu   = None)#menucontextuel
-        for path,recursive,update in rootfolders:
-            srec = recursive==1 and "ON" or "OFF"
-            supd = update==1 and "ON" or "OFF"
+        for path,recursive,update,exclude in rootfolders:
+            if exclude==0:
+                srec = recursive==1 and "ON" or "OFF"
+                supd = update==1 and "ON" or "OFF"
 
-            self.addDir(name      = path+" [recursive="+srec+" , update="+supd+"]",
-                        params    = [("do","rootclic"),("rootpath",path),("viewmode","view"),],#paramètres
-                        action    = "rootfolders",#action
-                        iconimage = join(PIC_PATH,"settings.png"),#icone
-                        fanart    = join(PIC_PATH,"fanart-setting.png"),
-                        #menucontextuel
-                        contextmenu   = [( __language__(30206),"Notification(TODO : scan folder,scan this folder now !)" ),
-                                         ( __language__(30207),"Container.Update(\"%s?action='rootfolders'&do='delroot'&delpath='%s'&viewmode='view'\",)"%(sys.argv[0],quote_plus(path.decode("utf8"))))
-                                         ]
-                        )
+                self.addDir(name      = "[COLOR=FF66CC00][B][ + ][/B][/COLOR] "+path.decode("utf8")+" [recursive="+srec+" , update="+supd+"]",
+                            params    = [("do","rootclic"),("rootpath",path),("viewmode","view"),("exclude","0")],#paramètres
+                            action    = "rootfolders",#action
+                            iconimage = join(PIC_PATH,"settings.png"),#icone
+                            fanart    = join(PIC_PATH,"fanart-setting.png"),
+                            #menucontextuel
+                            contextmenu   = [( __language__(30206),"Notification(TODO : scan folder,scan this folder now !)" ),
+                                             ( __language__(30207),"Container.Update(\"%s?action='rootfolders'&do='delroot'&delpath='%s'&exclude='1'&viewmode='view'\",)"%(sys.argv[0],quote_plus(path)))
+                                             ]
+                            )
+            else:
+                self.addDir(name      = "[COLOR=FFFF0000][B][ - ][/B][/COLOR] "+path.decode("utf8"),
+                            params    = [("do","rootclic"),("rootpath",path),("viewmode","view"),("exclude","1")],#paramètres
+                            action    = "rootfolders",#action
+                            iconimage = join(PIC_PATH,"settings.png"),#icone
+                            fanart    = join(PIC_PATH,"fanart-setting.png"),
+                            #menucontextuel
+                            contextmenu   = [( __language__(30207),"Container.Update(\"%s?action='rootfolders'&do='delroot'&delpath='%s'&exclude='0'&viewmode='view'\",)"%(sys.argv[0],quote_plus(path)))
+                                             ]
+                            )
         xbmcplugin.addSortMethod( int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE )
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="search")
         xbmcplugin.endOfDirectory( int(sys.argv[1]),updateListing=refresh)
@@ -574,21 +606,9 @@ class Main:
     def show_map(self):
         """get a google map for the given place (place is a string for an address, or a couple of gps lat/lon datas"""
         import geomaps
-##        from urllib import urlopen,quote
-        showmap = geomaps.main(DATA_PATH = DATA_PATH, place =self.args.place, picfile = join(unquote_plus(self.args.path),unquote_plus(self.args.filename)))
+        showmap = geomaps.main(datapath = DATA_PATH, place =self.args.place, picfile = join(unquote_plus(self.args.path),unquote_plus(self.args.filename)))
         showmap.doModal()
         del showmap
-
-##        response = xbmc.executeJSONRPC('''{ "jsonrpc": "2.0", "method": "XBMC.StartSlideshow", "parameter": "%s", "id": "1" }'''%join(DATA_PATH,unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension))
-##        
-##        print "response"
-##        print response
-##        html = urlopen(HTTP_API_url + "ClearSlideshow")
-##        html = urlopen(HTTP_API_url + "AddToSlideshow('%s')" % quote(join(DATA_PATH,unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension)) )
-##        print html.read()
-        #xbmc.executebuiltin( "ActivateWindow(12007)" )
-        #xbmc.executebuiltin( "SlideShow('%s',,notrandom)"% join(DATA_PATH,unquote_plus(self.args.filename).split(".")[0]+"_maps."+extension))
-        #xbmc.executebuiltin( "Notification(%s,Maps downloaded to %s)"%("MyPictures DB",join(DATA_PATH,"maps.jpg")))
 
     def prettydate(self,dateformat,datetuple):
         "Replace %a %A %b %B date string formater (see strftime format) by the day/month names for the given date tuple given"
@@ -909,13 +929,13 @@ class Main:
             context.append( (__language__(30060),"XBMC.RunPlugin(\"%s?action='locate'&filepath='%s'&viewmode='view'\" ,)"%(sys.argv[0],join(quote_plus(path),
                                                                                                                                                           quote_plus(filename)))))
 
-            #4 - si la photo contient des données GPS, la localiser sur une carte
-            coords = MPDB.getGPS(path,filename)
-            if coords:
-                #géolocalisation
-                context.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&path='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),
-                                                                                                                                                       quote_plus(path),
-                                                                                                                                                       quote_plus(filename))))
+##            #4 - si la photo contient des données GPS, la localiser sur une carte
+##            coords = MPDB.getGPS(path,filename)
+##            if coords:
+##                #géolocalisation
+##                context.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&path='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),
+##                                                                                                                                                       quote_plus(path),
+##                                                                                                                                                       quote_plus(filename))))
                                  
             #5 - les infos de la photo
             #context.append( ( "paramètres de l'addon","XBMC.ActivateWindow(virtualkeyboard)" ) )
@@ -935,16 +955,6 @@ class Main:
 if __name__=="__main__":
     m=Main()
     if not sys.argv[ 2 ]: #pas de paramètres : affichage du menu principal
-##        #montage ?
-##        smbpath= xbmcplugin.getSetting(int(sys.argv[1]),"sharepath")
-##        
-##        print smbpath.replace("smb:","")
-##        print xbmcplugin.getSetting(int(sys.argv[1]),"sharelogin")
-##        print xbmcplugin.getSetting(int(sys.argv[1]),"sharepass")
-##        print smbpath.replace("smb:","").replace("/","\\")
-##        MPDB.mount(mountpoint="w:",path="\\\\diskstation\\photos",
-##                   login=xbmcplugin.getSetting(int(sys.argv[1]),"sharelogin"),
-##                   password=xbmcplugin.getSetting(int(sys.argv[1]),"sharepass"))
         #set the debugging for the library
         MPDB.DEBUGGING = False
         # initialisation de la base :

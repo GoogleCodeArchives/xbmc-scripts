@@ -1,6 +1,8 @@
 import xbmcgui
-import urllib2,urllib
-import os.path
+from urllib2 import Request, urlopen
+from urllib import urlencode
+#import urllib2,urllib
+from os.path import join,isfile,basename
 from traceback import print_exc
 
 ACTION_CONTEXT_MENU = [117]
@@ -18,7 +20,7 @@ class main(xbmcgui.Window):
         self.ZMAX = 21
         self.ZMIN = 0
         
-        self.DATA_PATH = kwargs["DATA_PATH"]
+        self.DATA_PATH = kwargs["datapath"]
         self.place = kwargs["place"]
         self.picfile = kwargs["picfile"]
         self.draw()
@@ -28,13 +30,13 @@ class main(xbmcgui.Window):
     def draw(self):
         width = self.getWidth()
         height = self.getHeight()
-        print width,height
         self.ctrl_map = xbmcgui.ControlImage(0,0,width,height,"",aspectRatio=2)
         self.ctrl_pic = xbmcgui.ControlImage(50, 50, 200, 200,"", aspectRatio=2)
-        self.lbl_info = xbmcgui.ControlLabel(20,20,width-40,20,"info",'font13')
+        self.lbl_info = xbmcgui.ControlLabel(20,20,width-40,20,"info",'font13',alignment=2)
         self.addControl(self.ctrl_map)
         self.addControl(self.ctrl_pic)
         self.addControl(self.lbl_info)
+        self.lbl_info.setLabel("Use UP and DOWN arrow to zoom in / out")
 
     def zoom(self,way,step=1):
         if way=="+":
@@ -67,20 +69,21 @@ class main(xbmcgui.Window):
                      #Reporting Parameters:
                      "sensor" : "false" #is there a gps on system ? (req)
                      }
-        pDialog = xbmcgui.DialogProgress()
-        ret = pDialog.create("geomaps","Getting maps for coordinates :",self.place)
-        pDialog.update(0,"Creating connection...")
+        #pDialog = xbmcgui.DialogProgress()
+        #ret = pDialog.create("geomaps","Getting maps for coordinates :",self.place)
+        #pDialog.update(0,"Creating connection...")
 
         param_dic["markers"]=param_dic["markers"]%self.place
         request_headers = { 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; fr; rv:1.9.2.10) Gecko/20100914 Firefox/3.6.10' }
-        request = urllib2.Request(static_url+urllib.urlencode(param_dic), None, request_headers)
-        urlfile = urllib2.urlopen(request)
+        request = Request(static_url+urlencode(param_dic), None, request_headers)
+        urlfile = urlopen(request)
 
         extension = urlfile.info().getheader("Content-Type","").split("/")[1]
         filesize = int(urlfile.info().getheader("Content-Length",""))
-        mapfile = os.path.join(self.DATA_PATH,os.path.abspath(self.picfile).split(".")[0]+"_maps%s."%self.zoomlevel+extension)
-        print mapfile
-        if not os.path.isfile(mapfile):
+
+        mapfile = join(self.DATA_PATH,basename(self.picfile).split(".")[0]+"_maps%s."%self.zoomlevel+extension)
+        #print mapfile
+        if not isfile(mapfile):
             #mapfile is not downloaded yet, download it now...
             try:
                 f=open(mapfile,"wb")
@@ -88,9 +91,10 @@ class main(xbmcgui.Window):
                 print_exc()
             for i in range(1+(filesize/10)):
                 f.write(urlfile.read(10))
-                pDialog.update(int(100*(float(i*10)/filesize)),"downloading map","%0.2f%%"%(100*(float(i*10)/filesize)))
+                #pDialog.update(int(100*(float(i*10)/filesize)),"downloading map","%0.2f%%"%(100*(float(i*10)/filesize)))
+                self.lbl_info.setLabel("getting map... (%0.2f%%)"%(100*(float(i*10)/filesize)))
             urlfile.close()
-            pDialog.close()
+            #pDialog.close()
             try:
                 f.close()
             except:
@@ -98,6 +102,7 @@ class main(xbmcgui.Window):
                 pass
         self.set_pic(self.picfile)
         self.set_map(mapfile)
+        self.lbl_info.setLabel("Zoom level %s"%self.zoomlevel)
         
     def set_map(self,mapfile):
         self.ctrl_map.setImage(mapfile)
@@ -115,5 +120,6 @@ class main(xbmcgui.Window):
         elif action in ACTION_DOWN:
             self.zoom("-")
         else:
-            self.lbl_info.setLabel("%s / %s"%(action.getButtonCode(),action.getId()))
+            #self.lbl_info.setLabel("%s / %s"%(action.getButtonCode(),action.getId()))
+            pass
             
