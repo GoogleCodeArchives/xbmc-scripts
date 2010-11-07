@@ -22,43 +22,49 @@ usage :
           1- full path to the database
           2- if --rootpath, the path to scan for pictures
 """
-import os,sys
-try:
-    import xbmc
-    makepath=xbmc.translatePath(os.path.join)
-except:
-    makepath=os.path.join
-home = os.getcwd().replace(';','')
+#import sys
+from sys import path as syspath,modules as sysmodules
+from os import getcwd,stat,listdir as oslistdir
+from os.path import join,splitext,walk,basename,normpath,isdir,sep as separator,dirname as osdirname
+
+home = getcwd().replace(';','')
+
 #these few lines are taken from AppleMovieTrailers script
 # Shared resources
-BASE_RESOURCE_PATH = makepath( home, "resources" )
+BASE_RESOURCE_PATH = join( home, "resources" )
 DATA_PATH = xbmc.translatePath( "special://profile/addon_data/plugin.image.mypicsdb/")
-PIC_PATH = makepath( BASE_RESOURCE_PATH, "images")
+PIC_PATH = join( BASE_RESOURCE_PATH, "images")
 DB_PATH = xbmc.translatePath( "special://database/")
-sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
-# append the proper platforms folder to our path, xbox is the same as win32
-env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
-sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
+syspath.append( join( BASE_RESOURCE_PATH, "lib" ) )
 
 
 
-import xbmc,xbmcgui
+import xbmc,xbmcgui,xbmcaddon
+Addon = xbmcaddon.Addon(id='plugin.image.mypicsdb')
 from urllib import unquote_plus
 from traceback import print_exc,format_tb
-if sys.modules.has_key("MypicsDB"):
-    del sys.modules["MypicsDB"]
+if sysmodules.has_key("MypicsDB"):
+    del sysmodules["MypicsDB"]
 import MypicsDB as MPDB
     
 global pictureDB
-pictureDB = os.path.join(DB_PATH,"MyPictures.db")
+pictureDB = join(DB_PATH,"MyPictures.db")
 
 from time import strftime
-from traceback import print_exc
  
 from DialogAddonScan import AddonScan
 from file_item import Thumbnails  
+global Exclude_folders #TODO
+Exclude_folders = []
+for path,recursive,update,exclude in MPDB.RootFolders():
+    if exclude:
+        print path
+        Exclude_folders.append(normpath(path))
 
-listext = [".JPG",".TIF",".PNG",".GIF",".BMP",".JPEG"]
+global listext
+listext=[]
+for ext in Addon.getSetting("picsext").split("|"):
+    listext.append("." + ext.replace(".","").upper())
 
 def main2():
     #get active window
@@ -85,8 +91,9 @@ def main2():
         scan.update(0,0,"MyPicture Database [Preparing]","please wait...")
         count_files(unquote_plus(options.rootpath))
         try:
-            #browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None)
-            browse_folder(unquote_plus(options.rootpath),parentfolderID=None,recursive=options.recursive,updatecontent=options.update,rescan=True,updatefunc=scan,dateadded = dateadded )
+            #browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,addpics=True,delpics=True,rescan=False,updatefunc=None)
+            #browse_folder(unquote_plus(options.rootpath),parentfolderID=None,recursive=options.recursive,updatepics=options.update,addpics=True,delpics=True,rescan=False,updatefunc=scan,dateadded = dateadded )
+            browse_folder(unquote_plus(options.rootpath),parentfolderID=None,recursive=options.recursive,updatepics=True,addpics=True,delpics=True,rescan=False,updatefunc=scan,dateadded = dateadded )
         except:
             print_exc()
         scan.close()
@@ -99,66 +106,84 @@ def main2():
             scan.create( "MyPicture Database " )
             scan.update(0,0,"MyPicture Database [Preparing]","please wait...")
             
-            for path,recursive,update in listofpaths:
-                count_files(unquote_plus(path))
-                try:
-                    #browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None)
-                    browse_folder(unquote_plus(path),parentfolderID=None,recursive=recursive==1,updatecontent=update==1,rescan=False,updatefunc=scan,dateadded = dateadded)
-                except:
-                    print_exc()
+            for path,recursive,update,exclude in listofpaths:
+                if exclude==0:
+                    count_files(unquote_plus(path))
+                    try:
+                        #browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,rescan=False,updatefunc=None)
+                        browse_folder(unquote_plus(path),parentfolderID=None,recursive=recursive==1,updatepics=update==1,addpics=True,delpics=True,rescan=False,updatefunc=scan,dateadded = dateadded)
+                    except:
+                        print_exc()
+                else:
+                    print "Exclude path"
+                    print path
             scan.close()
             
 
 
 
-global compte,comptenew,cptscanned,cptdelete
-compte=comptenew=cptscanned=cptdelete=0
+global compte,comptenew,cptscanned,cptdelete,cptchanged
+compte=comptenew=cptscanned=cptdelete=cptchanged=0
 global totalfiles,totalfolders
 totalfiles=totalfolders=0
 
 def processDirectory ( args, dirname, filenames ):
+    print dirname
+    if dirname in Exclude_folders:#si le dirname est un chemin exclu, on sort
+        return
     global totalfolders,totalfiles
     totalfolders=totalfolders+1
     for filename in filenames:
-        if os.path.splitext(filename)[1].upper() in listext:
+        if splitext(filename)[1].upper() in listext:
             totalfiles=totalfiles+1
 
 def count_files ( path ):
     global totalfiles,totalfolders
     totalfiles=totalfolders=0
-    os.path.walk(path, processDirectory, None )
-    print totalfiles,totalfolders
+    if path in Exclude_folders: #si le path est un chemin exclu, on sort
+        return
+    walk(path, processDirectory, None )
+
     
-def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None,dateadded = strftime("%Y-%m-%d %H:%M:%S")):
+def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,addpics=True,delpics=True,rescan=False,updatefunc=None,dateadded = strftime("%Y-%m-%d %H:%M:%S")):
     """parcours le dossier racine 'dirname'
     - 'recursive' pour traverser récursivement les sous dossiers de 'dirname'
-    - 'update' pour forcer le scan des images qu'elles soient déjà en base ou pas
+    - 'updatepics' pour mettre à jour une image qui a changé
+    - 'rescan' pour forcer le scan des images qu'elles soient déjà en base ou pas
     - 'updatefunc' est une fonction appelée pour indiquer la progression. Les paramètres sont (pourcentage(int),[ line1(str),line2(str),line3(str) ] )
 """
-    
-    #######
-    # STEP 1 : list all files in directory
-    #######
-    try:
-        listdir = os.listdir(dirname)
-    except:
-        tb = sys.exc_info()[2]
-        tbinfo = format_tb(tb)[0]
-        pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
-                str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-        MPDB.log( pymsg )
-        listdir=[]
-        
-    global compte,comptenew,cptscanned,cptdelete
+    global compte,comptenew,cptscanned,cptdelete,cptchanged
     cpt=0
     #on liste les fichiers jpg du dossier
     listfolderfiles=[]
 
     #######
+    # STEP 0 : dirname should not be one of those which are excluded from scan !
+    #######
+    # TODO : if the path was already scanned before, we need to remove previously added pictures AND subfolders
+    print "######"
+    print dirname
+    if dirname in Exclude_folders:
+        print "##########"
+        cptdelete = cptdelete + MPDB.RemovePath(dirname)
+        return
+    #######
+    # STEP 1 : list all files in directory
+    #######
+    try:
+        listdir = oslistdir(dirname)
+    except:
+        print_exc()
+        MPDB.log( "Error while trying to get directory content" )
+        listdir=[]
+        
+
+
+    #######
     # STEP 2 : Keep only the files with extension...
     #######
     for f in listdir:
-        if os.path.splitext(f)[1].upper() in listext:
+        if splitext(f)[1].upper() in listext:
             listfolderfiles.append(f)
 
    
@@ -169,14 +194,14 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
     # STEP 3 : If folder contains pictures, create folder in database
     #######
     #on ajoute dans la table des chemins le chemin en cours
-    PFid = MPDB.DB_folder_insert(os.path.basename(dirname) or os.path.dirname(dirname).split(os.path.sep)[-1],
+    PFid = MPDB.DB_folder_insert(basename(dirname) or osdirname(dirname).split(separator)[-1],
                             dirname,
                             parentfolderID,
                             listfolderfiles and "1" or "0"#i
                             )
     if listfolderfiles:#si le dossier contient des fichiers jpg...
 ##        #on ajoute dans la table des chemins le chemin en cours
-##        PFid = DB_folder_insert(os.path.basename(dirname) or os.path.dirname(dirname).split(os.path.sep)[-1],
+##        PFid = DB_folder_insert(basename(dirname) or osdirname(dirname).split(separator)[-1],
 ##                                dirname,
 ##                                parentfolderID,
 ##                                i#"1" if listfolderfiles else "0"
@@ -185,74 +210,75 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
         # STEP 4 : browse all pictures
         #######
         #puis on parcours toutes les images du dossier en cours
-        for picfile in listfolderfiles:#... on parcours tous les jpg
+        for picfile in listfolderfiles:#... on parcours tous les jpg du dossier
             cptscanned = cptscanned+1
             cpt = cpt + 1
             ###if updatefunc and updatefunc.iscanceled(): return#dialog progress has been canceled
             #on enlève l'image traitée de listdir
             listdir.pop(listdir.index(picfile))
-            #picture is not yet inside database
-            if not (picfile in listDBdir) or rescan:
-                #if updatefunc: updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),"Adding from %s to Database :"%dirname,picfile)
-                if updatefunc:
-                    #updatefunc.update(int(100 * float(cpt)%len(listfolderfiles)),
-                    updatefunc.update(int(100*float(cptscanned)/float(totalfiles)),#cptscanned-(cptscanned/100)*100,
-                                      cptscanned/100,#TODO : compter les dossiers parcourus pour la 2ieme barre
-                                      "MyPicture Database [Adding] (%0.2f%%)"%(100*float(cptscanned)/float(totalfiles)),
-                                      picfile)
-                #préparation d'un dictionnaire pour les champs et les valeurs
-                # c'est ce dictionnaire qui servira à  remplir la table fichiers
-                ##picentry = { "strPath":dirname, "strFilename":picfile }
-                picentry = { "idFolder":PFid, "strPath":dirname.decode("utf8"),"strFilename":picfile.decode("utf8"),"UseIt":1,"sha":MPDB.fileSHA(os.path.join(dirname,picfile)),"DateAdded":strftime("%Y-%m-%d %H:%M:%S") }
+            if not rescan: #si pas de rescan
+                #les images ne sont pas à scanner de force
+                if picfile in listDBdir: #si l'image est déjà en base
+                    #l'image est déjà en base de donnée
+                    if updatepics: #si le paramètre est configuré pour mettre à jour les metas d'une photo
+                        #Il faut mettre à jour les images...
+                        if not (MPDB.fileSHA(join(dirname,picfile))==MPDB.getFileSha(dirname,picfile)): #si l'image a changé depuis qu'elle est en base
+                            #Scan les metas et ajoute l'image avec un paramètre de mise à jour = true
+                            DoScan = True
+                            update = True
+                            straction = "Updating"
+                            cptchanged = cptchanged + 1
+                        else:
+                            DoScan = False
+                            straction = "Passing"
+                            #mais l'image n'a pas changée. Donc on passe
+                    else:
+                        DoScan = False
+                        straction = "Passing"
+                        #mais on ne met pas à jour les photos. Donc on passe
+                else:
+                    DoScan = True
+                    update = False
+                    straction = "Adding"
+                    comptenew = comptenew + 1
+                    #l'image n'est pas dans la base. On l'ajoute maintenant avec paramètre de mise à jour = false
+            else:
+                DoScan = True
+                update = True
+                straction = "Rescan"
+                #on rescan les photos donc on ajoute l'image avec paramètre de mise à jour = true
 
-                ### chemin de la miniature
-                thumbnails = Thumbnails()
-                picentry["Thumb"]=thumbnails.get_cached_picture_thumb( os.path.join(dirname,picfile) ).decode("utf8")
 
-                ###############################
-                #    getting  EXIF  infos     #
-                ###############################
-                #reading EXIF infos
-                #   (file fields are creating if needed)
+            if updatefunc:
+                updatefunc.update(int(100*float(cptscanned)/float(totalfiles)),#cptscanned-(cptscanned/100)*100,
+                                  cptscanned/100,
+                                  "MyPicture Database [%s] (%0.2f%%)"%(straction,100*float(cptscanned)/float(totalfiles)),
+                                  picfile)
+            if DoScan:
+                
+                picentry = { "idFolder":PFid,
+                             "strPath":dirname.decode("utf8"),
+                             "strFilename":picfile.decode("utf8"),
+                             "UseIt":1,
+                             "sha":str(MPDB.fileSHA(join(dirname,picfile))),
+                             "DateAdded":dateadded,
+                             "mtime":str(stat(join(dirname,picfile)).st_mtime)}
+
+                #récupère les infos EXIF/IPTC
+                picentry.update(get_metas(dirname,picfile))
+
+                #insertion des données de la photo dans la table 'files'
                 try:
-                    exif = MPDB.get_exif(os.path.join(dirname,picfile).encode('utf8'))
-                except UnicodeDecodeError:
-                    exif = MPDB.get_exif(os.path.join(dirname,picfile))
-                #EXIF infos are added to a dictionnary
-                picentry.update(exif)
-
-                ###############################
-                #    getting  IPTC  infos     #
-                ###############################
-                iptc = MPDB.get_iptc(dirname,picfile)
-                #IPTC infos are added to a dictionnary
-                picentry.update(iptc)
-
-                ###############################
-                #  Insert infos in database   #
-                ###############################
-
-                #insertion des données dans la table
-                try:
-                    MPDB.DB_file_insert(dirname,picfile,picentry,rescan)
-                    #comptage
-                    comptenew=comptenew+1
+                    MPDB.DB_file_insert(dirname,picfile,picentry,update)
                 except MPDB.MyPictureDB:
                     pass
 
                 
-            else: # the file is already in DB, we are passing it
-                if updatefunc:
-                    updatefunc.update(int(100*float(cptscanned)/float(totalfiles)),#cptscanned-(cptscanned/100)*100,
-                                      cptscanned/100,
-                                      "MyPicture Database [Passing] (%0.2f%%)"%(100*float(cptscanned)/float(totalfiles)),
-                                      picfile)
-                pass
             if picfile in listDBdir:
                 listDBdir.pop(listDBdir.index(picfile))
                 
         #Now if the database contain some more pictures assign for this folder, we need to delete them if 'update' setting is true
-        if listDBdir and updatecontent: #à l'issu si listdir contient encore des fichiers, c'est qu'ils sont en base mais que le fichier n'existe plus physiquement.
+        if listDBdir :#and updatepics: #à l'issu si listdir contient encore des fichiers, c'est qu'ils sont en base mais que le fichier n'existe plus physiquement.
             for f in listDBdir: #on parcours les images en DB orphelines
                 cptdelete=cptdelete+1
                 if updatefunc:
@@ -279,13 +305,39 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False
         MPDB.log( "traitement des sous dossiers de :")
         MPDB.log( dirname )
         for item in listdir:
-            if os.path.isdir(os.path.join(dirname,item)):#un directory
-                #browse_folder(dirname,parentfolderID=None,recursive=True,updatecontent=False,rescan=False,updatefunc=None)
-                browse_folder(os.path.join(dirname,item),PFid,recursive,updatecontent,rescan,updatefunc,dateadded)
+            if isdir(join(dirname,item)):#un directory
+                #browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,rescan=False,updatefunc=None)
+                browse_folder(join(dirname,item),PFid,recursive,updatepics,addpics,delpics,rescan,updatefunc,dateadded)
             else:
                 #listdir contenait un fichier mais pas un dossier
                 # inutilisé... on passe pour le moment
                 pass
+            
+def get_metas(dirname,picfile):
+    picentry = {}
+    ### chemin de la miniature
+    thumbnails = Thumbnails()
+    picentry["Thumb"]=thumbnails.get_cached_picture_thumb( join(dirname,picfile) ).decode("utf8")
+
+    ###############################
+    #    getting  EXIF  infos     #
+    ###############################
+    #reading EXIF infos
+    #   (file fields are creating if needed)
+    try:
+        exif = MPDB.get_exif(join(dirname,picfile).encode('utf8'))
+    except UnicodeDecodeError:
+        exif = MPDB.get_exif(join(dirname,picfile))
+    #EXIF infos are added to a dictionnary
+    picentry.update(exif)
+
+    ###############################
+    #    getting  IPTC  infos     #
+    ###############################
+    iptc = MPDB.get_iptc(dirname,picfile)
+    #IPTC infos are added to a dictionnary
+    picentry.update(iptc)
+    return picentry
     
 def usage():
     print usagestr
@@ -293,7 +345,10 @@ def usage():
 if __name__=="__main__":
     #commande dos de test :
     #F:\Apps\Python24>python scanpath.py --rootpath --recursive --update 'c:\path to database\db.db' 'path to scan'
+    #récupération des chemins à exclure TODO
+
 
     #1- récupérer le paramètre
     main2()
-    xbmc.executebuiltin( "Notification(MyPictures Database,%s scanned / %s added / %s removed)"%(cptscanned,comptenew,cptdelete) )
+    
+    xbmc.executebuiltin( "Notification(MyPictures Database,%s scanned / %s added / %s removed / %s changed)"%(cptscanned,comptenew,cptdelete,cptchanged) )

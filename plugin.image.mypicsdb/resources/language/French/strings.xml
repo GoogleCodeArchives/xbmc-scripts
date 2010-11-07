@@ -10,12 +10,12 @@
     <string id="30006">Janv.|Fév.|Mars|Avr.|Mai|Juin|Juil.|Août|Sept.|Oct.|Nov.|Déc.</string>
     <string id="30007">Lundi|Mardi|Mercredi|Jeudi|Vendredi|Samedi|Dimanche</string>
     <string id="30008">Janvier|Février|Mars|Avril|Mai|Juin|Juillet|Août|Septembre|Octobre|Novembre|Décembre</string>
-    
+    <string id="30009"></string>
 
     <string id="30020">Dossier images</string>
     <string id="30021">Retirer de la base les images manquantes</string>
     <string id="30022">Scan récursif (tous les sous dossiers sont scannés à la recherche d'images)</string>
-
+    <string id="30023">Extensions des images</string>
     <string id="30024">Effectuer le scan au démarrage</string><!-- setting -->
     <string id="30025">Réinitialiser la base avant le scan</string><!-- setting -->
     <string id="30026">Utiliser l'image comme fanart pour les images</string><!-- setting -->
@@ -46,9 +46,9 @@
     <string id="30114">Saisir manuellement une date</string>
     <string id="30115">Mot à rechercher</string>
     <string id="30116">%s résultats pour '%s' dans '%s'</string> <!-- %s replaced respectively by : number of results, searched term, field where found -->
-    <string id="30116">La recherche pour '%s' n'a retourné aucun résultat dans toute la base</string> <!-- %s replaced by searched term-->
     <string id="30117">Date de début de période</string>
     <string id="30118">Date de fin de période</string>
+    <string id="30119">La recherche pour '%s' n'a retourné aucun résultat dans toute la base</string> <!-- %s replaced by searched term-->
     
     <string id="30150">Collections</string>
     <string id="30151">Retirer de la collection</string>
@@ -66,7 +66,7 @@
     
     <string id="30201">Dossier à scanner</string>
     <string id="30202">Parcourir ce dossier de manière récursive</string>
-    <string id="30203">Supprimer les entrées de la base si les images n'existe pas</string>
+    <string id="30203">Supprimer les entrées de la base si les images n'existent pas</string>
     <string id="30204">Chemin ajouté !</string>
     <string id="30205">Chemin supprimé !</string>
     <string id="30206">Effectuer un scan maintenant</string>

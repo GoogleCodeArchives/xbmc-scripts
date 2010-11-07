@@ -38,12 +38,13 @@ DEBUGGING = True
 from time import strftime,strptime
 
 #traitement EXIF
-import EXIF
+##import EXIF
 #traitement IPTC
-if sys.modules.has_key("iptcinfo"):
-    del sys.modules['iptcinfo']
-from iptcinfo import IPTCInfo 
-from iptcinfo import c_datasets as IPTC_FIELDS
+##if sys.modules.has_key("iptcinfo"):
+##    del sys.modules['iptcinfo']
+##from iptcinfo import IPTCInfo 
+##from iptcinfo import c_datasets as IPTC_FIELDS
+
 #base de donnée SQLITE
 try:
     from pysqlite2 import dbapi2 as sqlite
@@ -151,7 +152,7 @@ def Make_new_base(DBpath,ecrase=True):
 
     #table 'files'
     try:
-        cn.execute("""CREATE TABLE files ( idFile integer primary key, idFolder integer, strPath text, strFilename text, DateAdded DATETIME, UseIt integer , sha text, Thumb text,
+        cn.execute("""CREATE TABLE files ( idFile integer primary key, idFolder integer, strPath text, strFilename text, DateAdded DATETIME, mtime text, UseIt integer , sha text, Thumb text,
                     CONSTRAINT UNI_FILE UNIQUE ("strPath","strFilename")
                                    )""")
     except Exception,msg:
@@ -257,7 +258,8 @@ def Make_new_base(DBpath,ecrase=True):
   ("idRoot" INTEGER  PRIMARY KEY NOT NULL,
    "path" TEXT UNIQUE NOT NULL,
    "recursive" INTEGER NOT NULL,
-   "remove" INTEGER NOT NULL)""")
+   "remove" INTEGER NOT NULL,
+   "exclude" INTEGER DEFAULT 0)""")
     except Exception,msg:
         if msg.args[0].startswith("table 'Rootpaths' already exists"):
             #cette exception survient lorsque la table existe déjà.
@@ -347,14 +349,14 @@ def DB_file_insert(path,filename,dictionnary,update=False):
     keys are DB fields ; values are DB values
     """
 
+    if update :#si update alors on doit updater et non pas insert
+        if DB_exists(path,filename):
+            print "file exists in database and rescan is set to true..."
+            print Request("""DELETE FROM files WHERE idFolder = (SELECT idFolder FROM folders WHERE FullPath='%s') AND strFilename='%s'"""%(path,filename))
     conn = sqlite.connect(pictureDB)
     cn=conn.cursor()
     #méthode dajout d'une ligne d'un coup
     conn.text_factory = str#sqlite.OptimizedUnicode
-    if update :#si update alors on doit updater et non pas insert
-        if DB_exists(path,filename):
-            print "file exists in database and rescan is set to true..."
-            Request("""DELETE FROM files WHERE idFolder = (SELECT idFolder FROM folders WHERE FullPath='%s') AND strFilename='%s'"""%(str(path),str(filename)))
     try:
         cn.execute( """INSERT INTO files('%s') values (%s)""" % ( "','".join(dictionnary.keys()), ",".join(["?"]*len(dictionnary.values())) ) ,
                                                                      dictionnary.values()
@@ -365,6 +367,8 @@ def DB_file_insert(path,filename,dictionnary,update=False):
         log( "%s - %s"%(Exception,msg) )
         log( """INSERT INTO files('%s') values (%s)""" % ( "','".join(dictionnary.keys()) , ",".join(["?"]*len(dictionnary.values())) ) )
         log( "" )
+        conn.commit()
+        cn.close()
         raise MyPictureDB
     
     # TRAITEMENT DES MOTS CLES (base keywords)
@@ -442,20 +446,23 @@ def get_children(folderid):
         list_child.extend(get_children(idchild))
     return list_child
 
-def DB_del_pic(picpath,picfile=None):
+def DB_del_pic(picpath,picfile=None): #TODO : revoir la vérif du dossier inutile
     """Supprime le chemin/fichier de la base. Si aucun fichier n'est fourni, toutes les images du chemin sont supprimées de la base"""
     if picfile:
         #on supprime le fichier de la base
         Request("""DELETE FROM files WHERE idFolder = (SELECT idFolder FROM folders WHERE FullPath='%s') AND strFilename='%s'"""%(picpath,picfile))
         #puis maintenant on vérifie que le chemin dossier est toujours utile ou alors on le supprime
-        Request("""DELETE FROM folders 
-    WHERE 
-      (SELECT DISTINCT idFolder FROM files 
-          WHERE idFolder=(
-              SELECT DISTINCT idFolder FROM folders WHERE FullPath='%s'
-                         )
-      )
-   or FullPath='%s'""" %(picpath,picpath) )
+        #1- on récupère l'ID du dossier de l'image supprimée
+        #2- on cherche si il y a des images avec cet id
+        #3- si oui : on laisse / si non : on supprime le dossier
+##        Request("""DELETE FROM folders 
+##    WHERE 
+##      (SELECT DISTINCT idFolder FROM files 
+##          WHERE idFolder=(
+##              SELECT DISTINCT idFolder FROM folders WHERE FullPath='%s'
+##                         )
+##      )
+##   or FullPath='%s'""" %(picpath,picpath) )
     else:
         idpath = Request("SELECT idFolder FROM folders WHERE FullPath = '%s'"%picpath)[0][0]#le premier du tuple à un élément
         log( idpath )
@@ -475,10 +482,10 @@ def fileSHA ( filepath ) :
         Output : string : contains the hexadecimal representation of the SHA of the file.
                           returns '0' if file could not be read (file not found, no read rights...)
     """
-    import sha
+    import md5#sha
     try:
         file = open(filepath,'rb')
-        digest = sha.new()
+        digest = md5.new()#sha.new()
         data = file.read(65536)
         while len(data) != 0:
             digest.update(data)
@@ -489,8 +496,15 @@ def fileSHA ( filepath ) :
         return '0'
     else:
         return digest.hexdigest()
-
-
+def getFileSha (path,filename):
+    #return the SHA in DB for the given picture
+    try:
+        return [row for row in Request( """select sha from files where strPath="%s" and strFilename="%s";"""%(path,filename))][0][0]
+    except:
+        return "0"
+def getFileMtime(path,filename):
+    #return the modification time 'mtime' in DB for the given picture
+    return [row for row in Request( """select mtime from files where strPath="%s" and strFilename="%s";"""%(path,filename))][0][0]
 def DB_deltree(picpath):
     pass
 
@@ -605,43 +619,52 @@ def getGPS(filepath,filename):
 
 def RootFolders():
     "return folders which are root for scanning pictures"
-    return [row for row in Request( """SELECT path,recursive,remove FROM Rootpaths""")]
+    return [row for row in Request( """SELECT path,recursive,remove,exclude FROM Rootpaths""")]
 
-def AddRoot(path,recursive,remove):
+def AddRoot(path,recursive,remove,exclude):
     "add the path root inside the database. Recursive is 0/1 for recursive scan, remove is 0/1 for removing files that are not physically in the place"
-    Request( """INSERT INTO Rootpaths(path,recursive,remove) VALUES ("%s",%s,%s)"""%(path,recursive,remove) )
+    Request( """INSERT INTO Rootpaths(path,recursive,remove,exclude) VALUES ("%s",%s,%s,%s)"""%(path,recursive,remove,exclude) )
 
 def getRoot(path):
-    return [row for row in Request( """SELECT path,recursive,remove FROM Rootpaths WHERE path='%s'"""%path )][0]
-    
+    return [row for row in Request( """SELECT path,recursive,remove,exclude FROM Rootpaths WHERE path='%s'"""%path )][0]
+
 def RemoveRoot(path):
     "remove the given rootpath, remove pics from this path, ..."
+    #first remove the path with all its pictures / subfolders / keywords / pictures in collections...
+    RemovePath(path)
+    #then remove the rootpath itself
+    Request( """DELETE FROM Rootpaths WHERE path="%s" """%path )    
+    
+def RemovePath(path):
+    "remove the given rootpath, remove pics from this path, ..."
+    cptremoved = 0
     #récupère l'id de ce chemin
-    idpath = Request( """SELECT idFolder FROM folders WHERE FullPath = "%s";"""%path )[0][0]
-##    log("removeroot")
-##    log( idpath )
-##    log(path)
+    try:
+        idpath = Request( """SELECT idFolder FROM folders WHERE FullPath = "%s";"""%path )[0][0]
+    except:
+        #le chemin n'est sans doute plus en base
+        return 0
+    #1- supprime les images situées directement sous la racine du chemin à supprimer
+    cptremoved = Request( """SELECT count(*) FROM files WHERE idFolder='%s'"""%idpath )[0][0]
     Request( """DELETE FROM files WHERE idFolder='%s'"""%idpath)
-    #1- récupère la liste des images de ce dossier
-    for idchild in all_children(idpath):#parcours tous les sous dossiers
+    #parcours tous les sous dossiers
+    for idchild in all_children(idpath):
         #supprime les keywordsinfiles
         Request( """DELETE FROM KeywordsInFiles WHERE idKW in (SELECT idKW FROM KeywordsInFiles WHERE idFile in (SELECT idFile FROM files WHERE idFolder='%s'))"""%idchild )
         #supprime les photos de files in collection
         Request( """DELETE FROM FilesInCollections WHERE idFile in (SELECT idFile FROM files WHERE idFolder='%s')"""%idchild )        
         #2- supprime toutes les images
+        cptremoved = cptremoved + Request( """SELECT count(*) FROM files WHERE idFolder='%s'"""%idchild)[0][0]
         Request( """DELETE FROM files WHERE idFolder='%s'"""%idchild)
         #3 - supprime ce sous dossier
         Request( """DELETE FROM folders WHERE idFolder='%s'"""%idchild)
-    #3- supprime le dossier
+    #4- supprime le dossier
     Request( """DELETE FROM folders WHERE idFolder='%s'"""%idpath)
-    #4- supprime le rootpath
-    Request( """DELETE FROM Rootpaths WHERE path="%s" """%path )
-    #5- supprime les 'périodes'
+    #5- supprime les 'périodes' si elles ne contiennent plus de photos (TODO : voir si on supprime les périodes vides ou pas)
     for periodname,datestart,dateend in ListPeriodes():
-        print Request( """SELECT count(*) FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN '%s' AND '%s'"""%(datestart,dateend) )[0][0]
-        print type(Request( """SELECT count(*) FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN '%s' AND '%s'"""%(datestart,dateend) )[0][0])
         if Request( """SELECT count(*) FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN '%s' AND '%s'"""%(datestart,dateend) )[0][0]==0:
             Request( """DELETE FROM Periodes WHERE PeriodeName='%s'"""%periodname )
+    return cptremoved
 
 ##########################################
 ##########################################
@@ -664,10 +687,12 @@ def get_exif(picfile):
     """
     get EXIF fields in the picture and return datas as key:value dictionnary
     """
+    from EXIF import process_file as EXIF_file
     #définition des champs EXIF que nous souhaitons utiliser
     EXIF_fields =["Image DateTime",
                 "Image Model",
                 "Image Orientation",
+                "Image Rating",
                 #"Image ResolutionUnit",
                 #"Image XResolution",
                 #"Image YResolution",
@@ -688,7 +713,8 @@ def get_exif(picfile):
     #ouverture du fichier
     f=open(picfile,"rb")
     #   et lecture des tags EXIF (on ne prend pas les makernotes, données constructeurs)
-    tags = EXIF.process_file(f,details=False)
+    #tags = EXIF.process_file(f,details=False)
+    tags = EXIF_file(f,details=False)
     #fermeture du fichier
     f.close()
     #pré-initialisation des champs à  mettre en base
@@ -729,6 +755,11 @@ def get_iptc(path,filename):
     """
     Get IPTC datas from picfile and return a dictionnary where keys are DB fields and values are DB values
     """
+    if sys.modules.has_key("iptcinfo"):
+        del sys.modules['iptcinfo']
+    from iptcinfo import IPTCInfo 
+    from iptcinfo import c_datasets as IPTC_FIELDS
+
     try:
         info = IPTCInfo(join(path,filename))
     except Exception,msg:
@@ -972,29 +1003,8 @@ def search_all_dates():# TODO check if it is really usefull (check 'get_pics_dat
 def get_pics_dates():
     """return all different dates from 'EXIF DateTimeOriginal'"""
     return [t for (t,) in Request("""SELECT DISTINCT strftime("%Y-%m-%d","EXIF DateTimeOriginal") FROM files WHERE "EXIF DateTimeOriginal"  NOT NULL ORDER BY "EXIF DateTimeOriginal" ASC""")]
-#Quelques requêtes SQLite
-#
-"""
-SELECT strPath,strFilename,"EXIF DateTimeOriginal" FROM files
-   WHERE strftime('%Y-%m-%d %H:%M:%S', "EXIF DateTimeOriginal") > datetime("2009-01-01","start of year","-1 year")
-   ORDER BY "EXIF DateTimeOriginal" ASC
-"""
-#toutes les photos entre 2 dates/heures données
-"""
-SELECT strPath,strFilename,"EXIF DateTimeOriginal" FROM files
-WHERE strftime('%Y-%m-%d %H:%M:%S', "EXIF DateTimeOriginal") BETWEEN strftime('%Y-%m-%d %H:%M:%S','2007-01-01 00:00:01') AND strftime('%Y-%m-%d %H:%M:%S','2007-12-31 23:59:59')
-ORDER BY "EXIF DateTimeOriginal" ASC
-"""
-#toutes les photos d'un mois d'une date donnée
-"""
-SELECT strPath,strFilename,"EXIF DateTimeOriginal" FROM files
-WHERE strftime('%Y-%m-%d %H:%M:%S', "EXIF DateTimeOriginal") BETWEEN date("2009-11-21","start of month") AND date("2009-11-21","start of month","+1 month")
-ORDER BY "EXIF DateTimeOriginal" ASC
-"""
-#les dossiers racines :
-"""select * from folders where ParentFolder is Null"""
-#les dossiers enfants d'un dossier
-"""select * from folders where ParentFolder = 78"""
+
+
 if __name__=="__main__":
     # initialisation de la base :
     pictureDB = join(DATA_PATH,"MyPictures.db")
@@ -1070,74 +1080,3 @@ if __name__=="__main__":
     print "suppression des images du dossier 'C:\images_test'"
     DB_del_pic(r"C:\images_test")
 
-##    IPaddress = "192.168.0.21"
-##    HTTP_API_url = "http://%s/xbmcCmds/xbmcHttp?command="%IPaddress
-##    import urllib
-##    print "Suppression du diaporama en cours..."
-##    print urllib.urlopen( HTTP_API_url + "ClearSlideshow()" ).read()
-##    print "Diaporama supprime !"
-##    print
-##    print "Ajout des fichiers dans le diaporama..."
-##    for path,filename in c:
-##        fichier = join(path,filename)
-##        print "\t%s"%fichier
-##        if isfile(fichier):
-##            html = urllib.urlopen(HTTP_API_url + "AddToSlideshow(%s)" % fichier).read()
-##            print html
-##        else:
-##            print "'%s' n'est pas un fichier valide"%fichier
-##    print "Lancement de la lecture..."
-##    print urllib.urlopen( HTTP_API_url + "ExecBuiltIn(SlideShow(,,notrandom))" ).read()
-##    print "Lecture démarrée !"
-##    print
-
-del xbmc
-##Tags EXIF :
-EXIF_tags =["Image YCbCrPositioning",
-            "Image ExifOffset",
-            "Image DateTime",
-            "Image Model",
-            "Image Orientation",
-            "Image ResolutionUnit",
-            "Image XResolution",
-            "Image Make",
-            "Image YResolution",
-            "EXIF ComponentsConfiguration",
-            "EXIF CustomRendered",
-            "EXIF FlashPixVersion",
-            "EXIF ShutterSpeedValue",
-            "EXIF ColorSpace",
-            "EXIF MeteringMode",
-            "EXIF ExifVersion",
-            "EXIF Flash",
-            "EXIF DateTimeOriginal",
-            "EXIF ApertureValue",
-            "EXIF InteroperabilityOffset",
-            "EXIF FNumber",
-            "EXIF FileSource",
-            "EXIF ExifImageLength",
-            "EXIF CompressedBitsPerPixel",
-            "EXIF ExposureBiasValue",
-            "EXIF ExposureMode",
-            "EXIF FocalPlaneYResolution",
-            "EXIF ExifImageWidth",
-            "EXIF FocalPlaneXResolution",
-            "EXIF SceneCaptureType",
-            "EXIF DigitalZoomRatio",
-            "EXIF DateTimeDigitized",
-            "EXIF FocalLength",
-            "EXIF ExposureTime",
-            "EXIF WhiteBalance",
-            "EXIF FocalPlaneResolutionUnit",
-            "EXIF MaxApertureValue",
-            "EXIF SensingMethod",
-            "JPEGThumbnail",
-            "Thumbnail JPEGInterchangeFormat",
-            "Thumbnail JPEGInterchangeFormatLength",
-            "Thumbnail Compression",
-            "Thumbnail ResolutionUnit",
-            "Thumbnail XResolution",
-            "Thumbnail YResolution"]
-
-
-            
