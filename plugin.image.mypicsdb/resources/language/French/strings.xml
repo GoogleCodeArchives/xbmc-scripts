@@ -71,11 +71,11 @@
     <string id="30205">Chemin supprimé !</string>
     <string id="30206">Effectuer un scan maintenant</string>
     <string id="30207">Supprimer ce chemin de la base</string>
-    <string id="30208">Ajouter un chemin à la base</string>
+    <string id="30208">[B]Ajouter[/B] un chemin à la base</string>
     <string id="30209">Photos récentes</string>
-    <string id="30210"></string>
-    <string id="30211"></string>
-    <string id="30212"></string>
+    <string id="30210">Retirer ce chemin des exclusions</string>
+    <string id="30211">Ajouter un dosser à [B]exclure[/B]</string>
+    <string id="30212">Exclure ce dossier de la base</string>
 
     <string id="30220">Géolocaliser</string>
     <string id="30221">Téléchargement de la carte...</string>

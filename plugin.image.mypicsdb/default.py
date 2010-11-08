@@ -293,17 +293,17 @@ class Main:
             childrenfolders=[row for row in MPDB.Request("SELECT idFolder,FolderName FROM folders WHERE ParentFolder is null")]
         else:#sinon on affiche les sous dossiers du dossier sélectionné
             childrenfolders=[row for row in MPDB.Request("SELECT idFolder,FolderName FROM folders WHERE ParentFolder='%s'"%self.args.folderid)]
-        total = len(childrenfolders)
 
         #on ajoute les dossiers 
         for idchildren, childrenfolder in childrenfolders:
+            path = MPDB.Request( "SELECT FullPath FROM folders WHERE idFolder = %s"%idchildren )[0][0]
             self.addDir(name      = "%s (%s %s)"%(childrenfolder.decode("utf8"),MPDB.countPicsFolder(idchildren),__language__(30050)), #libellé
                         params    = [("method","folders"),("folderid",str(idchildren)),("onlypics","non"),("viewmode","view")],#paramètres
                         action    = "showfolder",#action
                         iconimage = join(PIC_PATH,"folders.png"),#icone
                         fanart    = join(PIC_PATH,"fanart-folder.png"),
-                        contextmenu   = None, #menucontextuel
-                        total = total)#nb total d'éléments
+                        contextmenu   = [(__language__(30212),"Container.Update(\"%s?action='rootfolders'&do='addrootfolder'&addpath='%s'&exclude='1'&viewmode='view'\",)"%(sys.argv[0],quote_plus(path)) ),],#None, #menucontextuel
+                        total = len(childrenfolders))#nb total d'éléments
         
         #maintenant, on liste les photos si il y en a, du dossier en cours
         picsfromfolder = [row for row in MPDB.Request("SELECT p.FullPath,f.strFilename FROM files f,folders p WHERE f.idFolder=p.idFolder AND f.idFolder='%s'"%self.args.folderid)]
@@ -509,7 +509,7 @@ class Main:
                 update = dialog.yesno(__language__(30000),__language__(30203)) and 1 or 0 # Remove files from database if pictures does not exists?
                 #ajoute le rootfolder dans la base
                 MPDB.AddRoot(newroot,recursive,update,0)#TODO : traiter le exclude (=0 pour le moment) pour gérer les chemins à exclure
-                xbmc.executebuiltin( "Notification(%s,%s)"%(__language__(30000).encode("utf8"),__language__(30204).encode("utf8")) )
+                xbmc.executebuiltin( "Notification(%s,%s,%s,%s)"%(__language__(30000).encode("utf8"),__language__(30204).encode("utf8"),3000,join(os.getcwd(),"icon.png") ) )
                 if dialog.yesno(__language__(30000),__language__(30206)):#do a scan now ?
     ##                xbmc.executebuiltin( "RunScript(%s,%s%s--rootpath %s) "%( join( os.getcwd(), "scanpath.py"),
     ##                                                                          recursive==1 and "--recursive " or "",
@@ -522,14 +522,18 @@ class Main:
                                                                             )
                                          )
 
-                #xbmc.executebuiltin( "Notification(My Pictures Database,Folder has been scanned)" )
+                #xbmc.executebuiltin( "Notification(My Pictures Database,Folder has been scanned,%s,%s)"%(3000,join(os.getcwd(),"icon.png")))
+        elif self.args.do=="addrootfolder":
+            if str(self.args.exclude)=="1":
+                MPDB.AddRoot(unquote_plus(self.args.addpath),0,0,1)
+            
         elif self.args.do=="delroot":
             try:
                 MPDB.RemoveRoot( unquote_plus(self.args.delpath) )
             except IndexError,msg:
                 print IndexError,msg#pass
             #TODO : this notification does not work with é letters in the string....
-            #xbmc.executebuiltin( "Notification(%s,%s)"%(__language__(30000),__language__(30205)))#+":".encode("utf8")+unquote_plus(self.args.delpath)) )
+            #xbmc.executebuiltin( "Notification(%s,%s,%s,%s)"%(__language__(30000),__language__(30205),3000,join(os.getcwd(),"icon.png")))#+":".encode("utf8")+unquote_plus(self.args.delpath)) )
         elif self.args.do=="rootclic":
             #dialog = xbmcgui.Dialog()
             #if dialog.yesno(__language__(30000),__language__(30206)):#do a scan now ?
@@ -545,7 +549,7 @@ class Main:
                                                                           quote_plus(path)
                                                                         )
                                      )
-                #xbmc.executebuiltin( "Notification(My Pictures Database,Folder has been scanned)" )
+                #xbmc.executebuiltin( "Notification(My Pictures Database,Folder has been scanned,3000,%s)"%join(os.getcwd(),"icon.png") )
             else:#clic sur un chemin à exclure...
                 pass
         elif self.args.do=="scanall":
@@ -553,52 +557,67 @@ class Main:
             return
         else:
             refresh=False
-        rootfolders = MPDB.RootFolders()
+
+        excludefolders=[]
+        includefolders=[]
+        for path,recursive,update,exclude in MPDB.RootFolders():
+            if exclude:
+                excludefolders.append([path,recursive,update])
+            else:
+                includefolders.append([path,recursive,update])
+
+        #ajout d'un item pour ajouter un rootpath
         self.addDir(name      = __language__(30208),#add a root path
                     params    = [("do","addroot"),("viewmode","view"),("exclude","0")],#paramètres
                     action    = "rootfolders",#action
                     iconimage = join(PIC_PATH,"newsettings.png"),#icone
                     fanart    = join(PIC_PATH,"fanart-setting.png"),
                     contextmenu   = None)#menucontextuel
-        if len(rootfolders):
-            self.addDir(name      = "Add a folder to EXCLUDE",#add a folder to exclude
-                        params    = [("do","addroot"),("viewmode","view"),("exclude","1")],#paramètres
-                        action    = "rootfolders",#action
-                        iconimage = join(PIC_PATH,"newsettings.png"),#icone
-                        fanart    = join(PIC_PATH,"fanart-setting.png"),
-                        contextmenu   = None)#menucontextuel            
-        if len(rootfolders) > 1:
+        
+        #ajout d'un item pour scanner tous les rootpaths (si il y en a au moins 2)
+        if len(includefolders) > 1:
             self.addDir(name      = "Scan all roots paths",#scan all distinct root paths
                         params    = [("do","scanall"),("viewmode","view"),],#paramètres
                         action    = "rootfolders",#action
                         iconimage = join(PIC_PATH,"settings.png"),#icone
                         fanart    = join(PIC_PATH,"fanart-setting.png"),
                         contextmenu   = None)#menucontextuel
-        for path,recursive,update,exclude in rootfolders:
-            if exclude==0:
-                srec = recursive==1 and "ON" or "OFF"
-                supd = update==1 and "ON" or "OFF"
+            
+        #on ajoute les rootpath à scanner...        
+        for path,recursive,update in includefolders:
+            srec = recursive==1 and "ON" or "OFF"
+            supd = update==1 and "ON" or "OFF"
 
-                self.addDir(name      = "[COLOR=FF66CC00][B][ + ][/B][/COLOR] "+path.decode("utf8")+" [recursive="+srec+" , update="+supd+"]",
-                            params    = [("do","rootclic"),("rootpath",path),("viewmode","view"),("exclude","0")],#paramètres
-                            action    = "rootfolders",#action
-                            iconimage = join(PIC_PATH,"settings.png"),#icone
-                            fanart    = join(PIC_PATH,"fanart-setting.png"),
-                            #menucontextuel
-                            contextmenu   = [( __language__(30206),"Notification(TODO : scan folder,scan this folder now !)" ),
-                                             ( __language__(30207),"Container.Update(\"%s?action='rootfolders'&do='delroot'&delpath='%s'&exclude='1'&viewmode='view'\",)"%(sys.argv[0],quote_plus(path)))
-                                             ]
-                            )
-            else:
-                self.addDir(name      = "[COLOR=FFFF0000][B][ - ][/B][/COLOR] "+path.decode("utf8"),
-                            params    = [("do","rootclic"),("rootpath",path),("viewmode","view"),("exclude","1")],#paramètres
-                            action    = "rootfolders",#action
-                            iconimage = join(PIC_PATH,"settings.png"),#icone
-                            fanart    = join(PIC_PATH,"fanart-setting.png"),
-                            #menucontextuel
-                            contextmenu   = [( __language__(30207),"Container.Update(\"%s?action='rootfolders'&do='delroot'&delpath='%s'&exclude='0'&viewmode='view'\",)"%(sys.argv[0],quote_plus(path)))
-                                             ]
-                            )
+            self.addDir(name      = "[COLOR=FF66CC00][B][ + ][/B][/COLOR] "+path.decode("utf8")+" [recursive="+srec+" , update="+supd+"]",
+                        params    = [("do","rootclic"),("rootpath",path),("viewmode","view"),("exclude","0")],#paramètres
+                        action    = "rootfolders",#action
+                        iconimage = join(PIC_PATH,"settings.png"),#icone
+                        fanart    = join(PIC_PATH,"fanart-setting.png"),
+                        #menucontextuel
+                        contextmenu   = [( __language__(30206),"Notification(TODO : scan folder,scan this folder now !,3000,%s)"%join(os.getcwd(),"icon.png") ),
+                                         ( __language__(30207),"Container.Update(\"%s?action='rootfolders'&do='delroot'&delpath='%s'&exclude='1'&viewmode='view'\",)"%(sys.argv[0],quote_plus(path)))
+                                         ]
+                        )
+        #ajout d'un item pour ajouter un chemin à exclure (si au moins un chemin à inclure existe)
+        if len(includefolders)>0: 
+            self.addDir(name      = __language__(30211),#add a folder to exclude
+                        params    = [("do","addroot"),("viewmode","view"),("exclude","1")],#paramètres
+                        action    = "rootfolders",#action
+                        iconimage = join(PIC_PATH,"newsettings.png"),#icone
+                        fanart    = join(PIC_PATH,"fanart-setting.png"),
+                        contextmenu   = None)#menucontextuel
+            
+        #on ajoute les rootpaths à exclure...
+        for path,recursive,update in excludefolders:
+            self.addDir(name      = "[COLOR=FFFF0000][B][ - ][/B][/COLOR] "+path.decode("utf8"),
+                        params    = [("do","rootclic"),("rootpath",path),("viewmode","view"),("exclude","1")],#paramètres
+                        action    = "rootfolders",#action
+                        iconimage = join(PIC_PATH,"settings.png"),#icone
+                        fanart    = join(PIC_PATH,"fanart-setting.png"),
+                        #menucontextuel
+                        contextmenu   = [( __language__(30210),"Container.Update(\"%s?action='rootfolders'&do='delroot'&delpath='%s'&exclude='0'&viewmode='view'\",)"%(sys.argv[0],quote_plus(path)))
+                                         ]
+                        )
         xbmcplugin.addSortMethod( int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE )
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="search")
         xbmcplugin.endOfDirectory( int(sys.argv[1]),updateListing=refresh)
@@ -668,9 +687,10 @@ class Main:
             namecollection = listcollection[rets]
         #3 associe en base l'id du fichier avec l'id de la collection
         MPDB.addPicToCollection( namecollection,unquote_plus(self.args.path),unquote_plus(self.args.filename) )
-        xbmc.executebuiltin( "Notification(%s,%s %s)"%(__language__(30000).encode("utf8"),
+        xbmc.executebuiltin( "Notification(%s,%s %s,%s,%s)"%(__language__(30000).encode("utf8"),
                                                        __language__(30154).encode("utf8"),
-                                                       namecollection)
+                                                       namecollection,
+                                                       3000,join(os.getcwd(),"icon.png"))
                              )
     def add_folder_to_collection(self):
         listcollection = ["[[%s]]"%__language__(30157)]+[col[0] for col in MPDB.ListCollections()]
@@ -695,9 +715,10 @@ class Main:
         filelist = self.show_pics() #on récupère les photos correspondantes à la vue
         for path,filename in filelist: #on les ajoute une par une
             MPDB.addPicToCollection( namecollection,path,filename )
-        xbmc.executebuiltin( "Notification(%s,%s %s)"%(__language__(30000).encode("utf8"),
+        xbmc.executebuiltin( "Notification(%s,%s %s,%s,%s)"%(__language__(30000).encode("utf8"),
                                                        __language__(30161).encode("utf8")%len(filelist),
-                                                       namecollection)
+                                                       namecollection,
+                                                       3000,join(os.getcwd(),"icon.png"))
                              )
         
     def remove_collection(self):
@@ -813,7 +834,7 @@ class Main:
                 ok = dialog.yesno(__language__(30000),"Archive '%s' already exists in"%basename(destination),dirname(destination), "Overwrite ?")
                 if not ok:
                     #todo, ask for another name and if cancel, cancel the zip process as well
-                    xbmc.executebuiltin( "Notification(My Picture Database,Archiving pictures canceled.,File already exists)" )
+                    xbmc.executebuiltin( "Notification(My Picture Database,Archiving pictures canceled.,File already exists,%s,%s)"%(3000,join(os.getcwd(),"icon.png")) )
                     return
                 else:
                     pass #user is ok to overwrite, let's go on
@@ -846,7 +867,7 @@ class Main:
             if not msg:
                 if error: msg = "%s Errors while zipping %s files"%(error,len(filelist))
                 else: msg = "%s files successfully Zipped !!"%len(filelist)
-            xbmc.executebuiltin( "Notification(%s,%s)"%(__language__(30000),msg) )
+            xbmc.executebuiltin( "Notification(%s,%s,%s,%s)"%(__language__(30000),msg,3000,join(os.getcwd(),"icon.png")) )
             return
         
         if self.args.viewmode=="export":
@@ -878,7 +899,7 @@ class Main:
                             print_exc()
                             dialog.ok("MyPictures Database","Error#%s : %s"%msg.args)
                     else:
-                        xbmc.executebuiltin( "Notification(%s,Files copy canceled ! )"%__language__(30000) )
+                        xbmc.executebuiltin( "Notification(%s,Files copy canceled !,%s,%s )"%(__language__(30000),3000,join(os.getcwd(),"icon.png")) )
                         return
 
             
@@ -901,7 +922,7 @@ class Main:
                 cpt = cpt+1
             pDialog.update(100,"Copying Finished !",dstpath)
             xbmc.sleep(1000)
-            xbmc.executebuiltin( "Notification(%s,%s files copied to %s )"%(__language__(30000),cpt,dstpath) )
+            xbmc.executebuiltin( "Notification(%s,%s files copied to %s,%s,%s )"%(__language__(30000),cpt,dstpath,3000,join(os.getcwd(),"icon.png")) )
             dialog.browse(2, "Pictures exported","files" ,"", True, False, dstpath)
             return
         
