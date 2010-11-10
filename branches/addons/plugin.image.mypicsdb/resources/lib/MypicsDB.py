@@ -689,7 +689,7 @@ def get_exif(picfile):
     """
     from EXIF import process_file as EXIF_file
     #définition des champs EXIF que nous souhaitons utiliser
-    EXIF_fields =["Image DateTime",
+    EXIF_fields =[
                 "Image Model",
                 "Image Orientation",
                 "Image Rating",
@@ -697,13 +697,15 @@ def get_exif(picfile):
                 #"Image XResolution",
                 #"Image YResolution",
                 #"Image Make",
+                "Image DateTime",
                 "EXIF DateTimeOriginal",
+                "EXIF DateTimeDigitized",
                 "EXIF ExifImageWidth",
+                "EXIF ExifImageLength",
                 #"EXIF FileSource",
                 #"EXIF Flash",
                 "EXIF SceneCaptureType",
                 #"EXIF DigitalZoomRatio",
-                "EXIF DateTimeDigitized",
                 "GPS GPSLatitude",
                 "GPS GPSLatitudeRef",
                 "GPS GPSLongitude",

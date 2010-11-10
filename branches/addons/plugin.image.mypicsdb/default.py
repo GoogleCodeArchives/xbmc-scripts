@@ -3,12 +3,11 @@
 """
 TODO :
   - upgrade iptcinfo library (need some unicode improvement)
-  - work to make better use of dates inside sqlite and python
   - 'add to collections' context menu from any folder in sort by date view
   - 'add to collections' context menu from any folder in sort by folders view
   - test if a 'collection' or 'period' or 'keyword' view doesn't contain any pictures : remove these from the database when deleting pictures
-  - update in scan from library is not good : 2 options : 1- update to remove not found pictures ; 2- update to rescan exif/iptc datas and update files database with new metas
   - Scan : need to fix parameters sending. Right now, recursive or update things are not handled (everything is recursive and updating for new/deleted pics)
+  - Set a parameter to prevent small pics to be added to the database (use EXIF_ImageWidth and EXIF_ImageLength metas)
 """
 import os,sys
 from os.path import join,isfile,basename,dirname
@@ -146,6 +145,7 @@ class Main:
         #liz.setInfo( type="Pictures", infoLabels={ "Title": name } )
         #menu contextuel
         if contextmenu :
+            contextmenu.append( (__language__(30303),"SlideShow(%s%s,,notrandom)"%(sys.argv[0],sys.argv[2]) ) )
             liz.addContextMenuItems(contextmenu,replacemenu)
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)#,totalItems=total)
         return ok
@@ -155,9 +155,6 @@ class Main:
         liz=xbmcgui.ListItem(picname,info)
         liz.setLabel2(info)
         coords = MPDB.getGPS(picpath,picname)
-##        picturepath = join(picpath.encode("utf8"),picname.encode("utf8"))
-##        infolabels = { "picturepath": picturepath, "overlay": xbmcgui.ICON_OVERLAY_TRAINED, "title": "test" }
-##        liz.setInfo( "Pictures", infolabels )
         if contextmenu:
             if coords:
                 #géolocalisation
@@ -165,6 +162,8 @@ class Main:
                                                                                                                                                            quote_plus(picpath),
                                                                                                                                                            quote_plus(picname)
                                                                                                                                                            )))
+                #TODO : add to favourite
+                #TODO : ...
             liz.addContextMenuItems(contextmenu,replacemenu)
         if fanart:
             liz.setProperty( "Fanart_Image", fanart )
@@ -324,7 +323,6 @@ class Main:
             self.addPic(filename,path,contextmenu=context,
                         fanart = join(PIC_PATH,"fanart-folder.png")
                         )
-                            #(__language__(30152),"XBMC.RunPlugin(%s?method='folders'&folderid='2'&onlypics='non'&action='showfolder'&name='2005-05+%%2823+images%%29')"%sys.argv[0])
             
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s : %s"%(__language__(30102),unquote_plus(self.args.folderid.encode("utf-8"))) )
@@ -588,7 +586,7 @@ class Main:
             srec = recursive==1 and "ON" or "OFF"
             supd = update==1 and "ON" or "OFF"
 
-            self.addDir(name      = "[COLOR=FF66CC00][B][ + ][/B][/COLOR] "+path.decode("utf8")+" [recursive="+srec+" , update="+supd+"]",
+            self.addDir(name      = "[COLOR=FF66CC00][B][ + ][/B][/COLOR] "+path.decode("utf8")+" [COLOR=FFC0C0C0][recursive="+srec+" , update="+supd+"][/COLOR]",
                         params    = [("do","rootclic"),("rootpath",path),("viewmode","view"),("exclude","0")],#paramètres
                         action    = "rootfolders",#action
                         iconimage = join(PIC_PATH,"settings.png"),#icone
@@ -929,15 +927,16 @@ class Main:
         #alimentation de la liste
         for path,filename in filelist:
             #création du menu contextuel selon les situasions
-            #1 - add to collection : tous les cas mais pas les collections
             context=[]
+            # - diaporama
             context.append( (__language__(30303),"SlideShow(%s%s,recursive,notrandom)"%(sys.argv[0],sys.argv[2]) ) )
+            # - add to collection
             context.append( ( __language__(30152),"XBMC.RunPlugin(\"%s?action='addtocollection'&viewmode='view'&path='%s'&filename='%s'\")"%(sys.argv[0],
                                                                                                                          quote_plus(path),
                                                                                                                          quote_plus(filename))
                               )
                             )
-            #2 - del pic from collection : seulement les images des collections
+            # - del pic from collection : seulement les images des collections
             if self.args.method=="collection":
                 context.append( ( __language__(30151),"XBMC.RunPlugin(\"%s?action='delfromcollection'&viewmode='view'&collect='%s'&path='%s'&filename='%s'\")"%(sys.argv[0],
                                                                                                                                              self.args.collect,
