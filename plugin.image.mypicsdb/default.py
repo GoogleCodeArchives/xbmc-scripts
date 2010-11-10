@@ -141,11 +141,8 @@ class Main:
         liz=xbmcgui.ListItem(name, thumbnailImage=iconimage)
         if fanart:
             liz.setProperty( "Fanart_Image", fanart )
-        #adjonction d'informations
-        #liz.setInfo( type="Pictures", infoLabels={ "Title": name } )
         #menu contextuel
         if contextmenu :
-            contextmenu.append( (__language__(30303),"SlideShow(%s%s,,notrandom)"%(sys.argv[0],sys.argv[2]) ) )
             liz.addContextMenuItems(contextmenu,replacemenu)
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)#,totalItems=total)
         return ok
@@ -264,7 +261,10 @@ class Main:
                         action    = "showpics",#action
                         iconimage = join(PIC_PATH,"dates.png"),#icone
                         fanart    = join(PIC_PATH,"fanart-date.png"),
-                        contextmenu   = [(__language__(30152),"XBMC.RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")"%(sys.argv[0],allperiod,self.args.value))])#menucontextuel
+                        contextmenu   = [(__language__(30152),"XBMC.RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")"%(sys.argv[0],allperiod,self.args.value)),
+                                         ("diaporama"        ,"XBMC.RunPlugin(\"%s?action='diapo'&method='date'&period='%s'&value='%s'&viewmode='scan'\")"%(sys.argv[0],allperiod,self.args.value))
+                                         ]
+                        )
             total=len(listperiod)
             for period in listperiod:
                 if period:
@@ -816,12 +816,20 @@ class Main:
         if self.args.viewmode=="scan":
             return filelist
         if self.args.viewmode=="diapo":
+            pDialog = xbmcgui.DialogProgress()
+            ret = pDialog.create(__language__(30000), 'Preparing SlideShow :','')
             from urllib import urlopen
             HTTP_API_url = "http://%s/xbmcCmds/xbmcHttp?command="%xbmc.getIPAddress()
             html = urlopen(HTTP_API_url + "ClearSlideshow" )
+            c=0
             for path,filename in filelist:
+                c=c+1
+                pDialog.update(int(100*(float(c)/len(filelist))) , "Adding pictures to the slideshow",filename)
+                if pDialog.iscanceled():break
                 html = urlopen(HTTP_API_url + "AddToSlideshow(%s)" % quote_plus(join(path,filename)))
-            html = urlopen(HTTP_API_url + "ExecBuiltIn(ActivateWindow(12007))" )
+            #html = urlopen(HTTP_API_url + "ExecBuiltIn(ActivateWindow(12007))" )
+            if not pDialog.iscanceled(): xbmc.executebuiltin( "SlideShow(,,notrandom)" )
+            pDialog.close()
             return
 
         if self.args.viewmode=="zip":
