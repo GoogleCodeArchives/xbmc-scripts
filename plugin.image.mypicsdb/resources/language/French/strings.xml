@@ -29,11 +29,11 @@
     <string id="30063">Ajoute le fichier à l'archive :</string>
     <string id="30064">L'archive '%s' existe déjà dans</string> <!-- %s will be replaced by the name of the archive -->
     <string id="30065">Ecraser ?</string>
-    <string id="30066">Archiving pictures canceled.</string>
-    <string id="30067">File already exists</string>
-    <string id="30068"></string>
-    <string id="30069"></string>
-    <string id="30070"></string>
+    <string id="30066">Archivage annulé.</string>
+    <string id="30067">Ajout de l'image à l'archive...</string>
+    <string id="30068">L'archivage a été annulé !</string>
+    <string id="30069">%s erreurs lors de l'archivage de %s fichiers</string> <!-- %s errors while zipping %s files -->
+    <string id="30070">%s images archivées avec succès !!</string>    <!-- %s files successfully Zipped !! -->
     <string id="30071"></string>
     
     <string id="30098">Recherche globale</string>
