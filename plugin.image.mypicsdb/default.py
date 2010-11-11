@@ -149,9 +149,13 @@ class Main:
     
     def addPic(self,picname,picpath,info="*",fanart=None,contextmenu=None,replacemenu=True):
         ok=True
-        liz=xbmcgui.ListItem(picname,info)
-        liz.setLabel2(info)
         coords = MPDB.getGPS(picpath,picname)
+        rating = MPDB.getRating(picpath,picname)
+        liz=xbmcgui.ListItem(picname,info)
+        prefix=""
+        if coords: prefix = prefix + "[COLOR C0C0C0C0][G][/COLOR]"
+        if rating: prefix = prefix + "[COLOR C0FFFF00]"+("*"*int(rating))+"[/COLOR][COLOR C0C0C0C0]"+("*"*(5-int(rating)))+"[/COLOR]"
+        liz.setLabel(prefix+" "+picname)
         if contextmenu:
             if coords:
                 #géolocalisation
@@ -954,8 +958,7 @@ class Main:
                                 )
                 
             #3 - montrer où est localisé physiquement la photo
-            context.append( (__language__(30060),"XBMC.RunPlugin(\"%s?action='locate'&filepath='%s'&viewmode='view'\" ,)"%(sys.argv[0],join(quote_plus(path),
-                                                                                                                                                          quote_plus(filename)))))
+            context.append( (__language__(30060),"XBMC.RunPlugin(\"%s?action='locate'&filepath='%s'&viewmode='view'\" ,)"%(sys.argv[0],quote_plus(join(path,filename)) ) ) )
 
 ##            #4 - si la photo contient des données GPS, la localiser sur une carte
 ##            coords = MPDB.getGPS(path,filename)
@@ -1043,6 +1046,8 @@ if __name__=="__main__":
         m.show_roots()
     elif m.args.action=='locate':
         dialog = xbmcgui.Dialog()
+        print m.args.filepath
+        print unquote_plus(m.args.filepath)
         dstpath = dialog.browse(2, "The file is located here :","files" ,"", True, False, unquote_plus(m.args.filepath))
     elif m.args.action=='geolocate':
         m.show_map()

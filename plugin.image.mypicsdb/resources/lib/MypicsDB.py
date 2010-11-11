@@ -496,17 +496,23 @@ def fileSHA ( filepath ) :
         return '0'
     else:
         return digest.hexdigest()
+
 def getFileSha (path,filename):
     #return the SHA in DB for the given picture
     try:
         return [row for row in Request( """select sha from files where strPath="%s" and strFilename="%s";"""%(path,filename))][0][0]
     except:
         return "0"
+
 def getFileMtime(path,filename):
     #return the modification time 'mtime' in DB for the given picture
     return [row for row in Request( """select mtime from files where strPath="%s" and strFilename="%s";"""%(path,filename))][0][0]
+
 def DB_deltree(picpath):
     pass
+
+def getRating(path,filename):
+    return [row for row in Request( """SELECT "Image Rating" FROM files WHERE strPath="%s" AND strFilename="%s";"""%(path,filename) )][0][0]
 
 def RequestOnList(request,picturelist):
     """applique la requête sur la liste d'images """
