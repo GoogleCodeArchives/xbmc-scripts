@@ -26,6 +26,15 @@
     <string id="30060">Localiser sur le disque</string>
     <string id="30061">Archiver ces images</string>
     <string id="30062">Exporter ces images vers...</string>
+    <string id="30063">Ajoute le fichier à l'archive :</string>
+    <string id="30064">L'archive '%s' existe déjà dans</string> <!-- %s will be replaced by the name of the archive -->
+    <string id="30065">Ecraser ?</string>
+    <string id="30066">Archiving pictures canceled.</string>
+    <string id="30067">File already exists</string>
+    <string id="30068"></string>
+    <string id="30069"></string>
+    <string id="30070"></string>
+    <string id="30071"></string>
     
     <string id="30098">Recherche globale</string>
     <string id="30099">Chemins des dossiers images</string>

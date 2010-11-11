@@ -24,8 +24,7 @@ DATA_PATH = xbmc.translatePath( "special://profile/addon_data/plugin.image.mypic
 PIC_PATH = join( BASE_RESOURCE_PATH, "images")
 DB_PATH = xbmc.translatePath( "special://database/")
 sys.path.append( join( BASE_RESOURCE_PATH, "lib" ) )
-print "data_path"
-print DATA_PATH
+
 
 from urllib import quote_plus,unquote_plus
 import xbmcplugin,xbmcgui,xbmcaddon
@@ -121,7 +120,10 @@ class Main:
         self.get_args()
 
     def get_args(self):
+        print "MyPicturesDB plugin called :"
         print "%s%s"%(sys.argv[0],sys.argv[2])
+        print "-"*20
+        print
         exec "self.args = _Info(%s)" % ( sys.argv[ 2 ][ 1 : ].replace( "&", ", " ), )
 
     def Title(self,title):
@@ -254,8 +256,6 @@ class Main:
             nextperiod=None
         
         if not None in listperiod:
-            #print self.args.value
-            #print strftime("%d/%m/%Y",strptime(self.args.value,"%Y-%m-%d"))
             dptd = displaythisdate
             dptd = dptd.replace("%b",monthname[strptime(self.args.value,thisdateformat).tm_mon - 1])    #replace %b marker by short month name
             dptd = dptd.replace("%B",fullmonthname[strptime(self.args.value,thisdateformat).tm_mon - 1])#replace %B marker by long month name
@@ -354,8 +354,8 @@ class Main:
                             iconimage = join(PIC_PATH,"keywords.png"),#icone
                             fanart    = join(PIC_PATH,"fanart-keyword.png"),
                             contextmenu   = [( __language__(30152),"XBMC.RunPlugin(\"%s?action='addfolder'&method='keyword'&kw='%s'&viewmode='scan'\")"%(sys.argv[0],kw)),
-                                             ( __language__(30161),"XBMC.RunPlugin(\"%s?action='showpics'&method='keyword'&viewmode='zip'&name='%s'&kw='%s'\")"%(sys.argv[0],kw,kw) ),
-                                             ( __language__(30162),"XBMC.RunPlugin(\"%s?action='showpics'&method='keyword'&viewmode='export'&name='%s'&kw='%s'\")"%(sys.argv[0],kw,kw) )
+                                             ( __language__(30061),"XBMC.RunPlugin(\"%s?action='showpics'&method='keyword'&viewmode='zip'&name='%s'&kw='%s'\")"%(sys.argv[0],kw,kw) ),
+                                             ( __language__(30062),"XBMC.RunPlugin(\"%s?action='showpics'&method='keyword'&viewmode='export'&name='%s'&kw='%s'\")"%(sys.argv[0],kw,kw) )
                                              ],#menucontextuel
                             total = total)#nb total d'éléments
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
@@ -533,7 +533,7 @@ class Main:
             try:
                 MPDB.RemoveRoot( unquote_plus(self.args.delpath) )
             except IndexError,msg:
-                print IndexError,msg#pass
+                print IndexError,msg
             #TODO : this notification does not work with é letters in the string....
             #xbmc.executebuiltin( "Notification(%s,%s,%s,%s)"%(__language__(30000),__language__(30205),3000,join(os.getcwd(),"icon.png")))#+":".encode("utf8")+unquote_plus(self.args.delpath)) )
         elif self.args.do=="rootclic":
@@ -838,20 +838,23 @@ class Main:
 
         if self.args.viewmode=="zip":
             from tarfile import open as taropen
+            #TODO : enable user to select the destination
             destination = join(DATA_PATH,unquote_plus(self.args.name)+".tar.gz")
             if isfile(destination):
                 dialog = xbmcgui.Dialog()
-                ok = dialog.yesno(__language__(30000),"Archive '%s' already exists in"%basename(destination),dirname(destination), "Overwrite ?")
+                ok = dialog.yesno(__language__(30000),__language__(30064)%basename(destination),dirname(destination), __language__(30065))#Archive already exists, overwrite ?
                 if not ok:
                     #todo, ask for another name and if cancel, cancel the zip process as well
-                    xbmc.executebuiltin( "Notification(My Picture Database,Archiving pictures canceled.,File already exists,%s,%s)"%(3000,join(os.getcwd(),"icon.png")) )
+                    xbmc.executebuiltin( "Notification(%s,%s,%s,%s)"%(__language__(30000),
+                                                                      __language__(30066),#Archiving pictures canceled
+                                                                      3000,join(os.getcwd(),"icon.png")) )
                     return
                 else:
                     pass #user is ok to overwrite, let's go on
             tar = taropen(destination,"w:gz")#open a tar file using gz compression
             error = 0
             pDialog = xbmcgui.DialogProgress()
-            ret = pDialog.create(__language__(30000), 'Adding file to archive :','')
+            ret = pDialog.create(__language__(30000), __language__(30063),'')
             compte=0
             msg=""
             for (path,filename) in filelist:
@@ -861,7 +864,7 @@ class Main:
                 arcname = join( arcroot, filename ).replace( "\\", "/" )
                 if picture == destination: # sert à rien de zipper le zip lui même :D
                     continue
-                pDialog.update(int(100*(compte/float(len(filelist)))),"Creating connection...",'Adding file to archive :',picture)
+                pDialog.update(int(100*(compte/float(len(filelist)))),__language__(30067),picture)#adding picture to the archive
                 try:
                     tar.add( picture , arcname)
                     print "Archiving  %s . . ." % picture
@@ -871,12 +874,12 @@ class Main:
                     print "Error  %s" % arcname
                     print_exc()
                 if pDialog.iscanceled():
-                    msg = "Zip file has been canceled !"
+                    msg = __language__(30068) #Zip file has been canceled !
                     break
             tar.close()
             if not msg:
-                if error: msg = "%s Errors while zipping %s files"%(error,len(filelist))
-                else: msg = "%s files successfully Zipped !!"%len(filelist)
+                if error: msg = __language__(30069)%(error,len(filelist))   #"%s Errors while zipping %s files"
+                else: msg = __language__(30070)%len(filelist)               #%s files successfully Zipped !!
             xbmc.executebuiltin( "Notification(%s,%s,%s,%s)"%(__language__(30000),msg,3000,join(os.getcwd(),"icon.png")) )
             return
         
