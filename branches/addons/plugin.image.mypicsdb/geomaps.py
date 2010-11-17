@@ -4,6 +4,9 @@ from urllib import urlencode
 #import urllib2,urllib
 from os.path import join,isfile,basename
 from traceback import print_exc
+from xbmcaddon import Addon
+addon = Addon(id='plugin.image.mypicsdb')
+__language__ = addon.getLocalizedString
 
 ACTION_CONTEXT_MENU = [117]
 ACTION_MENU = [122]
@@ -36,7 +39,7 @@ class main(xbmcgui.Window):
         self.addControl(self.ctrl_map)
         self.addControl(self.ctrl_pic)
         self.addControl(self.lbl_info)
-        self.lbl_info.setLabel("Use UP and DOWN arrow to zoom in / out")
+        self.lbl_info.setLabel(__language__(30223))#Use UP and DOWN arrow to zoom in / out
 
     def zoom(self,way,step=1):
         if way=="+":
@@ -69,11 +72,9 @@ class main(xbmcgui.Window):
                      #Reporting Parameters:
                      "sensor" : "false" #is there a gps on system ? (req)
                      }
-        #pDialog = xbmcgui.DialogProgress()
-        #ret = pDialog.create("geomaps","Getting maps for coordinates :",self.place)
-        #pDialog.update(0,"Creating connection...")
 
         param_dic["markers"]=param_dic["markers"]%self.place
+        
         request_headers = { 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; fr; rv:1.9.2.10) Gecko/20100914 Firefox/3.6.10' }
         request = Request(static_url+urlencode(param_dic), None, request_headers)
         urlfile = urlopen(request)
@@ -91,8 +92,7 @@ class main(xbmcgui.Window):
                 print_exc()
             for i in range(1+(filesize/10)):
                 f.write(urlfile.read(10))
-                #pDialog.update(int(100*(float(i*10)/filesize)),"downloading map","%0.2f%%"%(100*(float(i*10)/filesize)))
-                self.lbl_info.setLabel("getting map... (%0.2f%%)"%(100*(float(i*10)/filesize)))
+                self.lbl_info.setLabel(__language__(30221)%(100*(float(i*10)/filesize)))#getting map... (%0.2f%%)
             urlfile.close()
             #pDialog.close()
             try:
@@ -102,7 +102,7 @@ class main(xbmcgui.Window):
                 pass
         self.set_pic(self.picfile)
         self.set_map(mapfile)
-        self.lbl_info.setLabel("Zoom level %s"%self.zoomlevel)
+        self.lbl_info.setLabel(__language__(30222)%int(100*(float(self.zoomlevel)/self.ZMAX)))#Zoom level %s
         
     def set_map(self,mapfile):
         self.ctrl_map.setImage(mapfile)
@@ -120,6 +120,5 @@ class main(xbmcgui.Window):
         elif action in ACTION_DOWN:
             self.zoom("-")
         else:
-            #self.lbl_info.setLabel("%s / %s"%(action.getButtonCode(),action.getId()))
             pass
             

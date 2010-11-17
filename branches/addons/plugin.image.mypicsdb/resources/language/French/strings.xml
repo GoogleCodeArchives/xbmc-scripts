@@ -47,11 +47,11 @@
     <string id="30106">Ajouter une nouvelle période</string>
     <string id="30107">Choix du début de la période</string>
     <string id="30108">Choix de la fin de la période</string>
-    <string id="30109">Photos du %s au %s</string>
+    <string id="30109">Images du %s au %s</string>
     <string id="30110">Saisir un titre pour cette période :</string>
     <string id="30111">Supprimer cette période</string>
     <string id="30112">Editer cette période</string>
-    <string id="30113">Du %s au %s</string>
+    <string id="30113">Du %s au %s</string> <!-- from [start date] to [end date] -->
     <string id="30114">Saisir manuellement une date</string>
     <string id="30115">Mot à rechercher</string>
     <string id="30116">%s résultats pour '%s' dans '%s'</string> <!-- %s replaced respectively by : number of results, searched term, field where found -->
@@ -59,19 +59,40 @@
     <string id="30118">Date de fin de période</string>
     <string id="30119">La recherche pour '%s' n'a retourné aucun résultat dans toute la base</string> <!-- %s replaced by searched term-->
     
+    <string id="30130">Utiliser les flêches haut / bas pour zoomer</string>
+    <string id="30131">récupération de la carte... (%0.2f%%)</string>  <!-- %0.2f%% will be replaced by the percent of download for a map -->
+    <string id="30132">Zoom=%s</string>       <!-- %s will be replaced by the zoom level in a map -->
+    <string id="30133"></string>
+    <string id="30134"></string>
+    <string id="30135"></string>
+    <string id="30136"></string>
+    <string id="30137"></string>
+    <string id="30138"></string>
+    
     <string id="30150">Collections</string>
     <string id="30151">Retirer de la collection</string>
     <string id="30152">Ajouter à la collection...</string>
     <string id="30153">Saisir un nouveau titre</string>
-    <string id="30154">Photo ajoutée dans</string>
+    <string id="30154">Image ajoutée dans</string>
     <string id="30155">Saisir un titre pour la nouvelle collection</string>
     <string id="30156">Choisir une collection</string>
     <string id="30157">Nouvelle collection</string>
     <string id="30158">Supprimer cette collection</string>
     <string id="30159">Renommer cette collection</string>
     <string id="30160">Créer une nouvelle collection</string>
-    <string id="30161">%s photos ajoutées dans :</string>    <!-- %s replaced by the number of pictures added -->
+    <string id="30161">%s images ajoutées dans :</string>    <!-- %s replaced by the number of pictures added -->
     
+    <string id="30180">Choisir la destination pour l'exportation</string>
+    <string id="30181">Voulez-vous créer un dossier pour exporter les images ?</string>
+    <string id="30182">Saisir le nom du dossier</string>
+    <string id="30183">Export d'images annulé !</string>
+    <string id="30184">Export d'images...</string>
+    <string id="30185">Export de '%s' en cours vers :</string>       <!-- %s replaced by the filename that is beeing copied -->
+    <string id="30186">Un fichier '%s' existe déjà dans</string>  <!-- %s replaced by the filename that is beeing copied --> 
+    <string id="30187">Ecraser ?</string>
+    <string id="30188">Export terminé !</string>
+    <string id="30189">%s images copiés dans %s</string> <!-- %s[number of files] copied to %s[distination folder]-->
+    <string id="30190">Images exportées</string>
     
     <string id="30201">Dossier à scanner</string>
     <string id="30202">Parcourir ce dossier de manière récursive</string>
@@ -81,15 +102,21 @@
     <string id="30206">Effectuer un scan maintenant</string>
     <string id="30207">Supprimer ce chemin de la base</string>
     <string id="30208">[B]Ajouter[/B] un chemin à la base</string>
-    <string id="30209">Photos récentes</string>
+    <string id="30209">Images récentes</string>
     <string id="30210">Retirer ce chemin des exclusions</string>
     <string id="30211">Ajouter un dosser à [B]exclure[/B]</string>
     <string id="30212">Exclure ce dossier de la base</string>
 
     <string id="30220">Géolocaliser</string>
-    <string id="30221">Téléchargement de la carte...</string>
-    <string id="30221">Récupération de la carte Google pour les coordonnées :</string>
-    
+    <string id="30221">récupération de la carte... (%0.2f%%)</string>  <!-- %0.2f%% will be replaced by the percent of download for a map -->
+    <string id="30222">Zoom=%s</string>       <!-- %s will be replaced by the zoom level in a map -->
+    <string id="30223">Utiliser les flêches haut / bas pour zoomer</string>
+    <string id="30224"></string>
+    <string id="30225"></string>
+    <string id="30226"></string>
+    <string id="30227"></string>
+    <string id="30228"></string>
+     
     
     <string id="30300">nom de fichier</string>
     <string id="30301">chemin</string>
