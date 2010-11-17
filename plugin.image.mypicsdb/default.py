@@ -2,6 +2,7 @@
 # -*- coding: utf8 -*-
 """
 TODO :
+  - test a silent background scanning behaviour. May probably be done as the plugin still works while scanning.
   - upgrade iptcinfo library (need some unicode improvement)
   - 'add to collections' context menu from any folder in sort by date view
   - 'add to collections' context menu from any folder in sort by folders view
@@ -155,8 +156,13 @@ class Main:
         rating = MPDB.getRating(picpath,picname)
         liz=xbmcgui.ListItem(picname,info)
         prefix=""
-        if coords: prefix = prefix + "[COLOR C0C0C0C0][G][/COLOR]"
-        if rating: prefix = prefix + "[COLOR C0FFFF00]"+("*"*int(rating))+"[/COLOR][COLOR C0C0C0C0]"+("*"*(5-int(rating)))+"[/COLOR]"
+        if coords: prefix = prefix + "[COLOR=C0C0C0C0][G][/COLOR]"
+        if rating:
+            print "RATING :"
+            print rating
+            print type(rating)
+            print "----"
+            prefix = prefix + "[COLOR=C0FFFF00]"+("*"*int(rating))+"[/COLOR][COLOR=C0C0C0C0]"+("*"*(5-int(rating)))+"[/COLOR]"
         liz.setLabel(prefix+" "+picname)
         if contextmenu:
             if coords:
@@ -174,11 +180,11 @@ class Main:
         ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=join(picpath,picname),listitem=liz,isFolder=False)
         
     def show_home(self):
-        # last month
-        self.addDir("last month (betatest)",[("method","lastmonth"),("period",""),("value",""),("viewmode","view")],
-                    "showpics",join(PIC_PATH,"dates.png"),
-                    fanart=join(PIC_PATH,"fanart-date.png"))
-        # last year
+##        # last month
+##        self.addDir("last month (betatest)",[("method","lastmonth"),("period",""),("value",""),("viewmode","view")],
+##                    "showpics",join(PIC_PATH,"dates.png"),
+##                    fanart=join(PIC_PATH,"fanart-date.png"))
+        # last scan picture added
         self.addDir(unescape(__language__(30209)),[("method","recentpics"),("period",""),("value",""),("viewmode","view")],
                     "showpics",join(PIC_PATH,"dates.png"),
                     fanart=join(PIC_PATH,"fanart-date.png"))
@@ -318,12 +324,6 @@ class Main:
                                                                                                                          quote_plus(filename))  )
                             )
             #context.append( ("Don't use this picture","") )
-##            coords = MPDB.getGPS(path,filename)
-##            if coords:
-##                #géolocalisation
-##                context.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&path='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),
-##                                                                                                                                                       quote_plus(path),
-##                                                                                                                                                       quote_plus(filename))))
             self.addPic(filename,path,contextmenu=context,
                         fanart = join(PIC_PATH,"fanart-folder.png")
                         )
@@ -409,7 +409,7 @@ class Main:
         #search for inbase periods and show periods
         for periodname,dbdatestart,dbdateend in MPDB.ListPeriodes():
             datestart,dateend = MPDB.Request("SELECT strftime('%%Y-%%m-%%d',datetime('%s')),strftime('%%Y-%%m-%%d',datetime('%s','+1 days','-1.0 seconds'))"%(dbdatestart,dbdateend))[0]
-            self.addDir(name      = "%s (%s)"%(periodname.decode("utf8"),
+            self.addDir(name      = "%s [COLOR=C0C0C0C0](%s)[/COLOR]"%(periodname.decode("utf8"),
                                                __language__(30113)%(strftime(self.prettydate(__language__(30002),strptime(datestart,"%Y-%m-%d")).encode("utf8"),strptime(datestart,"%Y-%m-%d")).decode("utf8"),
                                                                     strftime(self.prettydate(__language__(30002),strptime(dateend  ,"%Y-%m-%d")).encode("utf8"),strptime(dateend  ,"%Y-%m-%d")).decode("utf8")
                                                                     )), #libellé
@@ -886,7 +886,7 @@ class Main:
         if self.args.viewmode=="export":
             #1- ask for destination
             dialog = xbmcgui.Dialog()
-            dstpath = dialog.browse(3, "Select the destination","files" ,"", True, False, "")
+            dstpath = dialog.browse(3, __language__(30180),"files" ,"", True, False, "")#Choose the destination for exported pictures
             #pour créer un dossier dans la destination, on peut utiliser le nom  self.args.name
             if dstpath == "":
                 return
@@ -895,11 +895,11 @@ class Main:
             #   a-1/ yes : show the keyboard for a possible value for a folder name (using m.args.name as base name)
             #               repeat as long as input value is not correct for a folder name or dialog has been canceled
             #   a-2/ no : simply go on with copy ...
-            ok = dialog.yesno("MyPictures Database","Do you want to create a subfolder for exported pictures ?","(%s)"%self.args.name)
+            ok = dialog.yesno(__language__(30000),__language__(30181),"(%s)"%self.args.name)#do you want to create a folder for exported pictures ?
             if ok:
                 dirok=False
                 while not dirok:
-                    kb = xbmc.Keyboard(self.args.name, 'Input subfolder name', False)
+                    kb = xbmc.Keyboard(self.args.name, __language__(30182), False)#Input subfolder name
                     kb.doModal()
                     
                     if (kb.isConfirmed()):
@@ -910,33 +910,35 @@ class Main:
                             dirok = True
                         except Exception,msg:
                             print_exc()
-                            dialog.ok("MyPictures Database","Error#%s : %s"%msg.args)
+                            dialog.ok(__language__(30000),"Error#%s : %s"%msg.args)
                     else:
-                        xbmc.executebuiltin( "Notification(%s,Files copy canceled !,%s,%s )"%(__language__(30000),3000,join(os.getcwd(),"icon.png")) )
+                        xbmc.executebuiltin( "Notification(%s,%s,%s,%s )"%(__language__(30000),__language__(30183),#Files copy canceled !
+                                                                           3000,join(os.getcwd(),"icon.png")) )
                         return
 
             
             #browse(type, heading, shares[, mask, useThumbs, treatAsFolder, default])
             from shutil import copy
             pDialog = xbmcgui.DialogProgress()
-            ret = pDialog.create(__language__(30000), 'Copying files...')
+            ret = pDialog.create(__language__(30000),__language__(30184))# 'Copying files...')
             i=0.0
             cpt=0
             for path,filename in filelist:
-                pDialog.update(int(100*i/len(filelist)),"Copying '%s' to :"%join(path,filename),dstpath)
+                pDialog.update(int(100*i/len(filelist)),__language__(30185)%join(path,filename),dstpath)#"Copying '%s' to :"
                 i=i+1.0
                 #2- does the destination have the file ? shall we overwrite it ?
                 #TODO : rename a file if it already exists, rather than asking to overwrite it
                 if isfile(join(dstpath,filename)):
-                    ok = dialog.yesno(__language__(30000),"File %s already exists in"%filename,dstpath,"Overwrite it ?")
+                    ok = dialog.yesno(__language__(30000),__language__(30186)%filename,dstpath,__language__(30187))#File %s already exists in... overwrite ?
                     if not ok:
                         continue
                 copy(join(path.decode("utf8"),filename.decode("utf8")), dstpath.decode("utf8"))
                 cpt = cpt+1
-            pDialog.update(100,"Copying Finished !",dstpath)
+            pDialog.update(100,__language__(30188),dstpath)#"Copying Finished !
             xbmc.sleep(1000)
-            xbmc.executebuiltin( "Notification(%s,%s files copied to %s,%s,%s )"%(__language__(30000),cpt,dstpath,3000,join(os.getcwd(),"icon.png")) )
-            dialog.browse(2, "Pictures exported","files" ,"", True, False, dstpath)
+            xbmc.executebuiltin( "Notification(%s,%s,%s,%s )"%(__language__(30000),__language__(30189)%(cpt,dstpath),#%s files copied to %s
+                                                               3000,join(os.getcwd(),"icon.png")) )
+            dialog.browse(2, __language__(30188),"files" ,"", True, False, dstpath)#show the folder which contain pictures exported
             return
         
         #alimentation de la liste
@@ -963,13 +965,6 @@ class Main:
             #3 - montrer où est localisé physiquement la photo
             context.append( (__language__(30060),"XBMC.RunPlugin(\"%s?action='locate'&filepath='%s'&viewmode='view'\" ,)"%(sys.argv[0],quote_plus(join(path,filename)) ) ) )
 
-##            #4 - si la photo contient des données GPS, la localiser sur une carte
-##            coords = MPDB.getGPS(path,filename)
-##            if coords:
-##                #géolocalisation
-##                context.append( (__language__(30220),"XBMC.RunPlugin(\"%s?action='geolocate'&place='%s'&path='%s'&filename='%s'&viewmode='view'\" ,)"%(sys.argv[0],"%0.6f,%0.6f"%(coords),
-##                                                                                                                                                       quote_plus(path),
-##                                                                                                                                                       quote_plus(filename))))
                                  
             #5 - les infos de la photo
             #context.append( ( "paramètres de l'addon","XBMC.ActivateWindow(virtualkeyboard)" ) )

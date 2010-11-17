@@ -161,10 +161,7 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,ad
     # STEP 0 : dirname should not be one of those which are excluded from scan !
     #######
     # TODO : if the path was already scanned before, we need to remove previously added pictures AND subfolders
-    print "######"
-    print dirname
     if dirname in Exclude_folders:
-        print "##########"
         cptdelete = cptdelete + MPDB.RemovePath(dirname)
         return
     #######
