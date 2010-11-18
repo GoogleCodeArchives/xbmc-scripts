@@ -553,7 +553,7 @@ def delCollection(Colname):
         log( """delCollection : User did not specify a name for the collection""" )
 def getCollectionPics(Colname):
     """List all pics associated to the Collection given as Colname"""
-    return [row for row in Request( """SELECT strPath,strFilename FROM Files WHERE idFile IN (SELECT idFile FROM FilesInCollections WHERE idCol IN (SELECT idCol FROM Collections WHERE CollectionName='%s'))"""%Colname)]
+    return [row for row in Request( """SELECT strPath,strFilename FROM Files WHERE idFile IN (SELECT idFile FROM FilesInCollections WHERE idCol IN (SELECT idCol FROM Collections WHERE CollectionName='%s')) ORDER BY "EXIF DateTimeOriginal" ASC;"""%Colname)]
 
 def renCollection(Colname,newname):
     """rename give collection"""
