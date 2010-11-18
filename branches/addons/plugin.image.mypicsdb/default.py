@@ -125,6 +125,7 @@ class Main:
         print "%s%s"%(sys.argv[0],sys.argv[2])
         print "-"*20
         print
+
         exec "self.args = _Info(%s)" % ( sys.argv[ 2 ][ 1 : ].replace( "&", ", " ), )
 
     def Title(self,title):
