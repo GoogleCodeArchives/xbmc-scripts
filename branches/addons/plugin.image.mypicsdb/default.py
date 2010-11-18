@@ -156,15 +156,17 @@ class Main:
         coords = MPDB.getGPS(picpath,picname)
         rating = MPDB.getRating(picpath,picname)
         liz=xbmcgui.ListItem(picname,info)
-        prefix=""
-        if coords: prefix = prefix + "[COLOR=C0C0C0C0][G][/COLOR]"
+        suffix=""
+        if coords: suffix = suffix + "[COLOR=C0C0C0C0][G][/COLOR]"
         if rating:
-            print "RATING :"
-            print rating
-            print type(rating)
-            print "----"
-            prefix = prefix + "[COLOR=C0FFFF00]"+("*"*int(rating))+"[/COLOR][COLOR=C0C0C0C0]"+("*"*(5-int(rating)))+"[/COLOR]"
-        liz.setLabel(prefix+" "+picname)
+            suffix = suffix + "[COLOR=C0FFFF00]"+("*"*int(rating))+"[/COLOR][COLOR=C0C0C0C0]"+("*"*(5-int(rating)))+"[/COLOR]"
+        print type(MPDB.getDate(picpath,picname))
+        date = MPDB.getDate(picpath,picname)
+        date = date and strftime("%d.%m.%Y",strptime(date,"%Y-%m-%d %H:%M:%S")) or ""
+        infolabels = { "picturepath":picname+" "+suffix,"title": "title of the pic", "date": date  }
+        liz.setInfo( type="pictures", infoLabels=infolabels )
+        liz.setLabel(picname+" "+suffix)
+        #liz.setLabel2(suffix)
         if contextmenu:
             if coords:
                 #géolocalisation
@@ -329,9 +331,9 @@ class Main:
                         fanart = join(PIC_PATH,"fanart-folder.png")
                         )
             
-        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
+        #xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
+        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_DATE )
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s : %s"%(__language__(30102),unquote_plus(self.args.folderid.encode("utf-8"))) )
-        #xbmcplugin.setPluginFanart(int(sys.argv[1]), join(PIC_PATH,"fanart-period.png"))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     def show_keywords(self):
@@ -974,7 +976,7 @@ class Main:
                         contextmenu = context,
                         fanart = xbmcplugin.getSetting(int(sys.argv[1]),'usepicasfanart')=='true' and join(path,filename) or picfanart
                         )
-        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
+        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_DATE )#SORT_METHOD_NONE)
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="photos" )
         xbmcplugin.endOfDirectory(int(sys.argv[1]))           
             
