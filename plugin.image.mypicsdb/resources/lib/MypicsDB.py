@@ -512,7 +512,10 @@ def DB_deltree(picpath):
     pass
 
 def getRating(path,filename):
-    return [row for row in Request( """SELECT files."Image Rating" FROM files WHERE strPath="%s" AND strFilename="%s";"""%(path,filename) )][0][0]
+    try:
+        return [row for row in Request( """SELECT files."Image Rating" FROM files WHERE strPath="%s" AND strFilename="%s";"""%(path,filename) )][0][0]
+    except IndexError:
+        return None
 
 def RequestOnList(request,picturelist):
     """applique la requête sur la liste d'images """
