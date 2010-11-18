@@ -1015,6 +1015,11 @@ def get_pics_dates():
     """return all different dates from 'EXIF DateTimeOriginal'"""
     return [t for (t,) in Request("""SELECT DISTINCT strftime("%Y-%m-%d","EXIF DateTimeOriginal") FROM files WHERE "EXIF DateTimeOriginal"  NOT NULL ORDER BY "EXIF DateTimeOriginal" ASC""")]
 
+def getDate(path,filename):
+    try:
+        return [row for row in Request( """SELECT files."EXIF DateTimeOriginal" FROM files WHERE strPath="%s" AND strFilename="%s";"""%(path,filename) )][0][0]
+    except IndexError:
+        return None
 
 if __name__=="__main__":
     # initialisation de la base :
