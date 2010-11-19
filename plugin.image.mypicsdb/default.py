@@ -153,8 +153,13 @@ class Main:
     
     def addPic(self,picname,picpath,info="*",fanart=None,contextmenu=None,replacemenu=True):
         ok=True
-        coords = MPDB.getGPS(picpath,picname)
         rating = MPDB.getRating(picpath,picname)
+        print "rating / ratingmini"
+        print rating,Addon.getSetting("ratingmini")
+        if int(Addon.getSetting("ratingmini"))>0:#un rating mini est configuré
+            if not rating:  return
+            if int(rating) < int(Addon.getSetting("ratingmini")): return #si on a un rating dans la photo
+        coords = MPDB.getGPS(picpath,picname)
         liz=xbmcgui.ListItem(picname,info)
         suffix=""
         if coords: suffix = suffix + "[COLOR=C0C0C0C0][G][/COLOR]"
@@ -986,6 +991,7 @@ class Main:
 
 if __name__=="__main__":
     m=Main()
+    print Addon.getSetting("ratingmini")
     if not sys.argv[ 2 ]: #pas de paramètres : affichage du menu principal
         #set the debugging for the library
         MPDB.DEBUGGING = False
