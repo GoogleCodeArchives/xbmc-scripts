@@ -4,6 +4,8 @@
     <setting id="bootscan" type="bool" label="30024" default="true" />
     <setting id="usepicasfanart" type="bool" label="30026" default="true" />
     <setting id="picsext" type="text" label="30023" default="JPG|TIF|PNG|GIF|BMP|JPEG" />
+    <setting id="ratingmini" type="enum" lvalues="30041|30042|30043|30044|30045|30046" label="30040" default="0"/>
+
     <!-- <setting type="lsep" label="30020" />         -->
     <!-- le dossier à scanner -->
     <!-- <setting id="scanfolder" type="folder" label="30023" default="c:\" />   -->

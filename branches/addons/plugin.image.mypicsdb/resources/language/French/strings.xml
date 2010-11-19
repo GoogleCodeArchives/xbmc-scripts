@@ -20,6 +20,13 @@
     <string id="30025">Réinitialiser la base avant le scan</string><!-- setting -->
     <string id="30026">Utiliser l'image comme fanart pour les images</string><!-- setting -->
     
+    <string id="30040">Note minimale des photos à afficher</string>
+    <string id="30041">Toutes</string>
+    <string id="30042">1 étoile</string>
+    <string id="30043">2 étoiles</string>
+    <string id="30044">3 étoiles</string>
+    <string id="30045">4 étoiles</string>
+    <string id="30046">5 étoiles</string>
     
     <string id="30050">images</string>
     
