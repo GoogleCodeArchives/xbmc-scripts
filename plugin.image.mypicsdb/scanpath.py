@@ -69,6 +69,7 @@ for ext in Addon.getSetting("picsext").split("|"):
 def main2():
     #get active window
     import optparse
+    global cptroots,iroots
     parser = optparse.OptionParser()
     parser.enable_interspersed_args()  
     parser.add_option("--database","-d",action="store_true", dest="database",default=False)
@@ -88,6 +89,8 @@ def main2():
         scan.create( "MyPicture Database " )
         print options.recursive
         print options.update
+        cptroots = 1
+        iroots = 1
         scan.update(0,0,"MyPicture Database [Preparing]","please wait...")
         count_files(unquote_plus(options.rootpath))
         try:
@@ -105,12 +108,19 @@ def main2():
             scan = AddonScan()#xbmcgui.getCurrentWindowId()
             scan.create( "MyPicture Database " )
             scan.update(0,0,"MyPicture Database [Preparing]","please wait...")
-            
+            #comptage des fichiers et des dossiers à parcourir
             for path,recursive,update,exclude in listofpaths:
                 if exclude==0:
-                    count_files(unquote_plus(path))
+                    cptroots = cptroots + 1
+                    count_files(unquote_plus(path),False)
+            print "cptroots"
+            print cptroots
+            for path,recursive,update,exclude in listofpaths:
+                if exclude==0:
+                    #count_files(unquote_plus(path))
                     try:
                         #browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,rescan=False,updatefunc=None)
+                        iroots=iroots+1
                         browse_folder(unquote_plus(path),parentfolderID=None,recursive=recursive==1,updatepics=update==1,addpics=True,delpics=True,rescan=False,updatefunc=scan,dateadded = dateadded)
                     except:
                         print_exc()
@@ -122,8 +132,8 @@ def main2():
 
 
 
-global compte,comptenew,cptscanned,cptdelete,cptchanged
-compte=comptenew=cptscanned=cptdelete=cptchanged=0
+global compte,comptenew,cptscanned,cptdelete,cptchanged,cptroots,iroots
+compte=comptenew=cptscanned=cptdelete=cptchanged=cptroots=iroots=0
 global totalfiles,totalfolders
 totalfiles=totalfolders=0
 
@@ -137,9 +147,10 @@ def processDirectory ( args, dirname, filenames ):
         if splitext(filename)[1].upper() in listext:
             totalfiles=totalfiles+1
 
-def count_files ( path ):
+def count_files ( path, reset = True ):
     global totalfiles,totalfolders
-    totalfiles=totalfolders=0
+    if reset:
+        totalfiles=totalfolders=0
     if path in Exclude_folders: #si le path est un chemin exclu, on sort
         return
     walk(path, processDirectory, None )
@@ -152,7 +163,7 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,ad
     - 'rescan' pour forcer le scan des images qu'elles soient déjà en base ou pas
     - 'updatefunc' est une fonction appelée pour indiquer la progression. Les paramètres sont (pourcentage(int),[ line1(str),line2(str),line3(str) ] )
 """
-    global compte,comptenew,cptscanned,cptdelete,cptchanged
+    global compte,comptenew,cptscanned,cptdelete,cptchanged,cptroots,iroots
     cpt=0
     #on liste les fichiers jpg du dossier
     listfolderfiles=[]
@@ -248,7 +259,8 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,ad
 
             if updatefunc:
                 updatefunc.update(int(100*float(cptscanned)/float(totalfiles)),#cptscanned-(cptscanned/100)*100,
-                                  cptscanned/100,
+                                  #cptscanned/100,
+                                  int(100*float(iroots)/float(cptroots)),
                                   "MyPicture Database [%s] (%0.2f%%)"%(straction,100*float(cptscanned)/float(totalfiles)),
                                   picfile)
             if DoScan:
@@ -280,7 +292,8 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,ad
                 cptdelete=cptdelete+1
                 if updatefunc:
                     updatefunc.update(int(100*float(cptscanned)/float(totalfiles)),#cptscanned-(cptscanned/100)*100,
-                                      cptscanned/100,
+                                      #cptscanned/100,
+                                      int(100*float(iroots)/float(cptroots)),
                                       "MyPicture Database [Removing]",
                                       f)
                 MPDB.DB_del_pic(dirname,f)

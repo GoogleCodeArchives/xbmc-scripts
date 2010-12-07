@@ -154,8 +154,6 @@ class Main:
     def addPic(self,picname,picpath,info="*",fanart=None,contextmenu=None,replacemenu=True):
         ok=True
         rating = MPDB.getRating(picpath,picname)
-        print "rating / ratingmini"
-        print rating,Addon.getSetting("ratingmini")
         if int(Addon.getSetting("ratingmini"))>0:#un rating mini est configuré
             if not rating:  return
             if int(rating) < int(Addon.getSetting("ratingmini")): return #si on a un rating dans la photo
@@ -165,7 +163,6 @@ class Main:
         if coords: suffix = suffix + "[COLOR=C0C0C0C0][G][/COLOR]"
         if rating:
             suffix = suffix + "[COLOR=C0FFFF00]"+("*"*int(rating))+"[/COLOR][COLOR=C0C0C0C0]"+("*"*(5-int(rating)))+"[/COLOR]"
-        print type(MPDB.getDate(picpath,picname))
         date = MPDB.getDate(picpath,picname)
         date = date and strftime("%d.%m.%Y",strptime(date,"%Y-%m-%d %H:%M:%S")) or ""
         infolabels = { "picturepath":picname+" "+suffix,"title": "title of the pic", "date": date  }
@@ -586,7 +583,7 @@ class Main:
         
         #ajout d'un item pour scanner tous les rootpaths (si il y en a au moins 2)
         if len(includefolders) > 1:
-            self.addDir(name      = "Scan all roots paths",#scan all distinct root paths
+            self.addDir(name      = __language__(30213),#scan all distinct root paths
                         params    = [("do","scanall"),("viewmode","view"),],#paramètres
                         action    = "rootfolders",#action
                         iconimage = join(PIC_PATH,"settings.png"),#icone
@@ -1060,6 +1057,15 @@ if __name__=="__main__":
         m.show_map()
     elif m.args.action=='diapo':
         m.show_diaporama()
+    elif m.args.action=='alea':
+        #TODO : afficher une liste aléatoire de photos
+        pass
+    elif m.args.action=='lastshot':
+        #TODO : afficher une liste des X dernières photos prise selon la date de prise de vue
+        pass
+    elif m.args.action=='request':
+        #TODO : afficher le résultat d'une requête
+        pass
     else:
         m.show_home()
     del MPDB

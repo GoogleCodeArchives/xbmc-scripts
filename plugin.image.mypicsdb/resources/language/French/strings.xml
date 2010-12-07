@@ -113,6 +113,7 @@
     <string id="30210">Retirer ce chemin des exclusions</string>
     <string id="30211">Ajouter un dosser à [B]exclure[/B]</string>
     <string id="30212">Exclure ce dossier de la base</string>
+    <string id="30213">Scanner tous les chemins</string>
 
     <string id="30220">Géolocaliser</string>
     <string id="30221">récupération de la carte... (%0.2f%%)</string>  <!-- %0.2f%% will be replaced by the percent of download for a map -->
