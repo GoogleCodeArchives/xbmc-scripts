@@ -505,10 +505,13 @@ class Main:
     def show_roots(self):
         "show the root folders"
         refresh=True
-        if self.args.do=="addroot":
+        if self.args.do=="addroot":#add a root to scan
             dialog = xbmcgui.Dialog()
             newroot = dialog.browse(0, __language__(30201), 'pictures')
             if not newroot: return
+            if newroot.startswith("smb:"):
+                newroot=newroot.replace("smb:","")
+                newroot=newroot.replace("/","\\")
             if str(self.args.exclude)=="1":
                 MPDB.AddRoot(newroot,0,0,1)
             else:
@@ -517,18 +520,15 @@ class Main:
                 #ajoute le rootfolder dans la base
                 MPDB.AddRoot(newroot,recursive,update,0)#TODO : traiter le exclude (=0 pour le moment) pour gérer les chemins à exclure
                 xbmc.executebuiltin( "Notification(%s,%s,%s,%s)"%(__language__(30000).encode("utf8"),__language__(30204).encode("utf8"),3000,join(os.getcwd(),"icon.png") ) )
-                if dialog.yesno(__language__(30000),__language__(30206)):#do a scan now ?
-    ##                xbmc.executebuiltin( "RunScript(%s,%s%s--rootpath %s) "%( join( os.getcwd(), "scanpath.py"),
-    ##                                                                          recursive==1 and "--recursive " or "",
-    ##                                                                          update==1 and "--update " or "",
-    ##                                                                          newroot
-    ##                                                                        )
-    ##                                     )
-                    xbmc.executebuiltin( "RunScript(%s,--rootpath=%s) "%( join( os.getcwd(), "scanpath.py"),
-                                                                              newroot
-                                                                            )
-                                         )
-
+                if not(xbmc.getInfoLabel( "Window.Property(DialogAddonScan.IsAlive)" ) == "true"): #si dialogaddonscan n'est pas en cours d'utilisation...
+                    if dialog.yesno(__language__(30000),__language__(30206)):#do a scan now ?
+                        xbmc.executebuiltin( "RunScript(%s,--rootpath=%s) "%( join( os.getcwd(), "scanpath.py"),
+                                                                                  newroot
+                                                                                )
+                                             )
+                else:
+                    #dialogaddonscan était en cours d'utilisation, on return
+                    return
                 #xbmc.executebuiltin( "Notification(My Pictures Database,Folder has been scanned,%s,%s)"%(3000,join(os.getcwd(),"icon.png")))
         elif self.args.do=="addrootfolder":
             if str(self.args.exclude)=="1":
@@ -541,27 +541,29 @@ class Main:
                 print IndexError,msg
             #TODO : this notification does not work with é letters in the string....
             #xbmc.executebuiltin( "Notification(%s,%s,%s,%s)"%(__language__(30000),__language__(30205),3000,join(os.getcwd(),"icon.png")))#+":".encode("utf8")+unquote_plus(self.args.delpath)) )
-        elif self.args.do=="rootclic":
-            #dialog = xbmcgui.Dialog()
-            #if dialog.yesno(__language__(30000),__language__(30206)):#do a scan now ?
-            if str(self.args.exclude)=="0":
-                path,recursive,update,exclude = MPDB.getRoot(unquote_plus(self.args.rootpath))
-##                xbmc.executebuiltin( "RunScript(%s,%s%s-p %s) "%( join( os.getcwd(), "scanpath.py"),
-##                                                                          recursive==1 and "-r " or "",
-##                                                                          update==1 and "-u " or "",
-##                                                                          quote_plus(path)
-##                                                                        )
-##                                     )
-                xbmc.executebuiltin( "RunScript(%s,--rootpath=%s)"%( join( os.getcwd(), "scanpath.py"),
-                                                                          quote_plus(path)
-                                                                        )
-                                     )
-                #xbmc.executebuiltin( "Notification(My Pictures Database,Folder has been scanned,3000,%s)"%join(os.getcwd(),"icon.png") )
-            else:#clic sur un chemin à exclure...
-                pass
+        elif self.args.do=="rootclic":#clic sur un chemin (à exclure ou à scanner)
+            if not(xbmc.getInfoLabel( "Window.Property(DialogAddonScan.IsAlive)" ) == "true"): #si dialogaddonscan n'est pas en cours d'utilisation...
+                if str(self.args.exclude)=="0":#le chemin choisi n'est pas un chemin à exclure...
+                    path,recursive,update,exclude = MPDB.getRoot(unquote_plus(self.args.rootpath))
+                    xbmc.executebuiltin( "RunScript(%s,--rootpath=%s)"%( join( os.getcwd(), "scanpath.py"),
+                                                                              quote_plus(path)
+                                                                            )
+                                         )
+                else:#clic sur un chemin à exclure...
+                    pass
+            else:
+                #dialogaddonscan était en cours d'utilisation, on return
+                return
         elif self.args.do=="scanall":
-            xbmc.executebuiltin( "RunScript(%s,--database)"% join( os.getcwd(), "scanpath.py") )
-            return
+            dialog = xbmcgui.Dialog()
+            dialog.ok(__language__(30000),str(xbmc.getInfoLabel( "Window.Property(DialogAddonScan.IsAlive)" ) == "true"))
+            if not(xbmc.getInfoLabel( "Window.Property(DialogAddonScan.IsAlive)" ) == "true"): #si dialogaddonscan n'est pas en cours d'utilisation...
+                xbmc.executebuiltin( "RunScript(%s,--database)"% join( os.getcwd(), "scanpath.py") )
+                return
+            else:
+                #dialogaddonscan était en cours d'utilisation, on return
+                return
+            
         else:
             refresh=False
 
