@@ -41,6 +41,8 @@ syspath.append( join( BASE_RESOURCE_PATH, "lib" ) )
 
 import xbmc,xbmcgui,xbmcaddon
 Addon = xbmcaddon.Addon(id='plugin.image.mypicsdb')
+__language__ = Addon.getLocalizedString
+
 from urllib import unquote_plus
 from traceback import print_exc,format_tb
 if sysmodules.has_key("MypicsDB"):
@@ -51,7 +53,7 @@ global pictureDB
 pictureDB = join(DB_PATH,"MyPictures.db")
 
 from time import strftime
- 
+
 from DialogAddonScan import AddonScan
 from file_item import Thumbnails  
 global Exclude_folders #TODO
@@ -86,12 +88,14 @@ def main2():
     if options.rootpath:
         print unquote_plus(options.rootpath)
         scan = AddonScan()#xbmcgui.getCurrentWindowId()
-        scan.create( "MyPicture Database " )
+        scan.create( __language__(30000) )
         print options.recursive
         print options.update
         cptroots = 1
         iroots = 1
-        scan.update(0,0,"MyPicture Database [Preparing]","please wait...")
+        scan.update(0,0,
+                    __language__(30000)+" ["+__language__(30241)+"]",#MyPicture Database [preparing]
+                    __language__(30247))#please wait...
         count_files(unquote_plus(options.rootpath))
         try:
             #browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,addpics=True,delpics=True,rescan=False,updatefunc=None)
@@ -106,8 +110,10 @@ def main2():
         listofpaths = MPDB.RootFolders()
         if listofpaths:
             scan = AddonScan()#xbmcgui.getCurrentWindowId()
-            scan.create( "MyPicture Database " )
-            scan.update(0,0,"MyPicture Database [Preparing]","please wait...")
+            scan.create( __language__(30000) )#MyPicture Database
+            scan.update(0,0,
+                        __language__(30000)+" ["+__language__(30241)+"]",#MyPicture Database [preparing]
+                        __language__(30247))#please wait...
             #comptage des fichiers et des dossiers à parcourir
             for path,recursive,update,exclude in listofpaths:
                 if exclude==0:
@@ -157,11 +163,14 @@ def count_files ( path, reset = True ):
 
     
 def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,addpics=True,delpics=True,rescan=False,updatefunc=None,dateadded = strftime("%Y-%m-%d %H:%M:%S")):
-    """parcours le dossier racine 'dirname'
-    - 'recursive' pour traverser récursivement les sous dossiers de 'dirname'
-    - 'updatepics' pour mettre à jour une image qui a changé
-    - 'rescan' pour forcer le scan des images qu'elles soient déjà en base ou pas
-    - 'updatefunc' est une fonction appelée pour indiquer la progression. Les paramètres sont (pourcentage(int),[ line1(str),line2(str),line3(str) ] )
+    """Browse the root folder 'dirname'
+    - 'recursive' : the scan is recursive. all the subfolders of 'dirname' are traversed for pics
+    - 'updatepics' : enable to modify a picture entry if metas changed
+    - 'rescan' : force the scan wheter pictures are already inside DB or not
+    - 'addpics' :
+    - 'delpics' :
+    - 'dateadded' : the date when the pictures are scanned (useful for subfolders calls to keep the same date as the main root folder)
+    - 'updatefunc' is a function called to show the progress of the scan. The parameters are : pourcentage(int),[ line1(str),line2(str),line3(str) ] )
 """
     global compte,comptenew,cptscanned,cptdelete,cptchanged,cptroots,iroots
     cpt=0
@@ -234,26 +243,26 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,ad
                             #Scan les metas et ajoute l'image avec un paramètre de mise à jour = true
                             DoScan = True
                             update = True
-                            straction = "Updating"
+                            straction = __language__(30242)#Updating
                             cptchanged = cptchanged + 1
                         else:
                             DoScan = False
-                            straction = "Passing"
+                            straction = __language__(30243)#"Passing"
                             #mais l'image n'a pas changée. Donc on passe
                     else:
                         DoScan = False
-                        straction = "Passing"
+                        straction = __language__(30243)#"Passing"
                         #mais on ne met pas à jour les photos. Donc on passe
                 else:
                     DoScan = True
                     update = False
-                    straction = "Adding"
+                    straction = __language__(30244)#"Adding"
                     comptenew = comptenew + 1
                     #l'image n'est pas dans la base. On l'ajoute maintenant avec paramètre de mise à jour = false
             else:
                 DoScan = True
                 update = True
-                straction = "Rescan"
+                straction = __language__(30245)#"Rescan"
                 #on rescan les photos donc on ajoute l'image avec paramètre de mise à jour = true
 
 
@@ -261,7 +270,7 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,ad
                 updatefunc.update(int(100*float(cptscanned)/float(totalfiles)),#cptscanned-(cptscanned/100)*100,
                                   #cptscanned/100,
                                   int(100*float(iroots)/float(cptroots)),
-                                  "MyPicture Database [%s] (%0.2f%%)"%(straction,100*float(cptscanned)/float(totalfiles)),
+                                  __language__(30000)+"[%s] (%0.2f%%)"%(straction,100*float(cptscanned)/float(totalfiles)),#"MyPicture Database [%s] (%0.2f%%)"
                                   picfile)
             if DoScan:
                 
@@ -294,7 +303,7 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,ad
                     updatefunc.update(int(100*float(cptscanned)/float(totalfiles)),#cptscanned-(cptscanned/100)*100,
                                       #cptscanned/100,
                                       int(100*float(iroots)/float(cptroots)),
-                                      "MyPicture Database [Removing]",
+                                      __language__(30000)+"["+__language__(30246)+"]",#MyPicture Database [Removing]
                                       f)
                 MPDB.DB_del_pic(dirname,f)
                 MPDB.log( "\t%s has been deleted from database because the file does not exists in this folder. "%f)#f.decode(sys_enc))
@@ -302,17 +311,17 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,ad
 
             
     else:
-        MPDB.log( "Ce dossier ne contient pas d'images :")
+        MPDB.log( "This folder does not contain any picture :")
         MPDB.log( dirname )
         MPDB.log( "" )
     
     if cpt:
-        MPDB.log( "%s nouvelles images trouvees dans %s"%(str(cpt),dirname) )
+        MPDB.log( "%s new pictures found in %s"%(str(cpt),dirname) )
         #unicode(info.data[k].encode("utf8").__str__(),"utf8")
         compte=compte+cpt
         cpt=0
     if recursive: #gestion de la recursivité. On rappel cette même fonction pour chaque dossier rencontré
-        MPDB.log( "traitement des sous dossiers de :")
+        MPDB.log( "scan the subfolders of :")
         MPDB.log( dirname )
         for item in listdir:
             if isdir(join(dirname,item)):#un directory
@@ -360,5 +369,8 @@ if __name__=="__main__":
 
     #1- récupérer le paramètre
     main2()
-    
-    xbmc.executebuiltin( "Notification(MyPictures Database,%s scanned / %s added / %s removed / %s changed)"%(cptscanned,comptenew,cptdelete,cptchanged) )
+
+    xbmc.executebuiltin( "Notification(%s,%s)"%(__language__(30000).encode("utf8"),
+                                                __language__(30248).encode("utf8")%(cptscanned,comptenew,cptdelete,cptchanged)
+                                                )
+                         )
