@@ -302,13 +302,13 @@ class Main:
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     def show_folders(self):
-        #on récupère les sous dossiers si il y en a
-        if not self.args.folderid: #pas d'id on affiche les dossiers racines
+        #get the subfolders if any
+        if not self.args.folderid: #No Id given, get all the root folders
             childrenfolders=[row for row in MPDB.Request("SELECT idFolder,FolderName FROM folders WHERE ParentFolder is null")]
-        else:#sinon on affiche les sous dossiers du dossier sélectionné
+        else:#else, get subfolders for given folder Id
             childrenfolders=[row for row in MPDB.Request("SELECT idFolder,FolderName FROM folders WHERE ParentFolder='%s'"%self.args.folderid)]
 
-        #on ajoute les dossiers 
+        #show the folders 
         for idchildren, childrenfolder in childrenfolders:
             path = MPDB.Request( "SELECT FullPath FROM folders WHERE idFolder = %s"%idchildren )[0][0]
             self.addDir(name      = "%s (%s %s)"%(childrenfolder.decode("utf8"),MPDB.countPicsFolder(idchildren),__language__(30050)), #libellé
@@ -316,7 +316,7 @@ class Main:
                         action    = "showfolder",#action
                         iconimage = join(PIC_PATH,"folders.png"),#icone
                         fanart    = join(PIC_PATH,"fanart-folder.png"),
-                        contextmenu   = [(__language__(30212),"Container.Update(\"%s?action='rootfolders'&do='addrootfolder'&addpath='%s'&exclude='1'&viewmode='view'\",)"%(sys.argv[0],quote_plus(path)) ),],#None, #menucontextuel
+                        contextmenu   = [(__language__(30212),"Container.Update(\"%s?action='rootfolders'&do='addrootfolder'&addpath='%s'&exclude='1'&viewmode='view'\",)"%(sys.argv[0],quote_plus(path)) ),],
                         total = len(childrenfolders))#nb total d'éléments
         
         #maintenant, on liste les photos si il y en a, du dossier en cours
@@ -540,7 +540,7 @@ class Main:
             except IndexError,msg:
                 print IndexError,msg
             #TODO : this notification does not work with é letters in the string....
-            #xbmc.executebuiltin( "Notification(%s,%s,%s,%s)"%(__language__(30000),__language__(30205),3000,join(os.getcwd(),"icon.png")))#+":".encode("utf8")+unquote_plus(self.args.delpath)) )
+            xbmc.executebuiltin( "Notification(%s,%s,%s,%s)"%(__language__(30000).encode("utf8"),__language__(30205).encode("utf8"),3000,join(os.getcwd(),"icon.png")))#+":".encode("utf8")+unquote_plus(self.args.delpath)) )
         elif self.args.do=="rootclic":#clic sur un chemin (à exclure ou à scanner)
             if not(xbmc.getInfoLabel( "Window.Property(DialogAddonScan.IsAlive)" ) == "true"): #si dialogaddonscan n'est pas en cours d'utilisation...
                 if str(self.args.exclude)=="0":#le chemin choisi n'est pas un chemin à exclure...
@@ -980,7 +980,11 @@ class Main:
                         contextmenu = context,
                         fanart = xbmcplugin.getSetting(int(sys.argv[1]),'usepicasfanart')=='true' and join(path,filename) or picfanart
                         )
-        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_DATE )#SORT_METHOD_NONE)
+        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_DATE )#SORT_METHOD_NONE)SORT_METHOD_TITLE
+        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_TITLE )
+        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_UNSORTED )
+        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_FILE )
+
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="photos" )
         xbmcplugin.endOfDirectory(int(sys.argv[1]))           
             
@@ -1052,9 +1056,7 @@ if __name__=="__main__":
         m.show_roots()
     elif m.args.action=='locate':
         dialog = xbmcgui.Dialog()
-        print m.args.filepath
-        print unquote_plus(m.args.filepath)
-        dstpath = dialog.browse(2, "The file is located here :","files" ,"", True, False, unquote_plus(m.args.filepath))
+        dstpath = dialog.browse(2, __language__(30071),"files" ,"", True, False, unquote_plus(m.args.filepath))
     elif m.args.action=='geolocate':
         m.show_map()
     elif m.args.action=='diapo':

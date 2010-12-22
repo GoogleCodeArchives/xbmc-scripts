@@ -19,6 +19,7 @@
     <string id="30024">Effectuer le scan au démarrage</string><!-- setting -->
     <string id="30025">Réinitialiser la base avant le scan</string><!-- setting -->
     <string id="30026">Utiliser l'image comme fanart pour les images</string><!-- setting -->
+    <string id="30027">Configurer le dialogue de scan</string>
     
     <string id="30040">Note minimale des photos à afficher</string>
     <string id="30041">Toutes</string>
@@ -41,7 +42,7 @@
     <string id="30068">L'archivage a été annulé !</string>
     <string id="30069">%s erreurs lors de l'archivage de %s fichiers</string> <!-- %s errors while zipping %s files -->
     <string id="30070">%s images archivées avec succès !!</string>    <!-- %s files successfully Zipped !! -->
-    <string id="30071"></string>
+    <string id="30071">Localisation du fichier sur le disque</string>
     
     <string id="30098">Recherche globale</string>
     <string id="30099">Chemins des dossiers images</string>
@@ -109,7 +110,7 @@
     <string id="30206">Effectuer un scan maintenant</string>
     <string id="30207">Supprimer ce chemin de la base</string>
     <string id="30208">[B]Ajouter[/B] un chemin à la base</string>
-    <string id="30209">Images récentes</string>
+    <string id="30209">Images récemment ajoutées</string>
     <string id="30210">Retirer ce chemin des exclusions</string>
     <string id="30211">Ajouter un dosser à [B]exclure[/B]</string>
     <string id="30212">Exclure ce dossier de la base</string>
@@ -125,6 +126,17 @@
     <string id="30227"></string>
     <string id="30228"></string>
      
+    <string id="30240"></string>
+    <string id="30241">préparation</string>
+    <string id="30242">actualise</string>
+    <string id="30243">passe</string>
+    <string id="30244">ajoute</string>
+    <string id="30245">re-scan</string>
+    <string id="30246">supprime</string>
+    <string id="30247">Veuillez patienter...</string>
+    <string id="30248">%s scannées / %s ajoutées / %s supprimées / %s modifiées</string>  <!-- %s respectively changed by number : scanned, added, deleted, modified -->
+    <string id="30249"></string>
+
     
     <string id="30300">nom de fichier</string>
     <string id="30301">chemin</string>
