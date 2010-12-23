@@ -496,7 +496,7 @@ class Main:
                             contextmenu   = [(__language__(30152),"XBMC.RunPlugin(\"%s?action='addfolder'&method='search'&field='%s'&searchterm='%s'&viewmode='scan'\")"%(sys.argv[0],colname,motrecherche))])#menucontextuel
         if not result:
             dialog = xbmcgui.Dialog()
-            dialog.ok(__language__(30000), __language__(30116)%motrecherche)
+            dialog.ok(__language__(30000).encode("utf8"), __language__(30119).encode("utf8")%motrecherche)
             return
         xbmcplugin.addSortMethod( int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE )
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="search")
