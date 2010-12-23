@@ -67,9 +67,9 @@
     <string id="30118">Date de fin de période</string>
     <string id="30119">La recherche pour '%s' n'a retourné aucun résultat dans toute la base</string> <!-- %s replaced by searched term-->
     
-    <string id="30130">Utiliser les flêches haut / bas pour zoomer</string>
-    <string id="30131">récupération de la carte... (%0.2f%%)</string>  <!-- %0.2f%% will be replaced by the percent of download for a map -->
-    <string id="30132">Zoom=%s</string>       <!-- %s will be replaced by the zoom level in a map -->
+    <string id="30130"></string>
+    <string id="30131"></string>
+    <string id="30132"></string>
     <string id="30133"></string>
     <string id="30134"></string>
     <string id="30135"></string>

@@ -67,9 +67,9 @@
     <string id="30118">End date of the period</string>
     <string id="30119">The search for '%s' did not match in the whole database</string> <!-- %s replaced by searched term-->
     
-    <string id="30130">Use up and down keys zoom in and out</string>
-    <string id="30131">getting the map... (%0.2f%%)</string>  <!-- %0.2f%% will be replaced by the percent of download for a map -->
-    <string id="30132">Zoom=%s</string>       <!-- %s will be replaced by the zoom level in a map -->
+    <string id="30130"></string>
+    <string id="30131"></string>
+    <string id="30132"></string>
     <string id="30133"></string>
     <string id="30134"></string>
     <string id="30135"></string>
@@ -102,24 +102,24 @@
     <string id="30189">%s pictures copied to %s</string> <!-- %s[number of files] copied to %s[distination folder]-->
     <string id="30190">Exported pictures</string>
     
-    <string id="30201">Dossier à scanner</string>
-    <string id="30202">Parcourir ce dossier de manière récursive</string>
-    <string id="30203">Supprimer les entrées de la base si les images n'existent pas</string>
-    <string id="30204">Chemin ajouté !</string>
-    <string id="30205">Chemin supprimé !</string>
-    <string id="30206">Effectuer un scan maintenant</string>
-    <string id="30207">Supprimer ce chemin de la base</string>
-    <string id="30208">[B]Ajouter[/B] un chemin à la base</string>
-    <string id="30209">Images récemment ajoutées</string>
-    <string id="30210">Retirer ce chemin des exclusions</string>
-    <string id="30211">Ajouter un dosser à [B]exclure[/B]</string>
-    <string id="30212">Exclure ce dossier de la base</string>
-    <string id="30213">Scanner tous les chemins</string>
+    <string id="30201">Folder to scan</string>
+    <string id="30202">Browse this folder recursively</string>
+    <string id="30203">Delete the database entries if picture does not exists anymore</string>
+    <string id="30204">Path added !</string>
+    <string id="30205">Path deleted !</string>
+    <string id="30206">Do a scan now</string>
+    <string id="30207">Delete this path from database</string>
+    <string id="30208">[B]Add[/B] a path to database</string>
+    <string id="30209">Pictures recently added</string>
+    <string id="30210">Remove this path from excluded</string>
+    <string id="30211">Add a folder to [B]exclude[/B]</string>
+    <string id="30212">Exclude this folder from database</string>
+    <string id="30213">Scan all paths</string>
 
-    <string id="30220">Géolocaliser</string>
-    <string id="30221">récupération de la carte... (%0.2f%%)</string>  <!-- %0.2f%% will be replaced by the percent of download for a map -->
+    <string id="30220">Geolocation</string>
+    <string id="30221">Fetching the map... (%0.2f%%)</string>  <!-- %0.2f%% will be replaced by the percent of download for a map -->
     <string id="30222">Zoom=%s</string>       <!-- %s will be replaced by the zoom level in a map -->
-    <string id="30223">Utiliser les flêches haut / bas pour zoomer</string>
+    <string id="30223">Use up / down arrows to zoom in / out</string>
     <string id="30224"></string>
     <string id="30225"></string>
     <string id="30226"></string>
@@ -127,20 +127,20 @@
     <string id="30228"></string>
      
     <string id="30240"></string>
-    <string id="30241">préparation</string>
-    <string id="30242">actualise</string>
-    <string id="30243">passe</string>
-    <string id="30244">ajoute</string>
+    <string id="30241">preparing</string>
+    <string id="30242">refreshing</string>
+    <string id="30243">passing</string>
+    <string id="30244">adding</string>
     <string id="30245">re-scan</string>
-    <string id="30246">supprime</string>
-    <string id="30247">Veuillez patienter...</string>
-    <string id="30248">%s scannées / %s ajoutées / %s supprimées / %s modifiées</string>  <!-- %s respectively changed by number : scanned, added, deleted, modified -->
+    <string id="30246">deleting</string>
+    <string id="30247">Please wait...</string>
+    <string id="30248">%s scanned / %s added / %s deleted / %s modified</string>  <!-- %s respectively changed by number : scanned, added, deleted, modified -->
     <string id="30249"></string>
     
-    <string id="30300">nom de fichier</string>
-    <string id="30301">chemin</string>
-    <string id="30302">chemin (miniature)</string>
-    <string id="30303">Voir le diaporama</string>
+    <string id="30300">file name</string>
+    <string id="30301">path</string>
+    <string id="30302">path (thumbnail)</string>
+    <string id="30303">Show the slideshow</string>
     <string id="30304"></string>
     <string id="30305"></string>
     <string id="30306"></string>
