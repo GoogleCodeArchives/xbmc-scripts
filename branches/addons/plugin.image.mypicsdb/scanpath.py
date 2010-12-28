@@ -55,7 +55,7 @@ import MypicsDB as MPDB
 global pictureDB
 pictureDB = join(DB_PATH,"MyPictures.db")
 
-from time import strftime
+from time import strftime,gmtime
 
 from DialogAddonScan import AddonScan
 from file_item import Thumbnails  
@@ -66,11 +66,16 @@ for path,recursive,update,exclude in MPDB.RootFolders():
         print path
         Exclude_folders.append(normpath(path))
 
-global listext
+global listext,vidsext
 listext=[]
-for ext in Addon.getSetting("picsext").split("|"):
-    listext.append("." + ext.replace(".","").upper())
-
+picsext=[]
+vidsext=[]
+for ext in Addon.getSetting("picsext").split("|"):#on récupère les extensions photo
+    picsext.append("." + ext.replace(".","").upper())
+for ext in Addon.getSetting("vidsext").split("|"):#on récupère les extensions vidéos
+    vidsext.append("." + ext.replace(".","").upper())
+listext=picsext+vidsext
+    
 def main2():
     #get active window
     import optparse
@@ -220,19 +225,19 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,ad
                             listfolderfiles and "1" or "0"#i
                             )
     if listfolderfiles:#si le dossier contient des fichiers jpg...
-##        #on ajoute dans la table des chemins le chemin en cours
-##        PFid = DB_folder_insert(basename(dirname) or osdirname(dirname).split(separator)[-1],
-##                                dirname,
-##                                parentfolderID,
-##                                i#"1" if listfolderfiles else "0"
-##                                )
         #######
         # STEP 4 : browse all pictures
         #######
         #puis on parcours toutes les images du dossier en cours
         for picfile in listfolderfiles:#... on parcours tous les jpg du dossier
+            extension = splitext(picfile)[1].upper()
+            if extension in vidsext and Addon.getSetting("usevids") == "false":#si une video mais qu'on ne prend pas les vidéos
+                if picfile in listDBdir:
+                    listDBdir.pop(listDBdir.index(picfile))
+                continue #alors on ne fait rien et on reprend la boucle
             cptscanned = cptscanned+1
             cpt = cpt + 1
+
             ###if updatefunc and updatefunc.iscanceled(): return#dialog progress has been canceled
             #on enlève l'image traitée de listdir
             listdir.pop(listdir.index(picfile))
@@ -276,14 +281,17 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,ad
                                   __language__(30000)+"[%s] (%0.2f%%)"%(straction,100*float(cptscanned)/float(totalfiles)),#"MyPicture Database [%s] (%0.2f%%)"
                                   picfile)
             if DoScan:
-                
                 picentry = { "idFolder":PFid,
                              "strPath":dirname.decode("utf8"),
                              "strFilename":picfile.decode("utf8"),
                              "UseIt":1,
                              "sha":str(MPDB.fileSHA(join(dirname,picfile))),
                              "DateAdded":dateadded,
-                             "mtime":str(stat(join(dirname,picfile)).st_mtime)}
+                             "mtime":str(stat(join(dirname,picfile)).st_mtime),
+                             "ftype": extension in picsext and "picture" or extension in vidsext and "video" or ""}
+                
+
+                
 
                 #récupère les infos EXIF/IPTC
                 picentry.update(get_metas(dirname,picfile))
@@ -338,27 +346,39 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,ad
 def get_metas(dirname,picfile):
     picentry = {}
     ### chemin de la miniature
-    thumbnails = Thumbnails()
-    picentry["Thumb"]=thumbnails.get_cached_picture_thumb( join(dirname,picfile) ).decode("utf8")
+    extension = splitext(picfile)[1].upper()
 
-    ###############################
-    #    getting  EXIF  infos     #
-    ###############################
-    #reading EXIF infos
-    #   (file fields are creating if needed)
-    try:
-        exif = MPDB.get_exif(join(dirname,picfile).encode('utf8'))
-    except UnicodeDecodeError:
-        exif = MPDB.get_exif(join(dirname,picfile))
-    #EXIF infos are added to a dictionnary
-    picentry.update(exif)
+    #si le fichier est une vidéo,
+    if extension in vidsext:
+        picentry.update({"EXIF DateTimeOriginal":strftime("%Y-%m-%d %H:%M:%S",gmtime(stat(join(dirname,picfile)).st_mtime))})
+    #si le fichier est une image
+    elif extension in picsext:
+        thumbnails = Thumbnails()
+        picentry["Thumb"]=thumbnails.get_cached_picture_thumb( join(dirname,picfile) ).decode("utf8")
 
-    ###############################
-    #    getting  IPTC  infos     #
-    ###############################
-    iptc = MPDB.get_iptc(dirname,picfile)
-    #IPTC infos are added to a dictionnary
-    picentry.update(iptc)
+        ###############################
+        #    getting  EXIF  infos     #
+        ###############################
+        #reading EXIF infos
+        #   (file fields are creating if needed)
+        try:
+            exif = MPDB.get_exif(join(dirname,picfile).encode('utf8'))
+        except UnicodeDecodeError:
+            exif = MPDB.get_exif(join(dirname,picfile))
+        #EXIF infos are added to a dictionnary
+        picentry.update(exif)
+
+        ###############################
+        #    getting  IPTC  infos     #
+        ###############################
+        iptc = MPDB.get_iptc(dirname,picfile)
+        #IPTC infos are added to a dictionnary
+        picentry.update(iptc)
+    else:
+        picentry={}
+        #this should never happen
+        print "file was neither of video type, nor picture type... Check the extensions in settings"
+
     return picentry
     
 def usage():

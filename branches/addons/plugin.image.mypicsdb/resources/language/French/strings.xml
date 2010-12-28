@@ -20,6 +20,8 @@
     <string id="30025">Réinitialiser la base avant le scan</string><!-- setting -->
     <string id="30026">Utiliser l'image comme fanart pour les images</string><!-- setting -->
     <string id="30027">Configurer le dialogue de scan</string>
+    <string id="30028">Extensions des vidéos</string>
+    <string id="30029">Utiliser les vidéos</string>
     
     <string id="30040">Note minimale des photos à afficher</string>
     <string id="30041">Toutes</string>

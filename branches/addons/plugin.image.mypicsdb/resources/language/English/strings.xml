@@ -20,7 +20,9 @@
     <string id="30025">Initialize the database before scanning</string>
     <string id="30026">Use the picture as fanart for pictures</string><!-- setting -->
     <string id="30027">Settings for the dialog scan popup</string>
-    
+    <string id="30028">Videos extensions</string>
+    <string id="30029">Use the videos</string>
+
     <string id="30040">Minimum required rate for pictures to display</string>
     <string id="30041">All</string>
     <string id="30042">1 star</string>
