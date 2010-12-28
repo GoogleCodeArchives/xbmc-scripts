@@ -11,7 +11,7 @@ TODO :
   - Set a parameter to prevent small pics to be added to the database (use EXIF_ImageWidth and EXIF_ImageLength metas)
 """
 import os,sys
-from os.path import join,isfile,basename,dirname
+from os.path import join,isfile,basename,dirname,splitext
 
 
 import xbmc, xbmcaddon
@@ -33,7 +33,7 @@ sys.path.append( join( BASE_RESOURCE_PATH, "lib" ) )
 from urllib import quote_plus,unquote_plus
 import xbmcplugin,xbmcgui
 
-from time import strftime,strptime
+from time import strftime,strptime,gmtime
 
 from traceback import print_exc
 
@@ -155,20 +155,34 @@ class Main:
     
     def addPic(self,picname,picpath,info="*",fanart=None,contextmenu=None,replacemenu=True):
         ok=True
-        rating = MPDB.getRating(picpath,picname)
-        if int(Addon.getSetting("ratingmini"))>0:#un rating mini est configuré
-            if not rating:  return
-            if int(rating) < int(Addon.getSetting("ratingmini")): return #si on a un rating dans la photo
-        coords = MPDB.getGPS(picpath,picname)
         liz=xbmcgui.ListItem(picname,info)
-        suffix=""
-        if coords: suffix = suffix + "[COLOR=C0C0C0C0][G][/COLOR]"
-        if rating:
-            suffix = suffix + "[COLOR=C0FFFF00]"+("*"*int(rating))+"[/COLOR][COLOR=C0C0C0C0]"+("*"*(5-int(rating)))+"[/COLOR]"
         date = MPDB.getDate(picpath,picname)
         date = date and strftime("%d.%m.%Y",strptime(date,"%Y-%m-%d %H:%M:%S")) or ""
-        infolabels = { "picturepath":picname+" "+suffix,"title": "title of the pic", "date": date  }
-        liz.setInfo( type="pictures", infoLabels=infolabels )
+        suffix=""
+        rating=""
+        coords=None
+        extension = splitext(picname)[1].upper()
+        #is the file a video ?
+        if extension in ["."+ext.replace(".","").upper() for ext in Addon.getSetting("vidsext").split("|")]:
+            #file is a video
+            infolabels = { "picturepath":picname+" "+suffix,"title": "title of the pic", "date": date  }
+            liz.setInfo( type="videos", infoLabels=infolabels )
+        #or is the file a picture ?
+        elif extension in ["."+ext.replace(".","").upper() for ext in Addon.getSetting("picsext").split("|")]:
+            #file is a picture
+            rating = MPDB.getRating(picpath,picname)
+            if int(Addon.getSetting("ratingmini"))>0:#un rating mini est configuré
+                if not rating:  return
+                if int(rating) < int(Addon.getSetting("ratingmini")): return #si on a un rating dans la photo
+            coords = MPDB.getGPS(picpath,picname)        
+            
+            if coords: suffix = suffix + "[COLOR=C0C0C0C0][G][/COLOR]"
+        
+            infolabels = { "picturepath":picname+" "+suffix,"title": "title of the pic", "date": date  }
+
+            if rating:
+                suffix = suffix + "[COLOR=C0FFFF00]"+("*"*int(rating))+"[/COLOR][COLOR=C0C0C0C0]"+("*"*(5-int(rating)))+"[/COLOR]"
+            liz.setInfo( type="pictures", infoLabels=infolabels )
         liz.setLabel(picname+" "+suffix)
         #liz.setLabel2(suffix)
         if contextmenu:

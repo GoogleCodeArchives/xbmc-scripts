@@ -3,8 +3,11 @@
   <category label="general">
     <setting id="bootscan" type="bool" label="30024" default="true" />
     <setting id="usepicasfanart" type="bool" label="30026" default="true" />
-    <setting id="picsext" type="text" label="30023" default="JPG|TIF|PNG|GIF|BMP|JPEG" />
+    <setting id="picsext" type="text" label="30023" default="JPG|JPEG|TIF|PNG|GIF|BMP" />
     <setting id="ratingmini" type="enum" lvalues="30041|30042|30043|30044|30045|30046" label="30040" default="0"/>
+    <setting type="lsep" label="" /> 
+    <setting id="usevids" type="bool" label="30029" default="true" />
+    <setting id="vidsext" type="text" label="30028" default="AVI|MPEG|MP4|MOV" enable="eq(-1,true)"/>
     <setting type="lsep" label="" /> 
     <setting type="action" label="30027" option="close" action="RunScript(special://home/addons/script.module.dialogaddonscan/lib/DialogAddonScan.py,opensettins)" default="" />
     <!-- <setting type="lsep" label="30020" />         -->
