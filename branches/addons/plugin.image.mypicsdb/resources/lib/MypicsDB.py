@@ -613,11 +613,16 @@ def getGPS(filepath,filename):
         return None
     if not coords: return None
     latR,lat,lonR,lon=coords
-        
-    lD,lM,lS = lat.replace(" ","").replace("[","").replace("]","").split(",")
-    LD,LM,LS = lon.replace(" ","").replace("[","").replace("]","").split(",")
-    exec("LS=%s"%LS)
+    tuplat = lat.replace(" ","").replace("[","").replace("]","").split(",")
+    tuplon = lon.replace(" ","").replace("[","").replace("]","").split(",")
+    lD,lM,lS = lat.replace(" ","").replace("[","").replace("]","").split(",")[:3]
+    LD,LM,LS = lon.replace(" ","").replace("[","").replace("]","").split(",")[:3]
+    exec("lD=%s"%lD)
+    exec("lM=%s"%lM)
     exec("lS=%s"%lS)
+    exec("LD=%s"%LD)
+    exec("LM=%s"%LM)
+    exec("LS=%s"%LS)
     latitude =  (int(lD)+(int(lM)/60.0)+(int(lS)/3600.0)) * (latR=="S" and -1 or 1)
     longitude = (int(LD)+(int(LM)/60.0)+(int(LS)/3600.0)) * (lonR=="W" and -1 or 1)
     return (latitude,longitude)

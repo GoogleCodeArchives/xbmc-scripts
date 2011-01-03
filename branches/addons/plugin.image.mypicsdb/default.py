@@ -9,6 +9,7 @@ TODO :
   - test if a 'collection' or 'period' or 'keyword' view doesn't contain any pictures : remove these from the database when deleting pictures
   - Scan : need to fix parameters sending. Right now, recursive or update things are not handled (everything is recursive and updating for new/deleted pics)
   - Set a parameter to prevent small pics to be added to the database (use EXIF_ImageWidth and EXIF_ImageLength metas)
+  - Les photos depuis x jours avec x configurable dans les options
 """
 import os,sys
 from os.path import join,isfile,basename,dirname,splitext
@@ -18,7 +19,6 @@ import xbmc, xbmcaddon
 
 Addon = xbmcaddon.Addon(id='plugin.image.mypicsdb')
 
-#home = os.getcwd().replace(';','')
 home = Addon.getAddonInfo('path')
 #these few lines are taken from AppleMovieTrailers script
 # Shared resources
@@ -109,7 +109,6 @@ def unescape(text):
     return sub("&#?\w+;", fixup, text)
 
 
-
 class _Info:
     def __init__( self, *args, **kwargs ):
         self.__dict__.update( kwargs )
@@ -165,11 +164,18 @@ class Main:
         #is the file a video ?
         if extension in ["."+ext.replace(".","").upper() for ext in Addon.getSetting("vidsext").split("|")]:
             #file is a video
-            infolabels = { "picturepath":picname+" "+suffix,"title": "title of the pic", "date": date  }
-            liz.setInfo( type="videos", infoLabels=infolabels )
+            print "video date"
+            print date
+            print
+            #infolabels = { "picturepath":picname+" "+suffix,"title": "title of the pic", "date": date  }
+            infolabels = { "date": date } 
+            liz.setInfo( type="video", infoLabels=infolabels )
         #or is the file a picture ?
         elif extension in ["."+ext.replace(".","").upper() for ext in Addon.getSetting("picsext").split("|")]:
             #file is a picture
+            print "picture date"
+            print date
+            print
             rating = MPDB.getRating(picpath,picname)
             if int(Addon.getSetting("ratingmini"))>0:#un rating mini est configuré
                 if not rating:  return
@@ -206,11 +212,23 @@ class Main:
 ##                    "showpics",join(PIC_PATH,"dates.png"),
 ##                    fanart=join(PIC_PATH,"fanart-date.png"))
         # last scan picture added
-        self.addDir(unescape(__language__(30209)),[("method","recentpics"),("period",""),("value",""),("viewmode","view")],
+        self.addDir(unescape(__language__(30209))%Addon.getSetting("recentnbdays"),[("method","recentpicsdb"),("period",""),("value",""),("viewmode","view")],
                     "showpics",join(PIC_PATH,"dates.png"),
                     fanart=join(PIC_PATH,"fanart-date.png"))
         
+        # Last pictures
+        self.addDir(unescape(__language__(30130))%Addon.getSetting("lastpicsnumber"),[("method","lastpicsshooted"),("viewmode","view")],
+                    "showpics",join(PIC_PATH,"dates.png"),
+                    fanart=join(PIC_PATH,"fanart-date.png"))
+        
+        # videos
+        if Addon.getSetting("usevids") == "true":
+            self.addDir(unescape(__language__(30051)),[("method","videos"),("viewmode","view")],
+                        "showpics",join(PIC_PATH,"videos.png"),
+                        fanart=join(PIC_PATH,"fanart-videos.png"))
+
         # par années
+        #select strPath,strFilename from files where ftype="video"
         self.addDir(unescape(__language__(30101)),[("period","year"),("value",""),("viewmode","view")],
                     "showdate",join(PIC_PATH,"dates.png"),
                     fanart=join(PIC_PATH,"fanart-date.png") )
@@ -769,7 +787,10 @@ class Main:
         self.args.viewmode="diapo"
         self.show_pics()
         
-        
+    def show_lastshots(self):
+        #récupère X dernières photos puis affiche le résultat
+        pass
+    
     def show_pics(self):
         picfanart = None
         if self.args.method == "folder":#NON UTILISE : l'affichage par dossiers affiche de lui même les photos
@@ -829,12 +850,25 @@ class Main:
             filelist = MPDB.Searchfiles(unquote_plus(self.args.field),unquote_plus(self.args.searchterm),count=False)
 
         elif self.args.method == "lastmonth":
+            #show pics taken within last month
             picfanart = join(PIC_PATH,"fanart-date.png")
             filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN datetime('now','-1 months') AND datetime('now') ORDER BY "EXIF DateTimeOriginal" ASC""")]
-        elif self.args.method == "recentpics":#TODO
+            
+        elif self.args.method == "recentpicsdb":#pictures added to database within x last days __OK
             picfanart = join(PIC_PATH,"fanart-date.png")
-            filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE DateAdded=(SELECT max(DateAdded) FROM files)""")]
+            #filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE DateAdded=(SELECT max(DateAdded) FROM files)""")]
+            numberofdays = Addon.getSetting("recentnbdays")
+            filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE DateAdded IN (SELECT DISTINCT DateAdded FROM files WHERE DateAdded>=datetime('now','start of day','-%s days')) AND UseIt = 1  ORDER BY DateAdded ASC"""%numberofdays)]
+            #filelist = [row for row in MPDB.Request( """select strPath,strFilename from files where idFile in (select idFile from files  order by DateAdded desc limit 100) order by "EXIF DateTimeOriginal" asc""")]
+            
+        elif self.args.method =="lastpicsshooted":#X last pictures shooted __OK
+            picfanart = join(PIC_PATH,"fanart-date.png")
+            filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE "EXIF DateTimeOriginal" NOT NULL AND UseIt=1 ORDER BY "EXIF DateTimeOriginal" DESC LIMIT %s"""%Addon.getSetting('lastpicsnumber') )]
 
+        elif self.args.method =="videos":#show all videos __OK
+            picfanart = join(PIC_PATH,"fanart-videos.png")
+            filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE "EXIF DateTimeOriginal" NOT NULL AND UseIt=1 AND ftype="video" ORDER BY "EXIF DateTimeOriginal" DESC""" )]
+            
         #on teste l'argumen 'viewmode'
             #si viewmode = view : on liste les images
             #si viewmode = scan : on liste les photos qu'on retourne
@@ -1082,7 +1116,7 @@ if __name__=="__main__":
         pass
     elif m.args.action=='lastshot':
         #TODO : afficher une liste des X dernières photos prise selon la date de prise de vue
-        pass
+        m.show_lastshots()
     elif m.args.action=='request':
         #TODO : afficher le résultat d'une requête
         pass
