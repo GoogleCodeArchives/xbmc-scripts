@@ -22,6 +22,9 @@
     <string id="30027">Configurer le dialogue de scan</string>
     <string id="30028">Extensions des vidéos</string>
     <string id="30029">Utiliser les vidéos</string>
+    <string id="30030">Général</string>
+    <string id="30031">Fichiers</string>
+    <string id="30032">Age des fichiers récents (en jours)</string>
     
     <string id="30040">Note minimale des photos à afficher</string>
     <string id="30041">Toutes</string>
@@ -32,6 +35,7 @@
     <string id="30046">5 étoiles</string>
     
     <string id="30050">images</string>
+    <string id="30051">Vidéos</string>
     
     <string id="30060">Localiser sur le disque</string>
     <string id="30061">Archiver ces images</string>
@@ -69,8 +73,8 @@
     <string id="30118">Date de fin de période</string>
     <string id="30119">La recherche pour '%s' n'a retourné aucun résultat dans toute la base</string> <!-- %s replaced by searched term-->
     
-    <string id="30130"></string>
-    <string id="30131"></string>
+    <string id="30130">Les %s dernières prises de vues</string> <!-- %s replaced by the number of last pictures shots in settings -->
+    <string id="30131">Dernières prises de vues (nombre d'images)</string>
     <string id="30132"></string>
     <string id="30133"></string>
     <string id="30134"></string>
@@ -112,7 +116,7 @@
     <string id="30206">Effectuer un scan maintenant</string>
     <string id="30207">Supprimer ce chemin de la base</string>
     <string id="30208">[B]Ajouter[/B] un chemin à la base</string>
-    <string id="30209">Images récemment ajoutées</string>
+    <string id="30209">Images ajoutées depuis %s jours</string>    <!-- %s will be replaced by the number of days to get images added> -->
     <string id="30210">Retirer ce chemin des exclusions</string>
     <string id="30211">Ajouter un dosser à [B]exclure[/B]</string>
     <string id="30212">Exclure ce dossier de la base</string>

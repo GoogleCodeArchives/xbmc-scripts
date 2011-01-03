@@ -92,7 +92,7 @@ def main2():
     print options
     print args
     print dir(parser)
-    dateadded = strftime("%Y-%m-%d %H:%M:%S")#pour inscrire la date de scan des images dans la base
+    #dateadded = strftime("%Y-%m-%d %H:%M:%S")#pour inscrire la date de scan des images dans la base
     if options.rootpath:
         print unquote_plus(options.rootpath)
         scan = AddonScan()#xbmcgui.getCurrentWindowId()
@@ -108,7 +108,7 @@ def main2():
         try:
             #browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,addpics=True,delpics=True,rescan=False,updatefunc=None)
             #browse_folder(unquote_plus(options.rootpath),parentfolderID=None,recursive=options.recursive,updatepics=options.update,addpics=True,delpics=True,rescan=False,updatefunc=scan,dateadded = dateadded )
-            browse_folder(unquote_plus(options.rootpath),parentfolderID=None,recursive=options.recursive,updatepics=True,addpics=True,delpics=True,rescan=False,updatefunc=scan,dateadded = dateadded )
+            browse_folder(unquote_plus(options.rootpath),parentfolderID=None,recursive=options.recursive,updatepics=True,addpics=True,delpics=True,rescan=False,updatefunc=scan,dateadded = strftime("%Y-%m-%d %H:%M:%S"))#dateadded )
         except:
             print_exc()
         scan.close()
@@ -135,7 +135,7 @@ def main2():
                     try:
                         #browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,rescan=False,updatefunc=None)
                         iroots=iroots+1
-                        browse_folder(unquote_plus(path),parentfolderID=None,recursive=recursive==1,updatepics=update==1,addpics=True,delpics=True,rescan=False,updatefunc=scan,dateadded = dateadded)
+                        browse_folder(unquote_plus(path),parentfolderID=None,recursive=recursive==1,updatepics=update==1,addpics=True,delpics=True,rescan=False,updatefunc=scan,dateadded = strftime("%Y-%m-%d %H:%M:%S"))#dateadded)
                     except:
                         print_exc()
                 else:
@@ -286,7 +286,8 @@ def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,ad
                              "strFilename":picfile.decode("utf8"),
                              "UseIt":1,
                              "sha":str(MPDB.fileSHA(join(dirname,picfile))),
-                             "DateAdded":dateadded,
+                             #"DateAdded":dateadded,
+                             "DateAdded":strftime("%Y-%m-%d %H:%M:%S"),
                              "mtime":str(stat(join(dirname,picfile)).st_mtime),
                              "ftype": extension in picsext and "picture" or extension in vidsext and "video" or ""}
                 
