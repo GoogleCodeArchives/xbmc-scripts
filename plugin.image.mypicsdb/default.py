@@ -164,18 +164,13 @@ class Main:
         #is the file a video ?
         if extension in ["."+ext.replace(".","").upper() for ext in Addon.getSetting("vidsext").split("|")]:
             #file is a video
-            print "video date"
-            print date
-            print
             #infolabels = { "picturepath":picname+" "+suffix,"title": "title of the pic", "date": date  }
             infolabels = { "date": date } 
             liz.setInfo( type="video", infoLabels=infolabels )
         #or is the file a picture ?
         elif extension in ["."+ext.replace(".","").upper() for ext in Addon.getSetting("picsext").split("|")]:
             #file is a picture
-            print "picture date"
-            print date
-            print
+
             rating = MPDB.getRating(picpath,picname)
             if int(Addon.getSetting("ratingmini"))>0:#un rating mini est configuré
                 if not rating:  return
