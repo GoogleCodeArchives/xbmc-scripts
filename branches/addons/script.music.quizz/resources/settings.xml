@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <setting type="lsep" label="Général" />
+      <setting id="nsongs" type="integer" label="30002" default="10" />
+      <setting id="timetoanswer" type="integer" label="30003" default="20" />
+      <setting id="seektime" type="integer" label="30006" default="20" />
+    <setting type="lsep" label="Enchainement" />
+      <setting id="autonextsong" type="bool" label="30001" default="false" />
+      <setting id="timebetweensongs" type="integer" label="30004" default="2" />
+      <setting id="continueplaylinglast" type="bool" label="30009" default="true" />
+    <setting type="lsep" label="Erreurs" />
+      <setting id="helpaftererror" type="bool" label="30007" default="true" />
+      <setting id="newquestionaftererror" type="bool" label="30008" default="true" />
+      <setting id="timebetweenquestions" type="integer" label="30005" default="2" />
+</settings> 

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon
+  id="script.music.quizz"
+  version="0.1"
+  name="Music Quizz"
+  provider-name="alexsolex®">
+  <requires>
+        <import addon="xbmc.python" version="1.0"/>
+        <import addon="script.module.pysqlite" version="2.5.6"/>
+  </requires>
+    <extension point="xbmc.python.pluginsource" library="default.py">
+        <provides>music</provides>
+    </extension>
+  <extension point="xbmc.addon.metadata">
+    <platform>all</platform>
+    <summary lang="en">Play a quizz on your music</summary>
+    <summary lang="fr">Jouer au Quizz avec votre musique</summary>
+    <description lang="en">Will you recognize the singer ? Which date this song was released ? What is the title of this song ? ...[CR]Answer questions while listening to your music. </description>
+    <description lang="fr">Reconnaitrez-vous le chanteur de cette chanson ? De quelle date est ce morceau ? Quel est le titre de cette musique ?... [CR]Répondez à des questions pendant que vous écoutez votre musique.</description>
+    <disclaimer lang="en">Very early beta script. Developped under windows for XBMC Dharma v10.[BR]To report bugs or for encouragements, please contact me : alexsolex@gmail.com</disclaimer>
+    <disclaimer lang="fr">Script en version pré alpha. Développé sous windows pour XBMC Dharma v10.[BR]En cas d'erreurs ou pour les encouragements, merci de me contacter : alexsolex@gmail.com</disclaimer>
+  </extension>
+</addon>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+ <!-- Important if you don't want to use the WindowLists you still need to remember not to use the ids for other stuff. -->
+   <!-- * id 3 - Button - For the View button (to change between the lists) -->
+   <!-- * id 4/5 - Reserved (Don't actually do anything at the moment) -->
+   <!-- * id 12 - Label - For displaying the number of items in the WindowLists -->
+   <!-- * id 50-59 - Lists/Panels - The actual lists for displaying the information in the window lists -->
+
+
+
+  <string id="100">Oui</string>
+  <string id="101">Non</string>
+  <string id="102">score</string>
+  <string id="103">Titre N°%s/%s</string> 
+    <!--string id 103:
+    first %s will be replaced by the actual song number,
+    second %s will be replaced by the total song number-->
+  <string id="104">Chanson suivante...</string>
+  <string id="105">Démarrer le quizz...</string>
+  <string id="106">Recommencer le quizz...</string>
+  
+<!--2 Messages when too late to answer :-->
+  <!-- 1/ this one shows when it is the last song (3 lines for ok dialog box) -->
+  <string id="200">Mince.... ne pas répondre dans les temps à la</string>
+  <string id="201">dernière question est quelque chose de très rageant.</string>
+  <string id="202">N'est-ce pas ?</string>
+  <!-- 2/ the other one shows when a new song follows (3 lines for ok dialog box) -->
+  <string id="203">Alors ? on ne répond pas dans les temps ??</string>
+  <string id="204">Peut être ferez vous mieux pour la prochaine</string>
+  <string id="205">question...</string>
+
+  <!--congratulations for correct answer (keep small words pipe's separated) -->
+  <string id="300">Bien joué !|Quel talent !|Super !|Splendide...</string>
+  <string id="301">Bonne réponse !</string>
+
+  <!--bad words when the answer is not correct(keep small words pipe's separated) -->
+  <string id="302">Erreur !|Et nonnn, c'est une mauvaise réponse !|Vous réussirez peut être la prochaine fois|Médiocre...</string>
+  <string id="303">Mauvaise réponse !</string>
+  <!--PARAMS STRINGS -->
+  <string id="30001">Passer à la chanson suivante automatiquement</string>
+  <string id="30002">Nombre de morceaux musicaux</string>
+  <string id="30003">Temps alloué pour la réponse (en sec)</string>
+  <string id="30004">Délai avant chanson suivante (en sec)</string>
+  <string id="30005">Délai avant une nouvelle question (en sec)</string>
+  <string id="30006">Décalage pour le début de lecture (en sec)</string>
+  <string id="30007">Montrer la bonne réponse en cas d'erreur</string>
+  <string id="30008">Poser une nouvelle question en cas d'erreur</string>
+  <string id="30009">Continuer la lecture de la dernière chanson</string>
+
+</strings>
