@@ -1,0 +1,252 @@
+<window>
+	<animation type="WindowOpen">
+	  <effect type="fade" start="0" end="100" time="1000"/>
+	</animation>
+ 	<allowoverlay>false</allowoverlay>
+  <coordinates>
+    <system>1</system>
+    <posx>0</posx>
+    <posy>0</posy>
+  </coordinates>
+	<defaultcontrol>130</defaultcontrol>
+  <controls>	
+	
+
+    <control type="visualisation">
+      <description>Visualisation</description>
+      <posx>0</posx>
+      <posy>50</posy>
+      <width>720</width> 
+      <height>480</height>
+      <visible>true</visible>
+    </control>
+		<control type="image">
+			<description>Title Background</description>
+			<posx>0</posx>
+			<posy>-5</posy>
+			<texture>title_background.png</texture>	
+		</control>
+ 		<control type="image">
+			<description>Background Image</description>
+			<posx>0</posx>
+			<posy>0</posy>
+			<visible>!Player.HasAudio</visible>
+			<texture>main_background.png</texture>
+			<colordiffuse>FFAACCEE</colordiffuse>
+		</control>
+    
+
+		
+		<control type="image">
+			<description>footer Background</description>
+			<posx>0</posx>
+			<posy>530</posy>
+			<texture>title_background.png</texture>	
+		</control>
+		
+	
+		<!-- END: Images -->
+		
+		<!-- START: Labels -->
+		<control type="label">
+			<description>Main Title</description>
+			<width>200</width>			
+			<posx>30</posx>
+			<posy>25</posy>
+			<align>left</align>
+			<aligny>center</aligny>
+			<label>Music Quizz</label>
+			<font>font13_title</font>
+			<textcolor>FFFFFFFF</textcolor>
+		</control>
+		
+		
+		<control type="label" id="602">
+			<description>Display the question</description>
+			<visible>Skin.String(showquestion,1)</visible>
+			<animation effect="slide" start="660,0" end="0,0" time="500">Visible</animation>
+	   	<animation effect="slide" start="0,0" end="-660,0" time="500">Hidden</animation>
+			<width>400</width>			
+			<posx>160</posx>
+			<posy>90</posy>
+			<align>center</align>
+			<aligny>center</aligny>
+			<label>-</label>
+			<wrapmultiline>true</wrapmultiline>
+			<shadowcolor>AA000000</shadowcolor>
+			<font>font13_title</font>
+			<textcolor>FFFFFFFF</textcolor>
+		</control>
+		
+		<control type="label" id="603">
+			<description>Song number</description>
+			<visible>True</visible>
+			<width>100</width>			
+			<posx>700</posx>
+			<posy>550</posy>
+			<align>right</align>
+			<aligny>center</aligny>
+			<label></label>
+			<font>font14</font>
+			<textcolor>FFFFFFFF</textcolor>
+		</control>
+
+		<control type="label" id="604">
+			<description>Timer counter</description>
+			<width>600</width>			
+			<posx>50</posx>
+			<posy>550</posy>
+			<align>left</align>
+			<aligny>center</aligny>
+			<label></label>
+			<font>font13_title</font>
+			<textcolor>FFFFFFFF</textcolor>
+		</control>
+
+		<control type="label" id="605">
+			<description>score</description>
+			<visible>True</visible>
+			<width>100</width>			
+			<posx>700</posx>
+			<posy>25</posy>
+			<align>right</align>
+			<aligny>center</aligny>
+			<label>score</label>
+			<font>font14</font>
+			<textcolor>FFFFFFFF</textcolor>
+		</control>		
+		<!-- END: Labels -->
+
+
+		<!-- START: <buttons> -->	
+			<control type="button" id="130">
+				<description>1st proposal Button</description>
+				<visible>!Skin.String(showproposal0,0)</visible>
+        <animation effect="slide" start="470,0" end="0,0" time="500">VisibleChange</animation>
+        <label></label>
+				<posx>250</posx>
+				<posy>150</posy>
+				<width>200</width>
+				<height>50</height>							
+				<align>center</align>
+        <texturefocus>yt-button-focus.png</texturefocus>
+				<texturenofocus>yt-button-nofocus.png</texturenofocus>
+				<textcolor>ffffffff</textcolor>
+				<disabledcolor>60ffffff</disabledcolor>
+				<onright>134</onright>
+				<onleft></onleft>
+				<onup>133</onup>
+				<ondown>131</ondown>
+			</control>
+
+			<control type="button" id="131">
+				<description>2nd proposal Button</description>
+  			<visible>!Skin.String(showproposal1,0)</visible>
+				<animation effect="slide" start="-450,0" end="0,0" time="500">VisibleChange</animation>
+        <label></label>
+				<posx>250</posx>
+				<posy>220</posy>
+				<width>200</width>
+				<height>50</height>						
+				<align>center</align>
+				<texturefocus>yt-button-focus.png</texturefocus>
+				<texturenofocus>yt-button-nofocus.png</texturenofocus>
+				<textcolor>ffffffff</textcolor>
+				<disabledcolor>60ffffff</disabledcolor>
+				<onright>134</onright>
+				<onleft></onleft>
+				<onup>130</onup>
+				<ondown>132</ondown>
+			</control>
+
+			<control type="button" id="132">
+				<description>3rd proposal Button</description>
+  			<visible>!Skin.String(showproposal2,0)</visible>
+				<animation effect="slide" start="470,0" end="0,0" time="500">VisibleChange</animation>
+        <label></label>
+				<posx>250</posx>
+				<posy>290</posy>
+				<width>200</width>
+				<height>50</height>						
+				<align>center</align>
+				<texturefocus>yt-button-focus.png</texturefocus>
+				<texturenofocus>yt-button-nofocus.png</texturenofocus>
+				<textcolor>ffffffff</textcolor>
+				<disabledcolor>60ffffff</disabledcolor>
+				<onright>134</onright>
+				<onleft></onleft>
+				<onup>131</onup>
+				<ondown>133</ondown>
+			</control>
+      		
+			<control type="button" id="133">
+				<description>4th proposal Button</description>
+  			<visible>!Skin.String(showproposal3,0)</visible>
+				<animation effect="slide" start="-450,0" end="0,0" time="500">VisibleChange</animation>
+        <label></label>
+				<posx>250</posx>
+				<posy>360</posy>
+				<width>200</width>
+				<height>50</height>			
+				<align>center</align>
+				<texturefocus>yt-button-focus.png</texturefocus>
+				<texturenofocus>yt-button-nofocus.png</texturenofocus>
+				<textcolor>ffffffff</textcolor>
+				<disabledcolor>60ffffff</disabledcolor>
+				<onright>134</onright>
+				<onleft></onleft>
+				<onup>132</onup>
+				<ondown>130</ondown>
+			</control>					
+			
+			
+			<control type="button" id="134">
+				<description>Next song button</description>
+  			<visible></visible>
+				<label></label>
+				<posx>310</posx>
+				<posy>200</posy>
+				<width>100</width>
+				<height>100</height>							
+				<align>center</align>
+				<aligny>top</aligny>
+				<textoffsety>90</textoffsety>
+        <texturefocus>next_a.png</texturefocus>
+				<texturenofocus>next.png</texturenofocus>
+				<textcolor>ffffffff</textcolor>
+				<disabledcolor>60ffffff</disabledcolor>
+				<onright></onright>
+				<onleft></onleft>
+				<onup></onup>
+				<ondown></ondown>
+			</control>
+
+		<!-- END: Buttons -->	
+<control type="image" id="1">
+      <description>OK on success</description>
+      <animation effect="fade" time="250" start="10" end="90" reverse="true">VisibleChange</animation>
+      <posx>250</posx>
+      <posy>132</posy>
+      <width>256</width>
+      <height>256</height>
+      <visible>Skin.String(showok,1)</visible>
+      <texture>MQ_Ok.png</texture>
+      <aspectratio>keep</aspectratio>
+</control>
+<!--<control type="progress" id="200">
+      <description>My first progress control</description>
+      <posx>80</posx>
+      <posy>60</posy>
+      <width>250</width>
+      <height>30</height>
+      <visible>true</visible>
+      <reveal>true</reveal>
+      <texturebg>calendar_list_background_sel.png</texturebg>
+      <lefttexture>yt-list-focus.png</lefttexture>
+      <midtexture>yt-list-focus.png</midtexture>
+      <righttexture>yt-list-focus.png</righttexture>
+      <overlaytexture>title_background.png</overlaytexture>
+      <info></info>
+</control>	 -->
+	</controls>
+</window>
