@@ -14,7 +14,6 @@ TODO :
 import os,sys
 from os.path import join,isfile,basename,dirname,splitext
 
-
 import xbmc, xbmcaddon
 
 Addon = xbmcaddon.Addon(id='plugin.image.mypicsdb')
@@ -28,6 +27,12 @@ DATA_PATH = Addon.getAddonInfo('profile')
 PIC_PATH = join( BASE_RESOURCE_PATH, "images")
 DB_PATH = xbmc.translatePath( "special://database/")
 sys.path.append( join( BASE_RESOURCE_PATH, "lib" ) )
+
+#catching the OS :
+#   win32 -> win
+#   darwin -> mac
+#   linux -> linux
+RunningOS = sys.platform
 
 
 from urllib import quote_plus,unquote_plus
@@ -535,11 +540,10 @@ class Main:
         "show the root folders"
         refresh=True
         if self.args.do=="addroot":#add a root to scan
-##            xbmc.executebuiltin( "ReplaceWindow(10002,f:)" )
             dialog = xbmcgui.Dialog()
             newroot = dialog.browse(0, __language__(30201), 'pictures')
             if not newroot: return
-            if newroot.startswith("smb:"):
+            if not RunningOS.startswith("darwin") and newroot.startswith("smb:"):
                 newroot=newroot.replace("smb:","")
                 newroot=newroot.replace("/","\\")
             if str(self.args.exclude)=="1":
