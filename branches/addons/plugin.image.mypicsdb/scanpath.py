@@ -25,6 +25,7 @@ usage :
 #import sys
 from sys import path as syspath,modules as sysmodules
 from os import stat,listdir as oslistdir
+from os import walk as oswalk
 from os.path import join,splitext,walk,basename,normpath,isdir,sep as separator,dirname as osdirname
 
 import xbmc,xbmcgui,xbmcaddon
@@ -85,7 +86,7 @@ def main2():
     parser.add_option("--database","-d",action="store_true", dest="database",default=False)
     #parser.add_option("--help","-h")
     parser.add_option("-p","--rootpath",action="store", type="string", dest="rootpath")
-    parser.add_option("-r","--recursive",action="store_true", dest="recursive", default=True)
+    parser.add_option("-r","--recursive",action="store_true", dest="recursive", default=False)
     parser.add_option("-u","--update",action="store_true", dest="update", default=True)
     (options, args) = parser.parse_args()
     print "option,args"
@@ -95,7 +96,7 @@ def main2():
     #dateadded = strftime("%Y-%m-%d %H:%M:%S")#pour inscrire la date de scan des images dans la base
     if options.rootpath:
         print unquote_plus(options.rootpath)
-        scan = AddonScan()#xbmcgui.getCurrentWindowId()
+        scan = AddonScan()
         scan.create( __language__(30000) )
         print options.recursive
         print options.update
@@ -104,7 +105,7 @@ def main2():
         scan.update(0,0,
                     __language__(30000)+" ["+__language__(30241)+"]",#MyPicture Database [preparing]
                     __language__(30247))#please wait...
-        count_files(unquote_plus(options.rootpath))
+        count_files(unquote_plus(options.rootpath),recursive = options.recursive)
         try:
             #browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,addpics=True,delpics=True,rescan=False,updatefunc=None)
             #browse_folder(unquote_plus(options.rootpath),parentfolderID=None,recursive=options.recursive,updatepics=options.update,addpics=True,delpics=True,rescan=False,updatefunc=scan,dateadded = dateadded )
@@ -161,13 +162,19 @@ def processDirectory ( args, dirname, filenames ):
         if splitext(filename)[1].upper() in listext:
             totalfiles=totalfiles+1
 
-def count_files ( path, reset = True ):
+def count_files ( path, reset = True, recursive = True ):
     global totalfiles,totalfolders
     if reset:
         totalfiles=totalfolders=0
     if path in Exclude_folders: #si le path est un chemin exclu, on sort
         return
-    walk(path, processDirectory, None )
+    if recursive:
+        walk(path, processDirectory, None )
+    else:
+        path,folders,files = oswalk(path).next()
+        totalfiles=len(files)
+        totalfolders=1
+        
 
     
 def browse_folder(dirname,parentfolderID=None,recursive=True,updatepics=False,addpics=True,delpics=True,rescan=False,updatefunc=None,dateadded = strftime("%Y-%m-%d %H:%M:%S")):

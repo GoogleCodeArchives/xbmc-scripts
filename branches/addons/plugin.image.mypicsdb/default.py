@@ -535,6 +535,7 @@ class Main:
         "show the root folders"
         refresh=True
         if self.args.do=="addroot":#add a root to scan
+##            xbmc.executebuiltin( "ReplaceWindow(10002,f:)" )
             dialog = xbmcgui.Dialog()
             newroot = dialog.browse(0, __language__(30201), 'pictures')
             if not newroot: return
@@ -551,8 +552,9 @@ class Main:
                 xbmc.executebuiltin( "Notification(%s,%s,%s,%s)"%(__language__(30000).encode("utf8"),__language__(30204).encode("utf8"),3000,join(home,"icon.png") ) )
                 if not(xbmc.getInfoLabel( "Window.Property(DialogAddonScan.IsAlive)" ) == "true"): #si dialogaddonscan n'est pas en cours d'utilisation...
                     if dialog.yesno(__language__(30000),__language__(30206)):#do a scan now ?
-                        xbmc.executebuiltin( "RunScript(%s,--rootpath=%s) "%( join( home, "scanpath.py"),
-                                                                                  newroot
+                        xbmc.executebuiltin( "RunScript(%s,%s--rootpath=%s) "%( join( home, "scanpath.py"),
+                                                                              recursive and "-r, " or "",
+                                                                              newroot
                                                                                 )
                                              )
                 else:
@@ -574,7 +576,8 @@ class Main:
             if not(xbmc.getInfoLabel( "Window.Property(DialogAddonScan.IsAlive)" ) == "true"): #si dialogaddonscan n'est pas en cours d'utilisation...
                 if str(self.args.exclude)=="0":#le chemin choisi n'est pas un chemin à exclure...
                     path,recursive,update,exclude = MPDB.getRoot(unquote_plus(self.args.rootpath))
-                    xbmc.executebuiltin( "RunScript(%s,--rootpath=%s)"%( join( home, "scanpath.py"),
+                    xbmc.executebuiltin( "RunScript(%s,%s--rootpath=%s)"%( join( home, "scanpath.py"),
+                                                                           recursive and "-r, " or "",
                                                                               quote_plus(path)
                                                                             )
                                          )
