@@ -1,0 +1,2 @@
+2011/01/08 : v0.1
+  initial work on this addon. Was already a working script before Dharma addon system. 

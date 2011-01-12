@@ -9,47 +9,57 @@ __script__       = "Music Quizz"
 __author__       = "Alexsolex"
 __credits__      = "Help from XBMC-Passion, http://passion-xbmc.org/"
 __platform__     = "xbmc media center, WIN32 [LINUX, OS X, XBOX not tested]"
-__date__         = "27-01-2010"
-__version__      = "0.0.4"
+__date__         = "09-01-2011"
+__version__      = "0.1"
 
 #bibliothèques généralistes
 import sys
 import os
 import unicodedata
-import xbmc,xbmcgui
+import xbmc,xbmcgui,xbmcaddon
 import random
 import re
 import threading,thread
 import time
-
+from os.path import join
 from traceback import print_exc
 
+
+Addon = xbmcaddon.Addon(id='script.music.quizz')
+
 # INITIALISATION CHEMIN RACINE
-ROOTDIR = os.getcwd().replace( ";", "" )
+ROOTDIR = Addon.getAddonInfo('path')
 # Shared resources
-BASE_RESOURCE_PATH = os.path.join( ROOTDIR, "resources" )
-sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ) )
+BASE_RESOURCE_PATH = join( ROOTDIR, "resources" )
+sys.path.append( join( BASE_RESOURCE_PATH, "lib" ) )
 # append the proper platforms folder to our path, xbox is the same as win32
 env = ( os.environ.get( "OS", "win32" ), "win32", )[ os.environ.get( "OS", "win32" ) == "xbox" ]
-sys.path.append( os.path.join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
+sys.path.append( join( BASE_RESOURCE_PATH, "platform_libraries", env ) )
 
-__language__ = xbmc.Language( ROOTDIR ).getLocalizedString
-settings = xbmc.Settings(ROOTDIR)
-AUTO_NEXT_SONG         = settings.getSetting("autonextsong")=="true"
-SONGS_TO_PLAY          = int(settings.getSetting("nsongs"))
-TIME_TO_ANSWER         = int(settings.getSetting("timetoanswer"))
-TIME_BETWEEN_SONGS     = int(settings.getSetting("timebetweensongs"))
-TIME_BETWEEN_QUESTIONS = int(settings.getSetting("timebetweenquestions"))
-TIME_TO_SEEK           = int(settings.getSetting("seektime"))
-HELP_AFTER_ERROR       = settings.getSetting("helpaftererror")=="true"
-NEW_QUESTION_AFTER_ERR = settings.getSetting("newquestionaftererror")=="true"
-CONTINUE_PLAYING_LAST  = settings.getSetting("continueplaylinglast")=="true"
+__language__ = Addon.getLocalizedString
+
+AUTO_NEXT_SONG         = Addon.getSetting("autonextsong")=="true"
+SONGS_TO_PLAY          = int(Addon.getSetting("nsongs"))
+TIME_TO_ANSWER         = int(Addon.getSetting("timetoanswer"))
+TIME_BETWEEN_SONGS     = int(Addon.getSetting("timebetweensongs"))
+TIME_BETWEEN_QUESTIONS = int(Addon.getSetting("timebetweenquestions"))
+TIME_TO_SEEK           = int(Addon.getSetting("seektime"))
+HELP_AFTER_ERROR       = Addon.getSetting("helpaftererror")=="true"
+NEW_QUESTION_AFTER_ERR = Addon.getSetting("newquestionaftererror")=="true"
+CONTINUE_PLAYING_LAST  = Addon.getSetting("continueplaylinglast")=="true"
+
 #import platform's librairies
-from pysqlite2 import dbapi2 as sqlite3
-
+try:
+    from pysqlite2 import dbapi2 as sqlite
+    print "using pysqlite2"
+except:
+    from sqlite3 import dbapi2 as sqlite
+    print "using sqlite3"
+    pass
 
 #variables
-db_path=os.path.join(xbmc.translatePath( "special://profile/Database/" ), "MyMusic7.db")
+db_path=join(xbmc.translatePath( "special://database/" ), "MyMusic7.db")
+
 #les questions (il faudra les sortir dans un fichier dédié et les placer dans le dossier langue qui convient)
 QUESTIONS = {"artist":[("Quel est l'interprète de cette chanson ?","QCM","C'est bien évidemment '%s' qui interprète cette chanson."),
                        ("L'interprète de cette chanson est '<artist>',","YN","Cette chanson est interprêtée par '%s'")
@@ -74,18 +84,18 @@ DBTAGS = ["strTitle", "strAlbum", "iYear", "strGenre", "strArtist", "strPath", "
 def load_database(cpt=10):
     """charge 'cpt' titres musicaux dans la DB XBMC.
 Retourne une liste de tuples [strTitle, strAlbum, iYear, strGenre, strArtist, strPath, strFileName]"""
-    conn_b = sqlite3.connect(db_path)
-    d = conn_b.cursor()
+    conn = sqlite.connect(db_path)
+    d = conn.cursor()
     d.execute('SELECT DISTINCT strTitle, strAlbum, iYear, strGenre, strArtist, strPath, strFileName FROM songview WHERE strTitle NOT NULL AND strAlbum NOT NULL AND strGenre NOT NULL AND iYear NOT NULL AND strArtist NOT NULL AND strPath NOT NULL AND strFileName NOT NULL ORDER BY RANDOM() LIMIT %s'%cpt)
-    db=[(item[0].encode("utf-8") , item[1].encode("utf-8") , str(item[2]) , item[3].encode("utf-8") , item[4].encode("utf-8"), os.path.join(item[5].encode("utf-8"),item[6].encode("utf-8"))) for item in d]
+    db=[(item[0].encode("utf-8") , item[1].encode("utf-8") , str(item[2]) , item[3].encode("utf-8") , item[4].encode("utf-8"), join(item[5].encode("utf-8"),item[6].encode("utf-8"))) for item in d]
     d.close()
     return db
 
 def get_random(tag,notvalue,nb=1):
     """obtient 'nb' informations pour le tag donné dans la base de données en excluant 'notvalue'"""
     field = DBTAGS[TAGS.index(tag)]    
-    conn_b = sqlite3.connect(db_path)
-    d = conn_b.cursor()
+    conn = sqlite.connect(db_path)
+    d = conn.cursor()
     d.execute('SELECT DISTINCT %s FROM songview WHERE strTitle NOT NULL AND strAlbum NOT NULL AND strGenre NOT NULL AND iYear NOT NULL AND strArtist NOT NULL AND strPath NOT NULL AND strFileName NOT NULL AND iYear NOT LIKE "0" %s ORDER BY RANDOM() LIMIT %s'%(field,
                                                                                                                                                                                                                                             "AND %s NOT LIKE \"%s\""%(field,notvalue),
                                                                                                                                                                                                                                             nb))
