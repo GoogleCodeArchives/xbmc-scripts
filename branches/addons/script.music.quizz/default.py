@@ -99,7 +99,15 @@ def get_random(tag,notvalue,nb=1):
     d.execute('SELECT DISTINCT %s FROM songview WHERE strTitle NOT NULL AND strAlbum NOT NULL AND strGenre NOT NULL AND iYear NOT NULL AND strArtist NOT NULL AND strPath NOT NULL AND strFileName NOT NULL AND iYear NOT LIKE "0" %s ORDER BY RANDOM() LIMIT %s'%(field,
                                                                                                                                                                                                                                             "AND %s NOT LIKE \"%s\""%(field,notvalue),
                                                                                                                                                                                                                                             nb))
-    db=[str(item[0]).encode("utf-8") for item in d]
+
+    #db=[str(item[0]).encode("utf8")) for item in d]
+    db=[]
+    for item in d:
+        print type(item[0])
+        try:
+            db.append(str(item[0]).encode("utf8"))
+        except:
+            db.append(item[0].__repr__())
     d.close()
     return db
 
@@ -164,6 +172,23 @@ garder une copie des stats du joueur"""
         f.write(self.score)
         f.close()
 
+class Conductor:
+    """Gère la phase de jeu : TODO"""
+    def __init__(self):
+        self.etapes={0 :"intro",
+                     1 :"start",
+                     2 :"question",
+                     3 :"proposal",
+                     4 :"answer",
+                     5 :"timeout",
+                     6 :"score",
+                     7 :"outro"
+                     }
+        self.etape=0
+    def next(self):
+        pass
+    
+
 #On définit la class gérant l'affichage en windowXML
 class MainGUI(xbmcgui.WindowXML):
     
@@ -225,7 +250,7 @@ class MainGUI(xbmcgui.WindowXML):
         #self.Show_Question_Proposal(False)
         self.getControl(self.btn_next).setVisible(True)#affiche le bouton de démarrage
         self.setFocusId(self.btn_next) #active le focus sur le bouton de démarrage
-        self.getControl(self.btn_next).setLabel(__language__( 105 ))#label démarrer le quizz
+        self.getControl(self.btn_next).setLabel(__language__( 105 ).encode("utf8"))#label démarrer le quizz
         #self.player.play(self.pls)
         xbmcgui.unlock()#débloque l'interface
         
@@ -290,12 +315,12 @@ class MainGUI(xbmcgui.WindowXML):
         
         #self.getControl(self.lbl_question).setLabel(self.question)
         if booleen:
-            self.getControl(self.lbl_question).setLabel(self.question)
+            self.getControl(self.lbl_question).setLabel(self.question.decode("utf8"))
             xbmc.executebuiltin( "Skin.SetString(showquestion,%s)"%vis )
         
         for pos,btnid in enumerate(self.btn_proposal):
             try:
-                self.getControl(btnid).setLabel(self.proposal[pos][0])
+                self.getControl(btnid).setLabel(self.proposal[pos][0].decode("utf8"))
                 xbmc.executebuiltin( "Skin.SetString(showproposal%s,%s)"%(pos,vis) )
             except:
                 xbmc.executebuiltin( "Skin.SetString(showproposal%s,0)"%(pos) )
@@ -323,7 +348,7 @@ class MainGUI(xbmcgui.WindowXML):
                 self.PlayNext()
             else:
                 #on affiche le bouton next si la chanson n'est pas la dernière
-                self.getControl(self.btn_next).setLabel( __language__( 104 ))#prochaine chanson
+                self.getControl(self.btn_next).setLabel( __language__( 104 ).encode("utf8"))#prochaine chanson
                 self.getControl(self.btn_next).setVisible(not self.pls.getposition() == self.pls.size()-1)
                 #A FAIRE : afficher un message d'erreur
 
@@ -349,22 +374,24 @@ class MainGUI(xbmcgui.WindowXML):
             self.timer.stop()
             xbmc.sleep(100)
             #self.getControl(self.lbl_timer).setLabel(random.choice(__language__(300).split("|")))#choisi parmis les félicitations
-            self.getControl(self.lbl_timer).setLabel(__language__(301))
+            self.getControl(self.lbl_timer).setLabel(__language__(301).encode("utf8"))
             #xbmc.sleep(TIME_BETWEEN_SONGS*1000)
         else:
             self.myscore-=1
             self.timer.stop()
             xbmc.sleep(100)
             if HELP_AFTER_ERROR:
-                self.getControl(self.lbl_timer).setLabel(self.solution)
+                self.getControl(self.lbl_timer).setLabel(self.solution.decode("utf8"))
             else:
                 #self.getControl(self.lbl_timer).setLabel(random.choice(__language__(302).split("|")))#choisi parmi les messages d'erreur
-                self.getControl(self.lbl_timer).setLabel(__language__(303))
+                self.getControl(self.lbl_timer).setLabel(__language__(303).encode("utf8"))
             #xbmc.sleep(TIME_BETWEEN_SONGS*1000)
         self.getControl(self.lbl_score).setLabel( "Score : %s"%self.myscore )
 
 
     def onAction(self, action):
+        print "onaction ="
+        print action
         #Close the script
         if action == ACTION_PREVIOUS_MENU :
             try:
@@ -418,7 +445,7 @@ class MainGUI(xbmcgui.WindowXML):
                     xbmc.sleep(TIME_BETWEEN_SONGS*1000)
                     if self.pls.getposition() == self.pls.size()-1:
                         #si la chanson est la dernière
-                        self.getControl(self.btn_next).setLabel( __language__( 106 ))#recommencer
+                        self.getControl(self.btn_next).setLabel( __language__( 106 ).encode("utf8"))#recommencer
                         self.getControl(self.btn_next).setVisible(True)
                         xbmc.sleep(100)
                         self.setFocusId(self.btn_next)
@@ -427,10 +454,10 @@ class MainGUI(xbmcgui.WindowXML):
                     #on affiche le bouton next 
                     if not self.pls.getposition() == self.pls.size()-1:
                         #si la chanson n'est pas la dernière
-                        self.getControl(self.btn_next).setLabel( __language__( 104 ))#prochaine chanson
+                        self.getControl(self.btn_next).setLabel( __language__( 104 ).encode("utf8"))#prochaine chanson
                     else:
                         #il s'agit de la dernière chanson
-                        self.getControl(self.btn_next).setLabel( __language__( 106 ))#recommencer
+                        self.getControl(self.btn_next).setLabel( __language__( 106 ).encode("utf8"))#recommencer
                     self.getControl(self.btn_next).setVisible(True)
                     xbmc.sleep(100)
                     self.setFocusId(self.btn_next)
@@ -454,7 +481,7 @@ class MainGUI(xbmcgui.WindowXML):
                     #CHANSON SUIVANTE MANUELLEMENT
                     else:
                         #on affiche le bouton next si la chanson n'est pas la dernière
-                        self.getControl(self.btn_next).setLabel( __language__( 104 ))#prochaine chanson
+                        self.getControl(self.btn_next).setLabel( __language__( 104 ).encode("utf8"))#prochaine chanson
                         self.getControl(self.btn_next).setVisible(not self.pls.getposition() == self.pls.size()-1)
                         xbmc.sleep(100)
                         self.setFocusId(self.btn_next)
@@ -493,7 +520,7 @@ class monlecteur(xbmc.Player):
     def onPlayBackStarted(self):#lors de la lecture ou du passage à une nouvelle chanson
         #appelé à chaque début de lecture
         self.seekTime(TIME_TO_SEEK) #on passe un temps pour éviter l'intro
-        w.getControl(w.lbl_numtitre).setLabel(__language__(103)%(w.pls.getposition()+1,w.pls.size()))
+        w.getControl(w.lbl_numtitre).setLabel(__language__(103).encode("utf8")%(w.pls.getposition()+1,w.pls.size()))
         xbmc.sleep(100)#on attend le chargement de la chanson pour maintenir l'animation des boutons qui va suivre
         w.Set_Question()#on charge la nouvelle question
 
@@ -563,5 +590,8 @@ if  __name__ == "__main__":
     # Appel de la class
     w = MainGUI("musicquizz.xml", ROOTDIR, "DefaultSkin")
     xbmc.sleep(100)
+    print "#"*10
+    print w.getWidth()
+    print w.getHeight()
     w.doModal()
     del w
