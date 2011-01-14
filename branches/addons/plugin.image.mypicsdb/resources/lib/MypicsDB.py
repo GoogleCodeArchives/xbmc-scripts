@@ -149,6 +149,21 @@ def Make_new_base(DBpath,ecrase=True):
             log( "~~~~" )
             log( "" )
 
+# MDB
+        try:
+            cn.execute("""DROP TABLE CategoriesInFiles""")
+        except Exception,msg:
+            log( ">>> Make_new_base - DROP TABLE CategoriesInFiles" )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+        try:
+            cn.execute("""DROP TABLE Categories""")
+        except Exception,msg:
+            log( ">>> Make_new_base - DROP TABLE Categories" )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
 
     #table 'files'
     try:
@@ -188,6 +203,29 @@ def Make_new_base(DBpath,ecrase=True):
             pass
         else: #sinon on imprime l'exception levée pour la traiter
             log( ">>> Make_new_base - CREATE TABLE KeywordsInFiles ..." )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+# MDB
+    #table 'Categories'
+    try:
+        cn.execute("""CREATE TABLE "Categories" ("idCategory" INTEGER NOT NULL primary key, "Category" TEXT UNIQUE);""")
+    except Exception,msg:
+        if msg.args[0].startswith("table 'Categories' already exists"):
+            pass
+        else:
+            log( ">>> Make_new_base - CREATE TABLE Categories ..." )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+    #table 'CategoriesInFiles'
+    try:
+        cn.execute("""CREATE TABLE "CategoriesInFiles" ("idCategory" INTEGER NOT NULL, "idFile" INTEGER NOT NULL);""")
+    except Exception,msg:
+        if msg.args[0].startswith("table 'CategoriesInFiles' already exists"):
+            pass
+        else: 
+            log( ">>> Make_new_base - CREATE TABLE CategoriesInFiles ..." )
             log( "%s - %s"%(Exception,msg) )
             log( "~~~~" )
             log( "" )
@@ -394,6 +432,30 @@ def DB_file_insert(path,filename,dictionnary,update=False):
                                                                                                                                                                                                filename))
                 except Exception,msg:
                     log("Error while adding KeywordsInFiles")
+                    log("\t%s - %s"% (Exception,msg) )
+    # TRAITEMENT DE SUPPLEMENTAL CATEGORY (base Categories)
+    if dictionnary.has_key("supplemental category"):
+        catl = dictionnary["supplemental category"].split(lists_separator)
+        for cat in catl:
+            if cat: #to add only category name that are not empty
+                #create first an entry for this category in Categories table
+                try:
+                    cn.execute("""INSERT INTO Categories(Category) VALUES("%s")"""%cat.encode("utf8"))
+                except Exception,msg:
+                    if str(msg)=="column Category is not unique":
+                        pass
+                    else:
+                        log( 'EXCEPTION >> Category' )
+                        log( "\t%s - %s"%(Exception,msg) )
+                        log( "~~~~" )
+                        log( "" )
+                #then, add the corresponding id of file and id of category inside the CategoriesInFiles database
+                try:
+                    cn.execute("""INSERT INTO CategoriesInFiles(idCategory,idFile) SELECT c.idCategory,f.idFile FROM Categories c, files f WHERE c.Category="%s" AND f.strPath="%s" AND f.strFilename="%s";"""%(cat.encode("utf8"),
+                                                                                                                                                                                               path,
+                                                                                                                                                                                               filename))
+                except Exception,msg:
+                    log("Error while adding CategoriesInFiles")
                     log("\t%s - %s"% (Exception,msg) )
 
 ##    # TRAITEMENT DES FOLDERS
@@ -665,6 +727,8 @@ def RemovePath(path):
     for idchild in all_children(idpath):
         #supprime les keywordsinfiles
         Request( """DELETE FROM KeywordsInFiles WHERE idKW in (SELECT idKW FROM KeywordsInFiles WHERE idFile in (SELECT idFile FROM files WHERE idFolder='%s'))"""%idchild )
+        #supprime les Categoriesinfiles
+        Request( """DELETE FROM CategoriesInFiles WHERE idCategory in (SELECT idCategory FROM CategoriesInFiles WHERE idFile in (SELECT idFile FROM files WHERE idFolder='%s'))"""%idchild )
         #supprime les photos de files in collection
         Request( """DELETE FROM FilesInCollections WHERE idFile in (SELECT idFile FROM files WHERE idFolder='%s')"""%idchild )        
         #2- supprime toutes les images
@@ -872,7 +936,7 @@ If keyword is not given, pictures with no keywords are returned"""
     if kw is not None: #si le mot clé est fourni
         return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile in (SELECT idFile FROM KeywordsInFiles WHERE idKW =(SELECT idKW FROM keywords WHERE keyword="%s"))"""%kw.encode("utf8"))]
     else: #sinon, on retourne toutes les images qui ne sont pas associées à des mots clés
-        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile in (SELECT DISTINCT idFile FROM KeywordsInFiles)""" )]
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile NOT IN (SELECT DISTINCT idFile FROM KeywordsInFiles)""" )]
 
 def list_KW():
     """Return a list of all keywords in database"""
@@ -884,6 +948,24 @@ def countKW(kw):
     else:
         return Request("""SELECT count(*) FROM files WHERE idFile not in (SELECT DISTINCT idFile FROM KeywordsInFiles)""" )[0][0]
 
+### MDB
+def search_category(p_category=None):
+    if p_category is not None: 
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile in (SELECT idFile FROM CategoriesInFiles WHERE idCategory =(SELECT idCategory FROM Categories WHERE Category="%s"))"""%p_category.encode("utf8"))]
+    else: 
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile NOT IN (SELECT DISTINCT idFile FROM CategoriesInFiles)""" )]
+
+def list_category():
+    return [row for (row,) in Request( """SELECT Category FROM Categories ORDER BY LOWER(Category) ASC""" )]
+
+def count_category(p_category):
+    if p_category is not None:
+        return Request("""SELECT count(*) FROM CategoriesInFiles WHERE idCategory =(SELECT idCategory FROM Categories WHERE Category="%s")"""%p_category.encode("utf8"))[0][0]
+    else:
+        return Request("""SELECT count(*) FROM files WHERE idFile not in (SELECT DISTINCT idFile FROM CategoriesInFiles)""" )[0][0]
+
+### MDB
+    
 def countPicsFolder(folderid):
     log("TEST : tous les enfants de %s"%folderid)
     log(all_children(folderid))
