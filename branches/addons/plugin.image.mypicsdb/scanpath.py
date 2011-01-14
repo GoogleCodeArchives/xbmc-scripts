@@ -172,8 +172,8 @@ def count_files ( path, reset = True, recursive = True ):
         walk(path, processDirectory, None )
     else:
         path,folders,files = oswalk(path).next()
-        totalfiles=len(files)
-        totalfolders=1
+        totalfiles=totalfiles+len(files)
+        totalfolders=totalfolders+int(len(files)>=1)
         
 
     
