@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<!-- Vertaald door Michel de Bokx (20110104b) -->
+<!-- Vertaald door Michel de Bokx (20110113b) -->
 <strings>
 	<string id="30000">MyPicture Database</string>
 	<string id="30001">Database</string>
@@ -25,6 +25,10 @@
 	<string id="30027">Instellingen voor scan dialoog</string>
 	<string id="30028">Bestandstypen videos</string>
 	<string id="30029">Scannen videos</string>
+	<string id="30030">!! General 30030</string>
+	<string id="30031">!! Files 30031</string>
+	<string id="30032">!! delay for recent files (in days)</string>
+	
 	<string id="30040">Minimum aantal sterren tijdens vertoning</string>
 	<string id="30041">Alles</string>
 	<string id="30042">1 ster</string>
@@ -33,6 +37,7 @@
 	<string id="30045">4 sterren</string>
 	<string id="30046">5 sterren</string>
 	<string id="30050">afbeeldingen</string>
+	<string id="30051">video's</string>
 	<string id="30060">Toon map van afbeelding</string>
 	<string id="30061">Archiveren afbeeldingen</string>
 	<string id="30062">Exporteren afbeeldingen</string>
@@ -45,6 +50,8 @@
 	<string id="30069">%s errors tijdens archiveren %s</string>
 	<string id="30070">%s afbeelden gearchiveerd</string>
 	<string id="30071">Locatie op disk2</string>
+	<string id="30096">!! Pictures without categories 30096</string>
+	<string id="30097">!! Weergeven Categorie 30097</string>
 	<string id="30098">Zoeken</string>
 	<string id="30099">Locatie mappen</string>
 	<string id="30100">Volledige periode %s (%s afbeeldingen)</string>
@@ -67,8 +74,8 @@
 	<string id="30117">Begindatum periode</string>
 	<string id="30118">Einddatum periode</string>
 	<string id="30119">Zoekargument '%s' niet gevonden</string>
-	<string id="30130"/>
-	<string id="30131"/>
+	<string id="30130">!! The last %s pictures shots</string>
+	<string id="30131">!! last shots (number of pictures)</string>
 	<string id="30132"/>
 	<string id="30133"/>
 	<string id="30134"/>

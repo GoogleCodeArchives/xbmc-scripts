@@ -240,6 +240,10 @@ class Main:
         self.addDir(unescape(__language__(30103)),[("kw",""),("viewmode","view")],"showkeywords",
                     join(PIC_PATH,"keywords.png"),
                     fanart=join(PIC_PATH,"fanart-keyword.png"))
+        # browse by category
+        self.addDir(unescape(__language__(30097)),[("category",""),("viewmode","view")],"showcategory",
+                    join(PIC_PATH,"keywords.png"),
+                    fanart=join(PIC_PATH,"fanart-keyword.png"))
         # période
         self.addDir(unescape(__language__(30105)),[("period",""),("viewmode","view"),],"showperiod",
                     join(PIC_PATH,"period.png"),
@@ -401,6 +405,37 @@ class Main:
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s : %s"%(__language__(30103),unquote_plus(self.args.kw.encode("utf-8"))) )
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
+    def show_category(self):
+        listkw = [u"%s"%c_category.decode("utf8") for c_category in MPDB.list_category()]
+        print "1 listkw"
+        print listkw
+        if MPDB.search_category(None): 
+            self.addDir(name      = "%s (%s %s)"%(__language__(30104),MPDB.count_category(None),__language__(30050)),
+                        params    = [("method","categories"),("cat",""),("viewmode","view")],
+                        action    = "showpics",
+                        iconimage = join(PIC_PATH,"keywords.png"),
+                        fanart    = join(PIC_PATH,"fanart-keyword.png"),
+                        contextmenu   = None)
+        print "2 total"
+        print len(listkw)
+        total = len(listkw)
+        for p_category in listkw:
+            print p_category
+            l_count = MPDB.count_category(p_category)
+            if l_count:
+                self.addDir(name      = "%s (%s %s)"%(p_category,l_count,__language__(30050)),
+                            params    = [("method","categories"),("cat",p_category),("viewmode","view")],
+                            action    = "showpics",
+                            iconimage = join(PIC_PATH,"keywords.png"),
+                            fanart    = join(PIC_PATH,"fanart-keyword.png"),
+                            contextmenu   = None,
+                            total = total)
+            print l_count
+        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
+        xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s : %s"%(__language__(30103),unquote_plus(self.args.category.encode("utf-8"))) )
+        xbmcplugin.endOfDirectory(int(sys.argv[1]))
+        print "waar zit einde loop"
+        
     def show_period(self): #TODO finished the datestart and dateend editing
         self.addDir(name      = __language__(30106),
                     params    = [("period","setperiod"),("viewmode","view")],#paramètres
@@ -834,6 +869,14 @@ class Main:
             else:
                 filelist = MPDB.search_keyword(unquote_plus(self.args.kw).decode("utf8"))
 
+        # we are showing pictures for a CATEGORY selection
+        elif self.args.method == "categories":
+            picfanart = join(PIC_PATH,"fanart-keyword.png")
+            if not self.args.cat:#p_category
+                filelist = MPDB.search_category(None)
+            else:
+                filelist = MPDB.search_category(unquote_plus(self.args.cat).decode("utf8"))
+
         # we are showing pictures for a FOLDER selection
         elif self.args.method == "folders":
             #   lister les images du dossier self.args.folderid et ses sous-dossiers
@@ -1080,6 +1123,9 @@ if __name__=="__main__":
     #   Tri par mots clés
     elif m.args.action=='showkeywords':
         m.show_keywords()
+    # browse by category
+    elif m.args.action=='showcategory':
+        m.show_category()
     #   Affiche les images
     elif m.args.action=='showpics':
         m.show_pics()
