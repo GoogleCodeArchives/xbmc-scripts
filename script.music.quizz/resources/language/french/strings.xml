@@ -18,6 +18,8 @@
   <string id="104">Chanson suivante...</string>
   <string id="105">Démarrer le quizz...</string>
   <string id="106">Recommencer le quizz...</string>
+  <string id="107">Secret</string>
+  <string id="108">Il reste %s secondes</string> <!-- %s replaced by the time remaining in seconds -->
   
 <!--2 Messages when too late to answer :-->
   <!-- 1/ this one shows when it is the last song (3 lines for ok dialog box) -->
@@ -29,13 +31,11 @@
   <string id="204">Peut être ferez vous mieux pour la prochaine</string>
   <string id="205">question...</string>
 
-  <!--congratulations for correct answer (keep small words pipe's separated) -->
-  <string id="300">Bien joué !|Quel talent !|Super !|Splendide...</string>
+  <string id="300"></string>
   <string id="301">Bonne réponse !</string>
-
-  <!--bad words when the answer is not correct(keep small words pipe's separated) -->
-  <string id="302">Erreur !|Et nonnn, c'est une mauvaise réponse !|Vous réussirez peut être la prochaine fois|Médiocre...</string>
+  <string id="302"></string>
   <string id="303">Mauvaise réponse !</string>
+  
   <!--PARAMS STRINGS -->
   <string id="30001">Passer à la chanson suivante automatiquement</string>
   <string id="30002">Nombre de morceaux musicaux</string>
@@ -47,4 +47,29 @@
   <string id="30008">Poser une nouvelle question en cas d'erreur</string>
   <string id="30009">Continuer la lecture de la dernière chanson</string>
 
+  <!-- questions / answers -->
+  <string id="40000">éQuel est l'interprète de cette chanson ?</string>
+  <string id="40001">éC'est bien évidemment '%s' qui interprète cette chanson.</string>     <!-- %s replaced by the artist -->
+  <string id="40002">éL'interprète de cette chanson est '[[artist]]'</string>
+  <string id="40003">éCette chanson est interprêtée par '%s'</string>                       <!-- %s replaced by the artist -->
+  <string id="40004">éQuel est le titre de cette chanson ?</string>
+  <string id="40005">éCette chanson s'appelle '%s'</string>                                 <!-- %s replaced by the title -->
+  <string id="40006">éLe titre de cette chanson est '[[title]]' !</string>
+  <string id="40007">éCette chanson s'intitule '%s'</string>                                <!-- %s replaced by the title -->
+  <string id="40008">éDe quel album cette chanson est t'elle extraite ?</string>
+  <string id="40009">éOn retrouve ce titre dans l'album '%s'</string>                       <!-- %s replaced by album name -->
+  <string id="40010">éCette chanson est extraite de l'album '[[album]]'</string>
+  <string id="40011">éCe que vous écoutez est extrait de l'album '%s'</string>              <!-- %s replaced by album name -->
+  <string id="40012">éDe quelle année date cette chanson ?</string>
+  <string id="40013">éC'est en %s que cette chanson est sortie !</string>                   <!-- %s replaced by year -->
+  <string id="40014">éCette chanson est de [[year]],</string>
+  <string id="40015">éCette chanson est de %s.</string>                                     <!-- %s replaced by year -->
+
+  <!-- greatings : Good response :-->
+  <string id="40050">Youpi !|Félicitation !|Pas mal !|Excellent !!|Trop facile !</string>
+  <!-- greatings : Bad response :-->
+  <string id="40051">Bouuuuu...|Tuuuuuut ! Mauvaise réponse !!|Aie aie aie...|Et non !|Erreur !!</string>
+  <!-- too late "greatings" -->
+  <string id="40052">Tic tac, tic tac...|Et alors ? on ne trouve pas ?|ZZZzzz...|N'oubliez pas de répondre|Temps écoulé !</string>
+  
 </strings>

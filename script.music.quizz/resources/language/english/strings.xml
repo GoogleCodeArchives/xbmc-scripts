@@ -8,43 +8,68 @@
 
 
 
-  <string id="100">Oui</string>
-  <string id="101">Non</string>
+  <string id="100">Yes</string>
+  <string id="101">No</string>
   <string id="102">score</string>
-  <string id="103">Titre N°%s/%s</string> 
+  <string id="103">Title N°%s/%s</string> 
     <!--string id 103:
     first %s will be replaced by the actual song number,
     second %s will be replaced by the total song number-->
-  <string id="104">Chanson suivante...</string>
-  <string id="105">Démarrer le quizz...</string>
-  <string id="106">Recommencer le quizz...</string>
+  <string id="104">Next song...</string>
+  <string id="105">Start...</string>
+  <string id="106">Restart...</string>
+  <string id="107">Secret</string>
+  <string id="108">%s seconds remaining</string> <!-- %s replaced by the time remaining in seconds -->
   
 <!--2 Messages when too late to answer :-->
   <!-- 1/ this one shows when it is the last song (3 lines for ok dialog box) -->
-  <string id="200">Mince.... ne pas répondre dans les temps à la</string>
-  <string id="201">dernière question est quelque chose de très rageant.</string>
-  <string id="202">N'est-ce pas ?</string>
+  <string id="200">Sad ! Not responding in time to the last question</string>
+  <string id="201">is something very annoying...</string>
+  <string id="202">Isn't it ?</string>
   <!-- 2/ the other one shows when a new song follows (3 lines for ok dialog box) -->
-  <string id="203">Alors ? on ne répond pas dans les temps ??</string>
-  <string id="204">Peut être ferez vous mieux pour la prochaine</string>
-  <string id="205">question...</string>
+  <string id="203">So ? we don't answer in time ??</string>
+  <string id="204">Maybe you'll do better on</string>
+  <string id="205">next question...</string>
 
-  <!--congratulations for correct answer (keep small words pipe's separated) -->
-  <string id="300">Bien joué !|Quel talent !|Super !|Splendide...</string>
-  <string id="301">Bonne réponse !</string>
-
-  <!--bad words when the answer is not correct(keep small words pipe's separated) -->
-  <string id="302">Erreur !|Et nonnn, c'est une mauvaise réponse !|Vous réussirez peut être la prochaine fois|Médiocre...</string>
-  <string id="303">Mauvaise réponse !</string>
+  <string id="300"></string>
+  <string id="301">Correct !</string>
+  <string id="302"></string>
+  <string id="303">Noooo !</string>
+  
   <!--PARAMS STRINGS -->
-  <string id="30001">Passer à la chanson suivante automatiquement</string>
-  <string id="30002">Nombre de morceaux musicaux</string>
-  <string id="30003">Temps alloué pour la réponse (en sec)</string>
-  <string id="30004">Délai avant chanson suivante (en sec)</string>
-  <string id="30005">Délai avant une nouvelle question (en sec)</string>
-  <string id="30006">Décalage pour le début de lecture (en sec)</string>
-  <string id="30007">Montrer la bonne réponse en cas d'erreur</string>
-  <string id="30008">Poser une nouvelle question en cas d'erreur</string>
-  <string id="30009">Continuer la lecture de la dernière chanson</string>
+  <string id="30001">Automaticaly go to the next song</string>
+  <string id="30002">How many song to play with ?</string>
+  <string id="30003">Time to answer (seconds)</string>
+  <string id="30004">Delay before next song (seconds)</string>
+  <string id="30005">Delay before new question (seconds)</string>
+  <string id="30006">Seek time (seconds)</string>
+  <string id="30007">Display correct answer in case of error</string>
+  <string id="30008">Ask a new question in case of error</string>
+  <string id="30009">Continue to play music after last song</string>
 
+  <!-- questions / answers -->
+  <string id="40000">Who sings this song ?</string>
+  <string id="40001">Of course it is '%s' who sings this song.</string>     <!-- %s replaced by the artist -->
+  <string id="40002">The artist of this song is '[[artist]]'</string>
+  <string id="40003">This song is interpreted by '%s'</string>                       <!-- %s replaced by the artist -->
+  <string id="40004">What is the title of this song ?</string>
+  <string id="40005">This song titles '%s'</string>                                 <!-- %s replaced by the title -->
+  <string id="40006">The title of this song is '[[title]]' !</string>
+  <string id="40007">This song entitle '%s'</string>                                <!-- %s replaced by the title -->
+  <string id="40008">What's the album this song is taken from ?</string>
+  <string id="40009">This song is from '%s' album</string>                       <!-- %s replaced by album name -->
+  <string id="40010">This song is taken from the album '[[album]]'</string>
+  <string id="40011">What you are listening to is from '%s' album</string>              <!-- %s replaced by album name -->
+  <string id="40012">What is the release year of this song ?</string>
+  <string id="40013">%s was the year this song's out !</string>                   <!-- %s replaced by year -->
+  <string id="40014">This song is from [[year]],</string>
+  <string id="40015">This song is from %s.</string>                                     <!-- %s replaced by year -->
+
+  <!-- greatings : Good response :-->
+  <string id="40050">Hurra !|Congratulation !|Not bad !|Excellent !!|Too easy !</string>
+  <!-- greatings : Bad response :-->
+  <string id="40051">buuu...|Tuuuuuut ! Bad answer !!|ho ho ho...|And... no !Mistake !!</string>
+  <!-- too late "greatings" -->
+  <string id="40052">Tic tac, tic tac...|And ? you don't find it ?|ZZZzzz...|Don't to forget to answer|Time elapsed !</string>
+  
 </strings>
