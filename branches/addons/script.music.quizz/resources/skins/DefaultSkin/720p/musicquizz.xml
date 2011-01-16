@@ -11,38 +11,43 @@
 	<defaultcontrol>130</defaultcontrol>
   <controls>	
 	
-
-    <control type="visualisation">
+		
+  <!--  <control type="visualisation">
       <description>Visualisation</description>
       <posx>0</posx>
-      <posy>50</posy>
-      <width>720</width> 
-      <height>480</height>
+      <posy>0</posy>
+      <width>1280</width> 
+      <height>720</height>
       <visible>true</visible>
-    </control>
-		<control type="image">
+    </control> -->
+	
+		 <control type="image">
+		<description>Background Image</description>
+		<posx>0</posx>
+		<posy>0</posy>
+		<width>1280</width> 
+		<height>720</height>
+		<!--<visible>!Player.HasAudio</visible>-->
+		<texture>background2.jpg</texture>
+		<colordiffuse>FFFFFFFF</colordiffuse>
+	</control>
+	
+	<!--	<control type="image">
 			<description>Title Background</description>
 			<posx>0</posx>
 			<posy>-5</posy>
+			 <width>100</width>
 			<texture>title_background.png</texture>	
-		</control>
- 		<control type="image">
-			<description>Background Image</description>
-			<posx>0</posx>
-			<posy>0</posy>
-			<visible>!Player.HasAudio</visible>
-			<texture>main_background.png</texture>
-			<colordiffuse>FFAACCEE</colordiffuse>
-		</control>
-    
+		</control>  
 
 		
 		<control type="image">
 			<description>footer Background</description>
 			<posx>0</posx>
 			<posy>530</posy>
+			<width>100</width>
 			<texture>title_background.png</texture>	
-		</control>
+		</control>--> 
 		
 	
 		<!-- END: Images -->
@@ -56,8 +61,9 @@
 			<align>left</align>
 			<aligny>center</aligny>
 			<label>Music Quizz</label>
-			<font>font13_title</font>
-			<textcolor>FFFFFFFF</textcolor>
+			<font>font13</font>
+			<textcolor>AA000000</textcolor>
+			<shadowcolor></shadowcolor>
 		</control>
 		
 		
@@ -68,52 +74,55 @@
 	   	<animation effect="slide" start="0,0" end="-660,0" time="500">Hidden</animation>
 			<width>400</width>			
 			<posx>160</posx>
-			<posy>90</posy>
+			<posy>200</posy>
 			<align>center</align>
 			<aligny>center</aligny>
 			<label>-</label>
 			<wrapmultiline>true</wrapmultiline>
-			<shadowcolor>AA000000</shadowcolor>
-			<font>font13_title</font>
-			<textcolor>FFFFFFFF</textcolor>
+			<font>font24_title</font>
+			<textcolor>AA000000</textcolor>
+			<shadowcolor></shadowcolor>
 		</control>
 		
 		<control type="label" id="603">
 			<description>Song number</description>
 			<visible>True</visible>
 			<width>100</width>			
-			<posx>700</posx>
-			<posy>550</posy>
+			<posx>1200</posx>
+			<posy>700</posy>
 			<align>right</align>
 			<aligny>center</aligny>
 			<label></label>
-			<font>font14</font>
-			<textcolor>FFFFFFFF</textcolor>
+			<font>font13</font>
+			<textcolor>AA000000</textcolor>
+			<shadowcolor></shadowcolor>
 		</control>
 
 		<control type="label" id="604">
 			<description>Timer counter</description>
 			<width>600</width>			
-			<posx>50</posx>
-			<posy>550</posy>
+			<posx>30</posx>
+			<posy>700</posy>
 			<align>left</align>
 			<aligny>center</aligny>
 			<label></label>
-			<font>font13_title</font>
-			<textcolor>FFFFFFFF</textcolor>
+			<font>font13</font>
+			<textcolor>AA000000</textcolor>
+			<shadowcolor></shadowcolor>
 		</control>
 
 		<control type="label" id="605">
 			<description>score</description>
 			<visible>True</visible>
 			<width>100</width>			
-			<posx>700</posx>
+			<posx>1200</posx>
 			<posy>25</posy>
 			<align>right</align>
 			<aligny>center</aligny>
 			<label>score</label>
-			<font>font14</font>
-			<textcolor>FFFFFFFF</textcolor>
+			<font>font13</font>
+			<textcolor>AA000000</textcolor>
+			<shadowcolor></shadowcolor>
 		</control>		
 		<!-- END: Labels -->
 
@@ -125,18 +134,17 @@
         <animation effect="slide" start="470,0" end="0,0" time="500">VisibleChange</animation>
         <label></label>
 				<posx>250</posx>
-				<posy>150</posy>
+				<posy>260</posy>
 				<width>200</width>
 				<height>50</height>							
 				<align>center</align>
-        <texturefocus>yt-button-focus.png</texturefocus>
-				<texturenofocus>yt-button-nofocus.png</texturenofocus>
-				<textcolor>ffffffff</textcolor>
-				<disabledcolor>60ffffff</disabledcolor>
+				<textcolor>AA000000</textcolor>
+				<disabledcolor>AACC0F0F</disabledcolor>
 				<onright>134</onright>
 				<onleft></onleft>
 				<onup>133</onup>
 				<ondown>131</ondown>
+				<font>font24_title</font>
 			</control>
 
 			<control type="button" id="131">
@@ -145,18 +153,17 @@
 				<animation effect="slide" start="-450,0" end="0,0" time="500">VisibleChange</animation>
         <label></label>
 				<posx>250</posx>
-				<posy>220</posy>
+				<posy>330</posy>
 				<width>200</width>
 				<height>50</height>						
 				<align>center</align>
-				<texturefocus>yt-button-focus.png</texturefocus>
-				<texturenofocus>yt-button-nofocus.png</texturenofocus>
-				<textcolor>ffffffff</textcolor>
-				<disabledcolor>60ffffff</disabledcolor>
+				<textcolor>AA000000</textcolor>
+				<disabledcolor>AACC0F0F</disabledcolor>
 				<onright>134</onright>
 				<onleft></onleft>
 				<onup>130</onup>
 				<ondown>132</ondown>
+				<font>font24_title</font>
 			</control>
 
 			<control type="button" id="132">
@@ -165,18 +172,17 @@
 				<animation effect="slide" start="470,0" end="0,0" time="500">VisibleChange</animation>
         <label></label>
 				<posx>250</posx>
-				<posy>290</posy>
+				<posy>400</posy>
 				<width>200</width>
 				<height>50</height>						
 				<align>center</align>
-				<texturefocus>yt-button-focus.png</texturefocus>
-				<texturenofocus>yt-button-nofocus.png</texturenofocus>
-				<textcolor>ffffffff</textcolor>
-				<disabledcolor>60ffffff</disabledcolor>
+				<textcolor>AA000000</textcolor>
+				<focusedcolor>AACC0F0F</focusedcolor>
 				<onright>134</onright>
 				<onleft></onleft>
 				<onup>131</onup>
 				<ondown>133</ondown>
+				<font>font24_title</font>
 			</control>
       		
 			<control type="button" id="133">
@@ -185,18 +191,17 @@
 				<animation effect="slide" start="-450,0" end="0,0" time="500">VisibleChange</animation>
         <label></label>
 				<posx>250</posx>
-				<posy>360</posy>
+				<posy>470</posy>
 				<width>200</width>
 				<height>50</height>			
 				<align>center</align>
-				<texturefocus>yt-button-focus.png</texturefocus>
-				<texturenofocus>yt-button-nofocus.png</texturenofocus>
-				<textcolor>ffffffff</textcolor>
-				<disabledcolor>60ffffff</disabledcolor>
+				<textcolor>AA000000</textcolor>
+				<focusedcolor>AACC0F0F</focusedcolor>
 				<onright>134</onright>
 				<onleft></onleft>
 				<onup>132</onup>
 				<ondown>130</ondown>
+				<font>font24_title</font>
 			</control>					
 			
 			
@@ -211,10 +216,10 @@
 				<align>center</align>
 				<aligny>top</aligny>
 				<textoffsety>90</textoffsety>
-        <texturefocus>next_a.png</texturefocus>
-				<texturenofocus>next.png</texturenofocus>
-				<textcolor>ffffffff</textcolor>
-				<disabledcolor>60ffffff</disabledcolor>
+				<texturefocus>play.png</texturefocus>
+				<texturenofocus>play.png</texturenofocus>
+				<textcolor>AA000000</textcolor>
+				<focusedcolor>60ffffff</focusedcolor>
 				<onright></onright>
 				<onleft></onleft>
 				<onup></onup>
