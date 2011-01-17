@@ -28,6 +28,8 @@
 	<string id="30030">Algemeen</string>
 	<string id="30031">Bestanden</string>
 	<string id="30032">Wachttijd in dagen (recente afbeeldingen)</string>
+	<string id="30033">[[ Menu Items ]]</string>
+	<string id="30034">[[ Display all items ]]</string>
 	
 	<string id="30040">Minimum aantal sterren tijdens vertoning</string>
 	<string id="30041">Alles</string>
@@ -76,8 +78,8 @@
 	<string id="30117">Begindatum periode</string>
 	<string id="30118">Einddatum periode</string>
 	<string id="30119">Zoekargument '%s' niet gevonden</string>
-	<string id="30130">!! The last %s pictures shots</string>
-	<string id="30131">!! last shots (number of pictures)</string>
+	<string id="30130">[[ The last %s pictures shots ]]</string>
+	<string id="30131">[[ last shots (number of pictures) ]]</string>
 	<string id="30132"/>
 	<string id="30133"/>
 	<string id="30134"/>

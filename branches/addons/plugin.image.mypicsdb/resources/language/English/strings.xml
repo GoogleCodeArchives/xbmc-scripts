@@ -25,6 +25,8 @@
     <string id="30030">General</string> 
     <string id="30031">Files</string> 
     <string id="30032">Age of recent files (days)</string>
+    <string id="30033">Menu Items</string>
+    <string id="30034">Display all items</string>
 
     <string id="30040">Only display pictures with rating of at least</string>
     <string id="30041">All</string>
