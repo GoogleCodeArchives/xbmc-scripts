@@ -50,6 +50,8 @@
     <string id="30070">%s images archivées avec succès !!</string>    <!-- %s files successfully Zipped !! -->
     <string id="30071">Localisation du fichier sur le disque</string>
     
+    <string id="30094">Images sans Catégories supplémentaires</string>
+    <string id="30095">Parcourir par Catégories supplémentaires</string>
     <string id="30096">Images sans Catégories</string>
     <string id="30097">Parcourir par Catégories</string>
     <string id="30098">Recherche globale</string>
