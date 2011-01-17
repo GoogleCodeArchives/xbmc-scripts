@@ -16,14 +16,17 @@
     <string id="30021">Remove from database missing pictures</string>
     <string id="30022">Recursive scan ( all sub-folders will be scanned for pictures )</string>
     <string id="30023">Folder to scan</string>
-    <string id="30024">Perform a scan now !</string>
+    <string id="30024">Perform scan at addon startup</string>
     <string id="30025">Initialize the database before scanning</string>
     <string id="30026">Use the picture as fanart for pictures</string><!-- setting -->
     <string id="30027">Settings for the dialog scan popup</string>
     <string id="30028">Videos extensions</string>
     <string id="30029">Use the videos</string>
+    <string id="30030">General</string> 
+    <string id="30031">Files</string> 
+    <string id="30032">Age of recent files (days)</string>
 
-    <string id="30040">Minimum required rate for pictures to display</string>
+    <string id="30040">Only display pictures with rating of at least</string>
     <string id="30041">All</string>
     <string id="30042">1 star</string>
     <string id="30043">2 stars</string>
@@ -32,6 +35,8 @@
     <string id="30046">5 stars</string>
         
     <string id="30050">pics</string>
+    <string id="30051">Videos</string>
+
 
     <string id="30060">Locate on disk</string>
     <string id="30061">Archive those pictures</string>
@@ -45,32 +50,34 @@
     <string id="30069">%s errors while archiving %s files</string> <!-- %s errors while zipping %s files -->
     <string id="30070">%s pictures successfully archived !!</string>    <!-- %s files successfully Zipped !! -->
     <string id="30071">Localization of the picture on disk</string>
-    
+   
+    <string id="30096">Pictures without categories</string>
+    <string id="30097">Browse by Category</string>
     <string id="30098">Global search</string>
     <string id="30099">Paths of pictures folders</string>    
-    <string id="30100">All the period %s (%s pics)</string>
+    <string id="30100">All images from %s (%s pics)</string>
     <string id="30101">Browse by Dates</string>
     <string id="30102">Browse by Folders</string>
-    <string id="30103">Browse by keywords</string>
+    <string id="30103">Browse by Keywords</string>
     <string id="30104">No keyword pictures</string>
-    <string id="30105">Periods</string>
-    <string id="30106">Add a new period</string>
+    <string id="30105">Date ranges</string>
+    <string id="30106">Add a new date range</string>
     <string id="30107">Choose the start date</string>
     <string id="30108">Choose the end date</string>
     <string id="30109">Pics from %s to %s</string>
-    <string id="30110">Input a title for this period :</string>
-    <string id="30111">Delete this period</string>
-    <string id="30112">Rename this period</string>
+    <string id="30110">Input a title for this date range :</string>
+    <string id="30111">Delete this date range</string>
+    <string id="30112">Rename this date range</string>
     <string id="30113">From %s to %s</string>
     <string id="30114">Input manually date</string>
     <string id="30115">Word to search for</string>
     <string id="30116">%s results for '%s' in '%s'</string> <!-- %s replaced respectively by : number of results, searched term, field where found -->
-    <string id="30117">Start date of the period</string>
-    <string id="30118">End date of the period</string>
+    <string id="30117">Start date of the date range</string>
+    <string id="30118">End date of the date range</string>
     <string id="30119">The search for '%s' did not match in the whole database</string> <!-- %s replaced by searched term-->
     
-    <string id="30130"></string>
-    <string id="30131"></string>
+    <string id="30130">The %s latest pics</string>
+    <string id="30131">Recent pics (number of images)</string>
     <string id="30132"></string>
     <string id="30133"></string>
     <string id="30134"></string>
@@ -90,7 +97,7 @@
     <string id="30158">Remove this collection</string>
     <string id="30159">Rename this collection</string>
     <string id="30160">Create a new collection</string>
-    <string id="30161">%s images ajoutées dans :</string>    <!-- %s replaced by the number of pictures added -->
+    <string id="30161">%s pictures added in</string>    <!-- %s replaced by the number of pictures added -->
     
     <string id="30180">Choose the destination for the export</string>
     <string id="30181">Do you want to create a folder to export pictures ?</string>
@@ -112,7 +119,7 @@
     <string id="30206">Do a scan now</string>
     <string id="30207">Delete this path from database</string>
     <string id="30208">[B]Add[/B] a path to database</string>
-    <string id="30209">Pictures recently added</string>
+    <string id="30209">Uploads from last %s days</string>
     <string id="30210">Remove this path from excluded</string>
     <string id="30211">Add a folder to [B]exclude[/B]</string>
     <string id="30212">Exclude this folder from database</string>
