@@ -50,7 +50,9 @@
     <string id="30069">%s errors while archiving %s files</string> <!-- %s errors while zipping %s files -->
     <string id="30070">%s pictures successfully archived !!</string>    <!-- %s files successfully Zipped !! -->
     <string id="30071">Localization of the picture on disk</string>
-   
+
+    <string id="30094">Pictures without supplemental category</string>
+    <string id="30095">Browse by Supplemental Category</string>
     <string id="30096">Pictures without categories</string>
     <string id="30097">Browse by Category</string>
     <string id="30098">Global search</string>

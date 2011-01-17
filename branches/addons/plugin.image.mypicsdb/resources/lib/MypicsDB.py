@@ -92,78 +92,101 @@ def Make_new_base(DBpath,ecrase=True):
     cn=conn.cursor()
     if ecrase:
         #drop table
-        try:
-            cn.execute("""DROP TABLE files""")
-        except Exception,msg:
-            log( ">>> Make_new_base - DROP TABLE files" )
-            log( "%s - %s"%(Exception,msg) )
-            log( "~~~~" )
-            log( "" )
-        try:
-            cn.execute("""DROP TABLE keywords""")
-        except Exception,msg:
-            log( ">>> Make_new_base - DROP TABLE keywords" )
-            log( "%s - %s"%(Exception,msg) )
-            log( "~~~~" )
-            log( "" )
-        try:
-            cn.execute("""DROP TABLE folders""")
-        except Exception,msg:
-            log( ">>> Make_new_base - DROP TABLE folders" )
-            log( "%s - %s"%(Exception,msg) )
-            log( "~~~~" )
-            log( "" )
-        try:
-            cn.execute("""DROP TABLE KeywordsInFiles""")
-        except Exception,msg:
-            log( ">>> Make_new_base - DROP TABLE KeywordsInFiles" )
-            log( "%s - %s"%(Exception,msg) )
-            log( "~~~~" )
-            log( "" )
-        try:
-            cn.execute("""DROP TABLE Collections""")
-        except Exception,msg:
-            log( ">>> Make_new_base - DROP TABLE Collections" )
-            log( "%s - %s"%(Exception,msg) )
-            log( "~~~~" )
-            log( "" )
-        try:
-            cn.execute("""DROP TABLE FilesInCollections""")
-        except Exception,msg:
-            log( ">>> Make_new_base - DROP TABLE FilesInCollections" )
-            log( "%s - %s"%(Exception,msg) )
-            log( "~~~~" )
-            log( "" )
-        try:
-            cn.execute("""DROP TABLE Periodes""")
-        except Exception,msg:
-            log( ">>> Make_new_base - DROP TABLE Periodes" )
-            log( "%s - %s"%(Exception,msg) )
-            log( "~~~~" )
-            log( "" )
-        try:
-            cn.execute("""DROP TABLE Rootpaths""")
-        except Exception,msg:
-            log( ">>> Make_new_base - DROP TABLE Rootpaths" )
-            log( "%s - %s"%(Exception,msg) )
-            log( "~~~~" )
-            log( "" )
-
-# MDB
-        try:
-            cn.execute("""DROP TABLE CategoriesInFiles""")
-        except Exception,msg:
-            log( ">>> Make_new_base - DROP TABLE CategoriesInFiles" )
-            log( "%s - %s"%(Exception,msg) )
-            log( "~~~~" )
-            log( "" )
-        try:
-            cn.execute("""DROP TABLE Categories""")
-        except Exception,msg:
-            log( ">>> Make_new_base - DROP TABLE Categories" )
-            log( "%s - %s"%(Exception,msg) )
-            log( "~~~~" )
-            log( "" )
+        for table in ["files","keywords","folders","KeywordsInFiles","Collections","FilesInCollections","Periodes","Rootpaths","CategoriesInFiles","Categories","SupplementalCategoriesInFiles","SupplementalCategories"]:
+            try:
+                cn.execute("""DROP TABLE %s"""%table)
+            except Exception,msg:
+                log( ">>> Make_new_base - DROP TABLE %s"%table )
+                log( "%s - %s"%(Exception,msg) )
+                log( "~~~~" )
+                log( "" )
+            
+##        try:
+##            cn.execute("""DROP TABLE files""")
+##        except Exception,msg:
+##            log( ">>> Make_new_base - DROP TABLE files" )
+##            log( "%s - %s"%(Exception,msg) )
+##            log( "~~~~" )
+##            log( "" )
+##        try:
+##            cn.execute("""DROP TABLE keywords""")
+##        except Exception,msg:
+##            log( ">>> Make_new_base - DROP TABLE keywords" )
+##            log( "%s - %s"%(Exception,msg) )
+##            log( "~~~~" )
+##            log( "" )
+##        try:
+##            cn.execute("""DROP TABLE folders""")
+##        except Exception,msg:
+##            log( ">>> Make_new_base - DROP TABLE folders" )
+##            log( "%s - %s"%(Exception,msg) )
+##            log( "~~~~" )
+##            log( "" )
+##        try:
+##            cn.execute("""DROP TABLE KeywordsInFiles""")
+##        except Exception,msg:
+##            log( ">>> Make_new_base - DROP TABLE KeywordsInFiles" )
+##            log( "%s - %s"%(Exception,msg) )
+##            log( "~~~~" )
+##            log( "" )
+##        try:
+##            cn.execute("""DROP TABLE Collections""")
+##        except Exception,msg:
+##            log( ">>> Make_new_base - DROP TABLE Collections" )
+##            log( "%s - %s"%(Exception,msg) )
+##            log( "~~~~" )
+##            log( "" )
+##        try:
+##            cn.execute("""DROP TABLE FilesInCollections""")
+##        except Exception,msg:
+##            log( ">>> Make_new_base - DROP TABLE FilesInCollections" )
+##            log( "%s - %s"%(Exception,msg) )
+##            log( "~~~~" )
+##            log( "" )
+##        try:
+##            cn.execute("""DROP TABLE Periodes""")
+##        except Exception,msg:
+##            log( ">>> Make_new_base - DROP TABLE Periodes" )
+##            log( "%s - %s"%(Exception,msg) )
+##            log( "~~~~" )
+##            log( "" )
+##        try:
+##            cn.execute("""DROP TABLE Rootpaths""")
+##        except Exception,msg:
+##            log( ">>> Make_new_base - DROP TABLE Rootpaths" )
+##            log( "%s - %s"%(Exception,msg) )
+##            log( "~~~~" )
+##            log( "" )
+##
+### MDB
+##        try:
+##            cn.execute("""DROP TABLE CategoriesInFiles""")
+##        except Exception,msg:
+##            log( ">>> Make_new_base - DROP TABLE CategoriesInFiles" )
+##            log( "%s - %s"%(Exception,msg) )
+##            log( "~~~~" )
+##            log( "" )
+##        try:
+##            cn.execute("""DROP TABLE Categories""")
+##        except Exception,msg:
+##            log( ">>> Make_new_base - DROP TABLE Categories" )
+##            log( "%s - %s"%(Exception,msg) )
+##            log( "~~~~" )
+##            log( "" )
+##        try:
+##            cn.execute("""DROP TABLE SupplementalCategoriesInFiles""")
+##        except Exception,msg:
+##            log( ">>> Make_new_base - DROP TABLE SupplementalCategoriesInFiles" )
+##            log( "%s - %s"%(Exception,msg) )
+##            log( "~~~~" )
+##            log( "" )
+##        try:
+##            cn.execute("""DROP TABLE SupplementalCategories""")
+##        except Exception,msg:
+##            log( ">>> Make_new_base - DROP TABLE SupplementalCategories" )
+##            log( "%s - %s"%(Exception,msg) )
+##            log( "~~~~" )
+##            log( "" )
 
     #table 'files'
     try:
@@ -226,6 +249,28 @@ def Make_new_base(DBpath,ecrase=True):
             pass
         else: 
             log( ">>> Make_new_base - CREATE TABLE CategoriesInFiles ..." )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+    #table 'SupplementalCategories'
+    try:
+        cn.execute("""CREATE TABLE "SupplementalCategories" ("idSupplementalCategory" INTEGER NOT NULL primary key, "SupplementalCategory" TEXT UNIQUE);""")
+    except Exception,msg:
+        if msg.args[0].startswith("table 'SupplementalCategories' already exists"):
+            pass
+        else:
+            log( ">>> Make_new_base - CREATE TABLE SupplementalCategories ..." )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+    #table 'SupplementalCategoriesInFiles'
+    try:
+        cn.execute("""CREATE TABLE "SupplementalCategoriesInFiles" ("idSupplementalCategory" INTEGER NOT NULL, "idFile" INTEGER NOT NULL);""")
+    except Exception,msg:
+        if msg.args[0].startswith("table 'SupplementalCategoriesInFiles' already exists"):
+            pass
+        else:
+            log( ">>> Make_new_base - CREATE TABLE SupplementalCategoriesInFiles ..." )
             log( "%s - %s"%(Exception,msg) )
             log( "~~~~" )
             log( "" )
@@ -440,23 +485,48 @@ def DB_file_insert(path,filename,dictionnary,update=False):
             if cat: #to add only category name that are not empty
                 #create first an entry for this category in Categories table
                 try:
-                    cn.execute("""INSERT INTO Categories(Category) VALUES("%s")"""%cat.encode("utf8"))
+                    cn.execute("""INSERT INTO SupplementalCategories(SupplementalCategory) VALUES("%s")"""%cat.encode("utf8"))
                 except Exception,msg:
-                    if str(msg)=="column Category is not unique":
+                    if str(msg)=="column SupplementalCategory is not unique":
                         pass
                     else:
-                        log( 'EXCEPTION >> Category' )
+                        log( 'EXCEPTION >> SupplementalCategory' )
                         log( "\t%s - %s"%(Exception,msg) )
                         log( "~~~~" )
                         log( "" )
                 #then, add the corresponding id of file and id of category inside the CategoriesInFiles database
                 try:
-                    cn.execute("""INSERT INTO CategoriesInFiles(idCategory,idFile) SELECT c.idCategory,f.idFile FROM Categories c, files f WHERE c.Category="%s" AND f.strPath="%s" AND f.strFilename="%s";"""%(cat.encode("utf8"),
+                    cn.execute("""INSERT INTO SupplementalCategoriesInFiles(idSupplementalCategory,idFile) SELECT c.idSupplementalCategory,f.idFile FROM SupplementalCategories c, files f WHERE c.SupplementalCategory="%s" AND f.strPath="%s" AND f.strFilename="%s";"""%(cat.encode("utf8"),
                                                                                                                                                                                                path,
                                                                                                                                                                                                filename))
                 except Exception,msg:
-                    log("Error while adding CategoriesInFiles")
+                    log("Error while adding SupplementalCategoriesInFiles")
                     log("\t%s - %s"% (Exception,msg) )
+
+
+    # TRAITEMENT DE CATEGORY (base Categories)
+
+    if dictionnary.has_key("category"):
+        if dictionnary["category"]: #to add only category name that are not empty
+            #create first an entry for this category in Categories table
+            try:
+                cn.execute("""INSERT INTO Categories(Category) VALUES("%s")"""%dictionnary["category"].encode("utf8"))
+            except Exception,msg:
+                if str(msg)=="column Category is not unique":
+                    pass
+                else:
+                    log( 'EXCEPTION >> Category' )
+                    log( "\t%s - %s"%(Exception,msg) )
+                    log( "~~~~" )
+                    log( "" )
+            #then, add the corresponding id of file and id of category inside the CategoriesInFiles database
+            try:
+                cn.execute("""INSERT INTO CategoriesInFiles(idCategory,idFile) SELECT c.idCategory,f.idFile FROM Categories c, files f WHERE c.Category="%s" AND f.strPath="%s" AND f.strFilename="%s";"""%(dictionnary["category"].encode("utf8"),
+                                                                                                                                                                                           path,
+                                                                                                                                                                                           filename))
+            except Exception,msg:
+                log("Error while adding CategoriesInFiles")
+                log("\t%s - %s"% (Exception,msg) )
 
 ##    # TRAITEMENT DES FOLDERS
 ##    try:
@@ -736,6 +806,8 @@ def RemovePath(path):
         Request( """DELETE FROM files WHERE idFolder='%s'"""%idchild)
         #3 - supprime ce sous dossier
         Request( """DELETE FROM folders WHERE idFolder='%s'"""%idchild)
+        #supprime les SupplementalCategoriesInFiles
+        Request( """DELETE FROM SupplementalCategoriesInFiles WHERE idSupplementalCategory in (SELECT idSupplementalCategory FROM SupplementalCategoriesInFiles WHERE idFile in (SELECT idFile FROM files WHERE idFolder='%s'))"""%idchild )
     #4- supprime le dossier
     Request( """DELETE FROM folders WHERE idFolder='%s'"""%idpath)
     #5- supprime les 'périodes' si elles ne contiennent plus de photos (TODO : voir si on supprime les périodes vides ou pas)
@@ -964,6 +1036,20 @@ def count_category(p_category):
     else:
         return Request("""SELECT count(*) FROM files WHERE idFile not in (SELECT DISTINCT idFile FROM CategoriesInFiles)""" )[0][0]
 
+def search_supplementalcategory(p_supplementalcategory=None):
+    if p_supplementalcategory is not None:
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile in (SELECT idFile FROM SupplementalCategoriesInFiles WHERE idSupplementalCategory =(SELECT idSupplementalCategory FROM SupplementalCategories WHERE SupplementalCategory="%s"))"""%p_supplementalcategory.encode("utf8"))]
+    else:
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile NOT IN (SELECT DISTINCT idFile FROM SupplementalCategoriesInFiles)""" )]
+ 
+def list_supplementalcategory():
+    return [row for (row,) in Request( """SELECT SupplementalCategory FROM SupplementalCategories ORDER BY LOWER(SupplementalCategory) ASC""" )]
+ 
+def count_supplementalcategory(p_supplementalcategory):
+    if p_supplementalcategory is not None:
+        return Request("""SELECT count(*) FROM SupplementalCategoriesInFiles WHERE idSupplementalCategory =(SELECT idSupplementalCategory FROM SupplementalCategories WHERE SupplementalCategory="%s")"""%p_supplementalcategory.encode("utf8"))[0][0]
+    else:
+        return Request("""SELECT count(*) FROM files WHERE idFile not in (SELECT DISTINCT idFile FROM SupplementalCategoriesInFiles)""" )[0][0]
 ### MDB
     
 def countPicsFolder(folderid):

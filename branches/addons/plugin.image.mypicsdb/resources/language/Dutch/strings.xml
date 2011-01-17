@@ -50,6 +50,8 @@
 	<string id="30069">%s errors tijdens archiveren %s</string>
 	<string id="30070">%s afbeelden gearchiveerd</string>
 	<string id="30071">Locatie op disk2</string>
+	<string id="30094">NEW STRING[[Weergeven zonder supplemental categorie]]</string>
+	<string id="30095">NEW STRING[[supplemental category]]</string>
 	<string id="30096">Weergeven zonder categorie</string>
 	<string id="30097">Weergeven categorie</string>
 	<string id="30098">Zoeken</string>
