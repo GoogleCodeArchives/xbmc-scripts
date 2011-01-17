@@ -211,53 +211,63 @@ class Main:
 ##        self.addDir("last month (betatest)",[("method","lastmonth"),("period",""),("value",""),("viewmode","view")],
 ##                    "showpics",join(PIC_PATH,"dates.png"),
 ##                    fanart=join(PIC_PATH,"fanart-date.png"))
+        display_all = Addon.getSetting('m_all')=='true'
         # last scan picture added
-        self.addDir(unescape(__language__(30209))%Addon.getSetting("recentnbdays"),[("method","recentpicsdb"),("period",""),("value",""),("viewmode","view")],
-                    "showpics",join(PIC_PATH,"dates.png"),
-                    fanart=join(PIC_PATH,"fanart-date.png"))
+        if Addon.getSetting('m_1')=='true' or display_all:
+            self.addDir(unescape(__language__(30209))%Addon.getSetting("recentnbdays"),[("method","recentpicsdb"),("period",""),("value",""),("viewmode","view")],
+                        "showpics",join(PIC_PATH,"dates.png"),
+                        fanart=join(PIC_PATH,"fanart-date.png"))
         
         # Last pictures
-        self.addDir(unescape(__language__(30130))%Addon.getSetting("lastpicsnumber"),[("method","lastpicsshooted"),("viewmode","view")],
+        if Addon.getSetting('m_2')=='true' or display_all:
+            self.addDir(unescape(__language__(30130))%Addon.getSetting("lastpicsnumber"),[("method","lastpicsshooted"),("viewmode","view")],
                     "showpics",join(PIC_PATH,"dates.png"),
                     fanart=join(PIC_PATH,"fanart-date.png"))
         
         # videos
-        if Addon.getSetting("usevids") == "true":
+        if Addon.getSetting('m_3')=='true' or display_all and Addon.getSetting("usevids") == "true":
             self.addDir(unescape(__language__(30051)),[("method","videos"),("viewmode","view")],
                         "showpics",join(PIC_PATH,"videos.png"),
                         fanart=join(PIC_PATH,"fanart-videos.png"))
 
         # par années
-        #select strPath,strFilename from files where ftype="video"
-        self.addDir(unescape(__language__(30101)),[("period","year"),("value",""),("viewmode","view")],
+        if Addon.getSetting('m_4')=='true' or display_all:
+              self.addDir(unescape(__language__(30101)),[("period","year"),("value",""),("viewmode","view")],
                     "showdate",join(PIC_PATH,"dates.png"),
                     fanart=join(PIC_PATH,"fanart-date.png") )
         # par dossiers
-        self.addDir(unescape(__language__(30102)),[("method","folders"),("folderid",""),("onlypics","non"),("viewmode","view")],
+        if Addon.getSetting('m_5')=='true' or display_all:
+              self.addDir(unescape(__language__(30102)),[("method","folders"),("folderid",""),("onlypics","non"),("viewmode","view")],
                     "showfolder",join(PIC_PATH,"folders.png"),
                     fanart=join(PIC_PATH,"fanart-folder.png"))
         # par mots clés
-        self.addDir(unescape(__language__(30103)),[("kw",""),("viewmode","view")],"showkeywords",
+        if Addon.getSetting('m_6')=='true' or display_all:
+              self.addDir(unescape(__language__(30103)),[("kw",""),("viewmode","view")],"showkeywords",
                     join(PIC_PATH,"keywords.png"),
                     fanart=join(PIC_PATH,"fanart-keyword.png"))
         # browse by category
-        self.addDir(unescape(__language__(30097)),[("category",""),("viewmode","view")],"showcategory",
+        if Addon.getSetting('m_7')=='true' or display_all:
+              self.addDir(unescape(__language__(30097)),[("category",""),("viewmode","view")],"showcategory",
                     join(PIC_PATH,"keywords.png"),
                     fanart=join(PIC_PATH,"fanart-keyword.png"))
        # browse by supplementalcategory
-        self.addDir(unescape(__language__(30095)),[("supplementalcategory",""),("viewmode","view")],"showsupplementalcategory",
+        if Addon.getSetting('m_8')=='true' or display_all:
+              self.addDir(unescape(__language__(30095)),[("supplementalcategory",""),("viewmode","view")],"showsupplementalcategory",
                     join(PIC_PATH,"keywords.png"),
                     fanart=join(PIC_PATH,"fanart-keyword.png"))
         # période
-        self.addDir(unescape(__language__(30105)),[("period",""),("viewmode","view"),],"showperiod",
+        if Addon.getSetting('m_9')=='true' or display_all:
+              self.addDir(unescape(__language__(30105)),[("period",""),("viewmode","view"),],"showperiod",
                     join(PIC_PATH,"period.png"),
                     fanart=join(PIC_PATH,"fanart-period.png"))
         # Collections
-        self.addDir(unescape(__language__(30150)),[("collect",""),("method","show"),("viewmode","view")],"showcollection",
+        if Addon.getSetting('m_10')=='true' or display_all:
+              self.addDir(unescape(__language__(30150)),[("collect",""),("method","show"),("viewmode","view")],"showcollection",
                     join(PIC_PATH,"collection.png"),
                     fanart=join(PIC_PATH,"fanart-collection.png"))
         # recherche globale
-        self.addDir(unescape(__language__(30098)),[("searchterm",""),("viewmode","view")],"globalsearch",
+        if Addon.getSetting('m_11')=='true' or display_all:
+              self.addDir(unescape(__language__(30098)),[("searchterm",""),("viewmode","view")],"globalsearch",
                     join(PIC_PATH,"search.png"),
                     fanart=join(PIC_PATH,"fanart-search.png"))
         # chemin scannés
