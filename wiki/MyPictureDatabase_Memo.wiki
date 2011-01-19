@@ -1,0 +1,14 @@
+#labels Phase-Implementation,Phase-Requirements
+#This is a memo file for features and/or todo on mypicture Database addon.
+
+= Introduction =
+
+Need something more in this addon ? An idea for a new feature ? Please write it down here.
+
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
