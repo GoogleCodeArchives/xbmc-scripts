@@ -6,9 +6,39 @@
 Need something more in this addon ? An idea for a new feature ? Please write it down here.
 
 
-= Details =
+= Documentation =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+Need to write some documentation for skinners or addon integrators.
+Documentation should cover the library (aka MyPicsDB.py) and the addon calls if a XBMC GUI skinner need to integrate it into their skin.
+
+= Feature Requests =
+
+* Browsing pictures using geographical IPTC metas (Country, City and Sub-location).
+Need to think about how to browse those metas
+
+* limit the number of pictures added to the container using sql syntax "LIMIT x OFFSET y" and adding a pagenumber parameter in the addon requests.
+This picture per page limit has to be configurable in the settings
+
+*
+
+= Known bugs =
+
+* some pictures's IPTC are not retrieved. Bug known but don't know yet what is the reason.
+
+* some pictures are a lot slower than others to scan. Don't know why
+
+* ...
+
+= Todos =
+
+* It is better to remove some dead code.
+
+* remove the excessive commentary records, beginning with # or """
+
+* have too many debug messages in the add-on
+
+* use an code beatifier like http://quickhighlighter.com/
+
+* write some kind of documentation for skinners and library integrator (see [documentation#Documentation] section
+
+ 
