@@ -19,7 +19,12 @@ Need to think about how to browse those metas
   * limit the number of pictures added to the container using sql syntax "LIMIT x OFFSET y" and adding a pagenumber parameter in the addon requests.
 This picture per page limit has to be configurable in the settings
 
-  *
+  * Exclude pictures that does not match some criteria such as minimal size, picture and/or folder names matching given patterns, ...
+
+  * Port the database to a possibly remote mySQL Database (as Dharma supports it and as it is then shareable within many XBMC in network)
+
+  * Multi criteria albums :
+Create smart albums that match different requests for different criterias
 
 = Known bugs =
 
@@ -40,5 +45,11 @@ This picture per page limit has to be configurable in the settings
   * use an code beatifier like http://quickhighlighter.com/
 
   * write some kind of documentation for skinners and library integrator (see [MyPictureDatabase_Memo#Documentation] section
+
+  * Check the ordering of the picture (date asc with correct sign up or down inside XBMC)
+
+  * Checking the availability of all the root paths (a drive may be not mounted at running time, or usb harddrive not plugged in ... If the root path is not available, what to do ? Disable the pictures temporary, delete pictures from database ? ...
+
+  * Re-Think the contextual menu in the whole addon ( http://forum.xbmc.org/showpost.php?p=646669&postcount=143 )
 
  
