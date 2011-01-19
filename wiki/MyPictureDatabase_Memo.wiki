@@ -39,6 +39,6 @@ This picture per page limit has to be configurable in the settings
 
 * use an code beatifier like http://quickhighlighter.com/
 
-* write some kind of documentation for skinners and library integrator (see [documentation#Documentation] section
+* write some kind of documentation for skinners and library integrator (see [MyPictureDatabase_Memo#Documentation] section
 
  
