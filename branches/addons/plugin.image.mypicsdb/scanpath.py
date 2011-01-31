@@ -362,7 +362,7 @@ def get_metas(dirname,picfile):
     #si le fichier est une image
     elif extension in picsext:
         thumbnails = Thumbnails()
-        picentry["Thumb"]=thumbnails.get_cached_picture_thumb( join(dirname,picfile) ).decode("utf8")
+        #picentry["Thumb"]=thumbnails.get_cached_picture_thumb( join(dirname,picfile) ).decode("utf8")
 
         ###############################
         #    getting  EXIF  infos     #

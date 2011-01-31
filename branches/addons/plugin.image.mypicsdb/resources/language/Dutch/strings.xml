@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<!-- Vertaald door Michel de Bokx (20110115) -->
+<!-- Vertaald door Michel de Bokx (20110119a) -->
 <strings>
 	<string id="30000">MyPicture Database</string>
 	<string id="30001">Database</string>
@@ -20,17 +20,17 @@
 	<string id="30022">Recursieve scan</string>
 	<string id="30023">Bestandstypen afbeeldingen</string>
 	<string id="30024">Uitvoeren scannen bij opstarten</string>
-	<string id="30025">Initialiseer database voor scannen</string>
+	<string id="30025">[[ Initialiseer database voor scannen ]] Initialize the database on next start</string>
 	<string id="30026">Gebruik afbeelding als fanart</string>
 	<string id="30027">Instellingen voor scan dialoog</string>
 	<string id="30028">Bestandstypen videos</string>
 	<string id="30029">Scannen videos</string>
 	<string id="30030">Algemeen</string>
 	<string id="30031">Bestanden</string>
-	<string id="30032">Wachttijd in dagen (recente afbeeldingen)</string>
-	<string id="30033">[[ Menu Items ]]</string>
-	<string id="30034">[[ Display all items ]]</string>
-	
+	<string id="30032">Periode laatste scannen (dagen)</string>
+	<string id="30033">Menu</string>
+	<string id="30034">Toon alle onderdelen</string>
+	<string id="30035">[[ Number of pics per page ]]</string>
 	<string id="30040">Minimum aantal sterren tijdens vertoning</string>
 	<string id="30041">Alles</string>
 	<string id="30042">1 ster</string>
@@ -39,7 +39,7 @@
 	<string id="30045">4 sterren</string>
 	<string id="30046">5 sterren</string>
 	<string id="30050">afbeeldingen</string>
-	<string id="30051">video's</string>
+	<string id="30051">Weergeven video's</string>
 	<string id="30060">Toon map van afbeelding</string>
 	<string id="30061">Archiveren afbeeldingen</string>
 	<string id="30062">Exporteren afbeeldingen</string>
@@ -52,10 +52,14 @@
 	<string id="30069">%s errors tijdens archiveren %s</string>
 	<string id="30070">%s afbeelden gearchiveerd</string>
 	<string id="30071">Locatie op disk2</string>
-	<string id="30094">NEW STRING[[Weergeven zonder supplemental categorie]]</string>
-	<string id="30095">NEW STRING[[supplemental category]]</string>
-	<string id="30096">Weergeven zonder categorie</string>
-	<string id="30097">Weergeven categorie</string>
+	<string id="30090">[[ Pictures without City ]]</string>
+	<string id="30091">[[ Pictures without Country ]]</string>
+	<string id="30092">[[ Other pictures in '%s' ]]</string> <!-- other pictures in country (%s replaced by a given country) -->
+	<string id="30093">[[ Browse by Geography ]]</string>
+	<string id="30094">Zonder aanvullende categorie</string>
+	<string id="30095">Weergeven aanvullende categorieën</string>
+	<string id="30096">Zonder categorie</string>
+	<string id="30097">Weergeven categorieën</string>
 	<string id="30098">Zoeken</string>
 	<string id="30099">Locatie mappen</string>
 	<string id="30100">Volledige periode %s (%s afbeeldingen)</string>
@@ -78,8 +82,8 @@
 	<string id="30117">Begindatum periode</string>
 	<string id="30118">Einddatum periode</string>
 	<string id="30119">Zoekargument '%s' niet gevonden</string>
-	<string id="30130">[[ The last %s pictures shots ]]</string>
-	<string id="30131">[[ last shots (number of pictures) ]]</string>
+	<string id="30130">Weergeven laatste %s opnamen</string>
+	<string id="30131">Aantal laatste opnamen</string>
 	<string id="30132"/>
 	<string id="30133"/>
 	<string id="30134"/>
@@ -118,7 +122,7 @@
 	<string id="30206">Direct scannen</string>
 	<string id="30207">Map verwijderen uit database</string>
 	<string id="30208">[B]Toevoegen[/B] map</string>
-	<string id="30209">toegevoegd voor %s dagen</string>
+	<string id="30209">Gescanned laatste %s dagen</string>
 	<string id="30210">Map verwijderen uit uitsluiting</string>
 	<string id="30211">Toevoegen map voor [B]uitsluiten[/B]</string>
 	<string id="30212">Map uitsluiten van database</string>

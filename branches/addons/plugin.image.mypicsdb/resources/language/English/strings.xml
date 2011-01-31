@@ -17,7 +17,7 @@
     <string id="30022">Recursive scan ( all sub-folders will be scanned for pictures )</string>
     <string id="30023">Folder to scan</string>
     <string id="30024">Perform scan at addon startup</string>
-    <string id="30025">Initialize the database before scanning</string>
+    <string id="30025">Initialize the database at next addon startup</string>
     <string id="30026">Use the picture as fanart for pictures</string><!-- setting -->
     <string id="30027">Settings for the dialog scan popup</string>
     <string id="30028">Videos extensions</string>
@@ -27,6 +27,7 @@
     <string id="30032">Age of recent files (days)</string>
     <string id="30033">Menu Items</string>
     <string id="30034">Display all items</string>
+    <string id="30035">Number of pics per page</string>
 
     <string id="30040">Only display pictures with rating of at least</string>
     <string id="30041">All</string>
@@ -52,7 +53,11 @@
     <string id="30069">%s errors while archiving %s files</string> <!-- %s errors while zipping %s files -->
     <string id="30070">%s pictures successfully archived !!</string>    <!-- %s files successfully Zipped !! -->
     <string id="30071">Localization of the picture on disk</string>
-
+    
+    <string id="30090">Pictures without City</string>
+    <string id="30091">Pictures without Country</string>
+    <string id="30092">Other pictures in '%s'</string> <!-- other pictures in country (%s replaced by a given country) -->
+    <string id="30093">Browse by Geography</string>
     <string id="30094">Pictures without supplemental category</string>
     <string id="30095">Browse by Supplemental Category</string>
     <string id="30096">Pictures without categories</string>

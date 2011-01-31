@@ -6,6 +6,10 @@
     <setting id="ratingmini" type="enum" lvalues="30041|30042|30043|30044|30045|30046" label="30040" default="0"/>
     <setting id="lastpicsnumber" type="text"  label="30131" default="50" />
     <setting id="recentnbdays" type="text" label="30032" default="10" />
+    <setting id="picsperpage" type="text" label="30035" default="100" />
+    <!-- pour recréer la base lors du scan -->
+    <setting type="lsep" label="" />
+    <setting id="initDB" type="bool" label="30025" default="false" />
     <setting type="lsep" label="" /> 
     <setting type="action" label="30027" option="close" action="RunScript(special://home/addons/script.module.dialogaddonscan/lib/DialogAddonScan.py,opensettins)" default="" />
   </category>
@@ -26,9 +30,10 @@
     <setting id="m_6" type="bool" label="30103" enable="eq(-6,false)" default="true"/>
     <setting id="m_7" type="bool" label="30097" enable="eq(-7,false)" default="true"/>
     <setting id="m_8" type="bool" label="30095" enable="eq(-8,false)" default="true"/>
-    <setting id="m_9" type="bool" label="30105" enable="eq(-9,false)" default="true"/>
-    <setting id="m_10" type="bool" label="30150" enable="eq(-10,false)" default="true"/>
-    <setting id="m_11" type="bool" label="30098" enable="eq(-11,false)" default="true"/>
+    <setting id="m_9" type="bool" label="30093" enable="eq(-9,false)" default="true"/>
+    <setting id="m_10" type="bool" label="30105" enable="eq(-10,false)" default="true"/>
+    <setting id="m_11" type="bool" label="30150" enable="eq(-11,false)" default="true"/>
+    <setting id="m_12" type="bool" label="30098" enable="eq(-12,false)" default="true"/>
   </category>
     <!-- <category label="debugging"> -->
     <!-- pour recréer la base lors du scan -->

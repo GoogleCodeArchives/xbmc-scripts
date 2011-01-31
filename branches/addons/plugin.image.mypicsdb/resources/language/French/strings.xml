@@ -17,7 +17,7 @@
     <string id="30022">Scan récursif (tous les sous dossiers sont scannés à la recherche d'images)</string>
     <string id="30023">Extensions des images</string>
     <string id="30024">Effectuer le scan au démarrage</string><!-- setting -->
-    <string id="30025">Réinitialiser la base avant le scan</string><!-- setting -->
+    <string id="30025">Réinitialiser la base au prochain démarrage</string><!-- setting -->
     <string id="30026">Utiliser l'image comme fanart pour les images</string><!-- setting -->
     <string id="30027">Configurer le dialogue de scan</string>
     <string id="30028">Extensions des vidéos</string>
@@ -27,6 +27,8 @@
     <string id="30032">Age des fichiers récents (en jours)</string>
     <string id="30033">Eléments du Menu</string>
     <string id="30034">Afficher tous les éléments</string>
+    <string id="30035">Nombre de photos par pages</string>
+    <string id="30036">Taille minimale pour les images</string>
     
     <string id="30040">Note minimale des photos à afficher</string>
     <string id="30041">Toutes</string>
@@ -52,6 +54,10 @@
     <string id="30070">%s images archivées avec succès !!</string>    <!-- %s files successfully Zipped !! -->
     <string id="30071">Localisation du fichier sur le disque</string>
     
+    <string id="30090">Images sans villes</string>
+    <string id="30091">Images sans Pays</string>
+    <string id="30092">Autres images en '%s'</string>  <!-- other pictures for %s (%s replaced by a given country) -->
+    <string id="30093">Parcourir par Géographie</string>
     <string id="30094">Images sans Catégories supplémentaires</string>
     <string id="30095">Parcourir par Catégories supplémentaires</string>
     <string id="30096">Images sans Catégories</string>

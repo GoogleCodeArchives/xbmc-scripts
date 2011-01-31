@@ -208,66 +208,76 @@ class Main:
         
     def show_home(self):
 ##        # last month
-##        self.addDir("last month (betatest)",[("method","lastmonth"),("period",""),("value",""),("viewmode","view")],
+##        self.addDir("last month (betatest)",[("method","lastmonth"),("period",""),("value",""),("page","1"),("viewmode","view")],
 ##                    "showpics",join(PIC_PATH,"dates.png"),
 ##                    fanart=join(PIC_PATH,"fanart-date.png"))
         display_all = Addon.getSetting('m_all')=='true'
         # last scan picture added
         if Addon.getSetting('m_1')=='true' or display_all:
-            self.addDir(unescape(__language__(30209))%Addon.getSetting("recentnbdays"),[("method","recentpicsdb"),("period",""),("value",""),("viewmode","view")],
+            self.addDir(unescape(__language__(30209))%Addon.getSetting("recentnbdays"),[("method","recentpicsdb"),("period",""),("value",""),("page","1"),("viewmode","view")],
                         "showpics",join(PIC_PATH,"dates.png"),
                         fanart=join(PIC_PATH,"fanart-date.png"))
         
         # Last pictures
         if Addon.getSetting('m_2')=='true' or display_all:
-            self.addDir(unescape(__language__(30130))%Addon.getSetting("lastpicsnumber"),[("method","lastpicsshooted"),("viewmode","view")],
+            self.addDir(unescape(__language__(30130))%Addon.getSetting("lastpicsnumber"),[("method","lastpicsshooted"),("page","1"),("viewmode","view")],
                     "showpics",join(PIC_PATH,"dates.png"),
                     fanart=join(PIC_PATH,"fanart-date.png"))
         
         # videos
         if Addon.getSetting('m_3')=='true' or display_all and Addon.getSetting("usevids") == "true":
-            self.addDir(unescape(__language__(30051)),[("method","videos"),("viewmode","view")],
+            self.addDir(unescape(__language__(30051)),[("method","videos"),("page","1"),("viewmode","view")],
                         "showpics",join(PIC_PATH,"videos.png"),
                         fanart=join(PIC_PATH,"fanart-videos.png"))
 
         # par années
         if Addon.getSetting('m_4')=='true' or display_all:
-              self.addDir(unescape(__language__(30101)),[("period","year"),("value",""),("viewmode","view")],
+            self.addDir(unescape(__language__(30101)),[("period","year"),("value",""),("viewmode","view")],
                     "showdate",join(PIC_PATH,"dates.png"),
                     fanart=join(PIC_PATH,"fanart-date.png") )
         # par dossiers
         if Addon.getSetting('m_5')=='true' or display_all:
-              self.addDir(unescape(__language__(30102)),[("method","folders"),("folderid",""),("onlypics","non"),("viewmode","view")],
+            self.addDir(unescape(__language__(30102)),[("method","folders"),("folderid",""),("onlypics","non"),("viewmode","view")],
                     "showfolder",join(PIC_PATH,"folders.png"),
                     fanart=join(PIC_PATH,"fanart-folder.png"))
         # par mots clés
         if Addon.getSetting('m_6')=='true' or display_all:
-              self.addDir(unescape(__language__(30103)),[("kw",""),("viewmode","view")],"showkeywords",
+            self.addDir(unescape(__language__(30103)),[("kw",""),("viewmode","view")],"showkeywords",
                     join(PIC_PATH,"keywords.png"),
                     fanart=join(PIC_PATH,"fanart-keyword.png"))
         # browse by category
         if Addon.getSetting('m_7')=='true' or display_all:
-              self.addDir(unescape(__language__(30097)),[("category",""),("viewmode","view")],"showcategory",
+            self.addDir(unescape(__language__(30097)),[("category",""),("viewmode","view")],"showcategory",
                     join(PIC_PATH,"keywords.png"),
                     fanart=join(PIC_PATH,"fanart-keyword.png"))
        # browse by supplementalcategory
         if Addon.getSetting('m_8')=='true' or display_all:
-              self.addDir(unescape(__language__(30095)),[("supplementalcategory",""),("viewmode","view")],"showsupplementalcategory",
+            self.addDir(unescape(__language__(30095)),[("supplementalcategory",""),("viewmode","view")],"showsupplementalcategory",
                     join(PIC_PATH,"keywords.png"),
                     fanart=join(PIC_PATH,"fanart-keyword.png"))
-        # période
+       # browse by country/city
         if Addon.getSetting('m_9')=='true' or display_all:
-              self.addDir(unescape(__language__(30105)),[("period",""),("viewmode","view"),],"showperiod",
+            self.addDir(unescape(__language__(30093)),[("country",""),("viewmode","view")],"showcountry",
+                 join(PIC_PATH,"keywords.png"),
+                 fanart=join(PIC_PATH,"fanart-keyword.png"))
+##       # browse by city
+##        if Addon.getSetting('m_10')=='true' or display_all:
+##            self.addDir(unescape(__language__(30092)),[("city",""),("viewmode","view")],"showcity",
+##                 join(PIC_PATH,"keywords.png"),
+##                 fanart=join(PIC_PATH,"fanart-keyword.png"))
+        # période
+        if Addon.getSetting('m_10')=='true' or display_all:
+            self.addDir(unescape(__language__(30105)),[("period",""),("viewmode","view"),],"showperiod",
                     join(PIC_PATH,"period.png"),
                     fanart=join(PIC_PATH,"fanart-period.png"))
         # Collections
-        if Addon.getSetting('m_10')=='true' or display_all:
-              self.addDir(unescape(__language__(30150)),[("collect",""),("method","show"),("viewmode","view")],"showcollection",
+        if Addon.getSetting('m_11')=='true' or display_all:
+            self.addDir(unescape(__language__(30150)),[("collect",""),("method","show"),("viewmode","view")],"showcollection",
                     join(PIC_PATH,"collection.png"),
                     fanart=join(PIC_PATH,"fanart-collection.png"))
         # recherche globale
-        if Addon.getSetting('m_11')=='true' or display_all:
-              self.addDir(unescape(__language__(30098)),[("searchterm",""),("viewmode","view")],"globalsearch",
+        if Addon.getSetting('m_12')=='true' or display_all:
+            self.addDir(unescape(__language__(30098)),[("searchterm",""),("viewmode","view")],"globalsearch",
                     join(PIC_PATH,"search.png"),
                     fanart=join(PIC_PATH,"fanart-search.png"))
         # chemin scannés
@@ -311,6 +321,7 @@ class Main:
             allperiod = "month"
             action="showpics"
             periodformat="%Y-%m-%d"
+            page=""
             displaydate=__language__(30002)#"%a %d %b %Y"
             thisdateformat="%Y-%m"
             displaythisdate=__language__(30003)#"%b %Y"
@@ -324,7 +335,7 @@ class Main:
             dptd = dptd.replace("%B",fullmonthname[strptime(self.args.value,thisdateformat).tm_mon - 1])#replace %B marker by long month name
             nameperiode = strftime(dptd.encode("utf8"),strptime(self.args.value,thisdateformat))
             self.addDir(name      = __language__(30100)%(nameperiode.decode("utf8"),MPDB.countPeriod(allperiod,self.args.value)), #libellé#"All the period %s (%s pics)"%(self.args.value,MPDB.countPeriod(allperiod,self.args.value)), #libellé
-                        params    = [("method","date"),("period",allperiod),("value",self.args.value),("viewmode","view")],#paramètres
+                        params    = [("method","date"),("period",allperiod),("value",self.args.value),("page",""),("viewmode","view")],#paramètres
                         action    = "showpics",#action
                         iconimage = join(PIC_PATH,"dates.png"),#icone
                         fanart    = join(PIC_PATH,"fanart-date.png"),
@@ -336,7 +347,7 @@ class Main:
             for period in listperiod:
                 if period:
                     if action=="showpics":
-                        context = [(__language__(30152),"XBMC.RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")"%(sys.argv[0],nextperiod,period))]
+                        context = [(__language__(30152),"XBMC.RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&page=''&viewmode='scan'\")"%(sys.argv[0],nextperiod,period))]
                     else:
                         context = [(__language__(30152),"XBMC.RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")"%(sys.argv[0],self.args.period,period))]
                     self.addDir(name      = "%s (%s %s)"%(strftime(self.prettydate(displaydate,strptime(period,periodformat)).encode("utf8"),strptime(period,periodformat)).decode("utf8"),
@@ -395,7 +406,7 @@ class Main:
         listkw = [u"%s"%k.decode("utf8")  for k in MPDB.list_KW()]
         if MPDB.search_keyword(None): #si il y a des photos sans mots clés
             self.addDir(name      = "%s (%s %s)"%(__language__(30104),MPDB.countKW(None),__language__(30050)), #libellé
-                        params    = [("method","keyword"),("kw",""),("viewmode","view")],#paramètres
+                        params    = [("method","keyword"),("kw",""),("page","1"),("viewmode","view")],#paramètres
                         action    = "showpics",#action
                         iconimage = join(PIC_PATH,"keywords.png"),#icone
                         fanart    = join(PIC_PATH,"fanart-keyword.png"),
@@ -406,13 +417,13 @@ class Main:
             nb = MPDB.countKW(kw)
             if nb:
                 self.addDir(name      = "%s (%s %s)"%(kw,nb,__language__(30050)), #libellé
-                            params    = [("method","keyword"),("kw",kw),("viewmode","view")],#paramètres
+                            params    = [("method","keyword"),("kw",kw),("page","1"),("viewmode","view")],#paramètres
                             action    = "showpics",#action
                             iconimage = join(PIC_PATH,"keywords.png"),#icone
                             fanart    = join(PIC_PATH,"fanart-keyword.png"),
                             contextmenu   = [( __language__(30152),"XBMC.RunPlugin(\"%s?action='addfolder'&method='keyword'&kw='%s'&viewmode='scan'\")"%(sys.argv[0],kw)),
-                                             ( __language__(30061),"XBMC.RunPlugin(\"%s?action='showpics'&method='keyword'&viewmode='zip'&name='%s'&kw='%s'\")"%(sys.argv[0],kw,kw) ),
-                                             ( __language__(30062),"XBMC.RunPlugin(\"%s?action='showpics'&method='keyword'&viewmode='export'&name='%s'&kw='%s'\")"%(sys.argv[0],kw,kw) )
+                                             ( __language__(30061),"XBMC.RunPlugin(\"%s?action='showpics'&method='keyword'&page=''&viewmode='zip'&name='%s'&kw='%s'\")"%(sys.argv[0],kw,kw) ),
+                                             ( __language__(30062),"XBMC.RunPlugin(\"%s?action='showpics'&method='keyword'&page=''&viewmode='export'&name='%s'&kw='%s'\")"%(sys.argv[0],kw,kw) )
                                              ],#menucontextuel
                             total = total)#nb total d'éléments
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
@@ -423,7 +434,7 @@ class Main:
         listkw = [u"%s"%c_category.decode("utf8") for c_category in MPDB.list_category()]
         if MPDB.search_category(None): 
             self.addDir(name      = "%s (%s %s)"%(__language__(30096),MPDB.count_category(None),__language__(30050)),
-                        params    = [("method","categories"),("cat",""),("viewmode","view")],
+                        params    = [("method","categories"),("cat",""),("page","1"),("viewmode","view")],
                         action    = "showpics",
                         iconimage = join(PIC_PATH,"keywords.png"),
                         fanart    = join(PIC_PATH,"fanart-keyword.png"),
@@ -433,7 +444,7 @@ class Main:
             l_count = MPDB.count_category(p_category)
             if l_count:
                 self.addDir(name      = "%s (%s %s)"%(p_category,l_count,__language__(30050)),
-                            params    = [("method","categories"),("cat",p_category),("viewmode","view")],
+                            params    = [("method","categories"),("cat",p_category),("page","1"),("viewmode","view")],
                             action    = "showpics",
                             iconimage = join(PIC_PATH,"keywords.png"),
                             fanart    = join(PIC_PATH,"fanart-keyword.png"),
@@ -447,7 +458,7 @@ class Main:
         listkw = [u"%s"%c_supplementalcategory.decode("utf8") for c_supplementalcategory in MPDB.list_supplementalcategory()]
         if MPDB.search_supplementalcategory(None):
             self.addDir(name      = "%s (%s %s)"%(__language__(30094),MPDB.count_supplementalcategory(None),__language__(30050)),
-                        params    = [("method","supplementalcategories"),("cat",""),("viewmode","view")],
+                        params    = [("method","supplementalcategories"),("cat",""),("page","1"),("viewmode","view")],
                         action    = "showpics",
                         iconimage = join(PIC_PATH,"keywords.png"),
                         fanart    = join(PIC_PATH,"fanart-keyword.png"),
@@ -457,7 +468,7 @@ class Main:
             l_count = MPDB.count_supplementalcategory(p_supplementalcategory)
             if l_count:
                 self.addDir(name      = "%s (%s %s)"%(p_supplementalcategory,l_count,__language__(30050)),
-                            params    = [("method","supplementalcategories"),("cat",p_supplementalcategory),("viewmode","view")],
+                            params    = [("method","supplementalcategories"),("cat",p_supplementalcategory),("page","1"),("viewmode","view")],
                             action    = "showpics",
                             iconimage = join(PIC_PATH,"keywords.png"),
                             fanart    = join(PIC_PATH,"fanart-keyword.png"),
@@ -466,6 +477,52 @@ class Main:
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
         xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s : %s"%(__language__(30095),unquote_plus(self.args.supplementalcategory.encode("utf-8"))) )
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+    def show_country(self):
+        countries = [(c_country,count) for c_country,count in MPDB.list_country()]
+        total = len(countries)
+        for countryname,count in countries:
+            if not countryname:
+                countrylabel = str(__language__(30091))
+                action = "showpics"
+                method = "countries"
+            else:
+                countrylabel = countryname.decode("utf8")
+                action = "showcity"
+                method = ""
+            self.addDir(name      = "%s (%s %s)"%(countrylabel,count,__language__(30050)),
+                        params    = [("method",method),("country",countryname.decode("utf8")),("city",""),("page",""),("viewmode","view")],
+                        action    = action,
+                        iconimage = join(PIC_PATH,"keywords.png"),
+                        fanart    = join(PIC_PATH,"fanart-keyword.png"),
+                        contextmenu   = None,
+                        total = total)
+        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
+        xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s : %s"%(__language__(30097),unquote_plus(self.args.country.decode("utf8"))) )
+        xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+
+    def show_city(self):
+        cities = [(u"%s"%c_city.decode("utf8"),count) for c_city,count in MPDB.list_city(unquote_plus(self.args.country).decode("utf8"))]
+        total = len(cities)
+        for cityname,count in cities:
+            if not cityname:
+                citylabel = __language__(30092)%unquote_plus(self.args.country).decode("utf8")
+            else:
+                citylabel = "%s - %s"%(cityname,unquote_plus(self.args.country).decode("utf8"))
+                
+            if count:
+                self.addDir(name      = "%s (%s %s)"%(citylabel,count,__language__(30050)),
+                            params    = [("method","citiesincountry"),("country",unquote_plus(self.args.country).decode("utf8")),("city",cityname),("page",""),("viewmode","view")],
+                            action    = "showpics",
+                            iconimage = join(PIC_PATH,"keywords.png"),
+                            fanart    = join(PIC_PATH,"fanart-keyword.png"),
+                            contextmenu   = None,
+                            total = total)
+        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE)
+        xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category="%s : %s"%(__language__(30097),unquote_plus(self.args.country.decode("utf8"))) )
+        xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
         
     def show_period(self): #TODO finished the datestart and dateend editing
         self.addDir(name      = __language__(30106),
@@ -518,7 +575,7 @@ class Main:
                                                __language__(30113)%(strftime(self.prettydate(__language__(30002),strptime(datestart,"%Y-%m-%d")).encode("utf8"),strptime(datestart,"%Y-%m-%d")).decode("utf8"),
                                                                     strftime(self.prettydate(__language__(30002),strptime(dateend  ,"%Y-%m-%d")).encode("utf8"),strptime(dateend  ,"%Y-%m-%d")).decode("utf8")
                                                                     )), #libellé
-                        params    = [("method","date"),("period","period"),("datestart",datestart),("dateend",dateend),("viewmode","view")],#paramètres
+                        params    = [("method","date"),("period","period"),("datestart",datestart),("dateend",dateend),("page","1"),("viewmode","view")],#paramètres
                         action    = "showpics",#action
                         iconimage = join(PIC_PATH,"period.png"),#icone
                         fanart    = join(PIC_PATH,"fanart-period.png"),
@@ -554,14 +611,14 @@ class Main:
 
         for collection in MPDB.ListCollections():
             self.addDir(name      = collection[0].decode("utf8"),
-                        params    = [("method","collection"),("collect",collection[0].decode("utf8")),("viewmode","view")],#paramètres
+                        params    = [("method","collection"),("collect",collection[0].decode("utf8")),("page","1"),("viewmode","view")],#paramètres
                         action    = "showpics",#action
                         iconimage = join(PIC_PATH,"collection.png"),#icone
                         fanart    = join(PIC_PATH,"fanart-collection.png"),
                         contextmenu   = [(__language__(30158),"XBMC.RunPlugin(\"%s?action='removecollection'&viewmode='view'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8")) ),
                                          (__language__(30159),"XBMC.RunPlugin(\"%s?action='renamecollection'&viewmode='view'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8")) ),
-                                         (__language__(30061),"XBMC.RunPlugin(\"%s?action='showpics'&method='collection'&viewmode='zip'&name='%s'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8"),collection[0].decode("utf8")) ),
-                                         (__language__(30062),"XBMC.RunPlugin(\"%s?action='showpics'&method='collection'&viewmode='export'&name='%s'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8"),collection[0].decode("utf8")) ) 
+                                         (__language__(30061),"XBMC.RunPlugin(\"%s?action='showpics'&method='collection'&page=''&viewmode='zip'&name='%s'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8"),collection[0].decode("utf8")) ),
+                                         (__language__(30062),"XBMC.RunPlugin(\"%s?action='showpics'&method='collection'&page=''&viewmode='export'&name='%s'&collect='%s'\")"%(sys.argv[0],collection[0].decode("utf8"),collection[0].decode("utf8")) ) 
                                          ] )#menucontextuel 
             
         xbmcplugin.addSortMethod( int(sys.argv[1]), xbmcplugin.SORT_METHOD_NONE )
@@ -589,7 +646,7 @@ class Main:
             if compte:
                 result = True
                 self.addDir(name      = __language__(30116)%(compte,motrecherche.decode("utf8"),files_fields_description.has_key(colname) and files_fields_description[colname] or colname),
-                            params    = [("method","search"),("field",u"%s"%colname.decode("utf8")),("searchterm",u"%s"%motrecherche.decode("utf8")),("viewmode","view")],#paramètres
+                            params    = [("method","search"),("field",u"%s"%colname.decode("utf8")),("searchterm",u"%s"%motrecherche.decode("utf8")),("page","1"),("viewmode","view")],#paramètres
                             action    = "showpics",#action
                             iconimage = join(PIC_PATH,"search.png"),#icone
                             fanart    = join(PIC_PATH,"fanart-search.png"),
@@ -848,11 +905,12 @@ class Main:
 
     def del_pics_from_collection(self):
         MPDB.delPicFromCollection(unquote_plus(self.args.collect),unquote_plus(self.args.path),unquote_plus(self.args.filename))
-        xbmc.executebuiltin( "Container.Update(\"%s?action='showpics'&viewmode='view'&collect='%s'&method='collection'\" , replace)"%(sys.argv[0],self.args.collect) , )
+        xbmc.executebuiltin( "Container.Update(\"%s?action='showpics'&viewmode='view'&page='1'&collect='%s'&method='collection'\" , replace)"%(sys.argv[0],self.args.collect) , )
 
     def show_diaporama(self):
         #1- récupère la liste des images (en utilisant show_pics avec le bon paramètre
         self.args.viewmode="diapo"
+        self.args.page=""
         self.show_pics()
         
     def show_lastshots(self):
@@ -860,6 +918,20 @@ class Main:
         pass
     
     def show_pics(self):
+        #TODO : limit the number of pictures to display in the container and add multipage navigating
+        #order by %field% asc limit X offset Y
+        #TODO : pass the limit and offset values to functions in the library
+        # X = nombre de photos par pages
+        # Y = (p-1) * X | avec p le numéro de page (Commence par 1)
+        if not self.args.page: #0 ou "" ou None : pas de pagination ; on affiche toutes les photos de la requête sans limite
+            limit = -1  # SQL 'LIMIT' statement equals to -1 returns all resulting rows
+            offset = -1 # SQL 'OFFSET' statement equals to -1  : return resulting rows with no offset
+            page = 0
+        else: #do pagination stuff
+            limit = int(Addon.getSetting("picsperpage"))
+            offset = (int(self.args.page)-1)*limit
+            page = int(self.args.page)
+            
         picfanart = None
         if self.args.method == "folder":#NON UTILISE : l'affichage par dossiers affiche de lui même les photos
             pass
@@ -896,9 +968,9 @@ class Main:
             #   lister les images correspondant au mot clé
             picfanart = join(PIC_PATH,"fanart-keyword.png")
             if not self.args.kw: #le mot clé est vide '' --> les photos sans mots clés
-                filelist = MPDB.search_keyword(None)
+                filelist = MPDB.search_keyword(None,limit,offset)
             else:
-                filelist = MPDB.search_keyword(unquote_plus(self.args.kw).decode("utf8"))
+                filelist = MPDB.search_keyword(unquote_plus(self.args.kw).decode("utf8"),limit,offset)
 
         # we are showing pictures for a CATEGORY selection
         elif self.args.method == "categories":
@@ -915,7 +987,25 @@ class Main:
                 filelist = MPDB.search_supplementalcategory(None)
             else:
                 filelist = MPDB.search_supplementalcategory(unquote_plus(self.args.cat).decode("utf8"))
-                
+        # we are showing pictures for a COUNTRY selection
+        elif self.args.method == "countries":
+            picfanart = join(PIC_PATH,"fanart-keyword.png")
+            if not self.args.country:#p_country
+                filelist = MPDB.search_country(None)
+            else:
+                filelist = MPDB.search_country(unquote_plus(self.args.country).decode("utf8"))
+
+        # we are showing pictures for a CITY selection
+        elif self.args.method == "citiesincountry":
+            picfanart = join(PIC_PATH,"fanart-keyword.png")
+            filelist = MPDB.search_city4country(unquote_plus(self.args.country).decode("utf8"),unquote_plus(self.args.city).decode("utf8"))
+        # we are showing pictures for a CITY selection
+        elif self.args.method == "cities":
+            picfanart = join(PIC_PATH,"fanart-keyword.png")
+            if not self.args.city:#p_city
+                filelist = MPDB.search_city(None)
+            else:
+                filelist = MPDB.search_city(unquote_plus(self.args.city).decode("utf8"))                
         # we are showing pictures for a FOLDER selection
         elif self.args.method == "folders":
             #   lister les images du dossier self.args.folderid et ses sous-dossiers
@@ -923,7 +1013,9 @@ class Main:
             #   il faut la modifier pour récupérer les photos filles des sous dossiers
             picfanart = join(PIC_PATH,"fanart-folder.png")
             listid = MPDB.all_children(self.args.folderid)
-            filelist = [row for row in MPDB.Request( "SELECT p.FullPath,f.strFilename FROM files f,folders p WHERE f.idFolder=p.idFolder AND p.ParentFolder in ('%s')"%"','".join([str(i) for i in listid]))]
+            filelist = [row for row in MPDB.Request( """SELECT p.FullPath,f.strFilename FROM files f,folders p WHERE f.idFolder=p.idFolder AND p.ParentFolder in ('%s') ORDER BY "EXIF DateTimeOriginal" ASC LIMIT %s OFFSET %s"""%("','".join([str(i) for i in listid]),
+                                                                                                                                                                                                                                    limit,
+                                                                                                                                                                                                                                    offset) )]
             
         elif self.args.method == "collection":
             picfanart = join(PIC_PATH,"fanart-collection.png")
@@ -936,13 +1028,16 @@ class Main:
         elif self.args.method == "lastmonth":
             #show pics taken within last month
             picfanart = join(PIC_PATH,"fanart-date.png")
-            filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN datetime('now','-1 months') AND datetime('now') ORDER BY "EXIF DateTimeOriginal" ASC""")]
+            filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE datetime("EXIF DateTimeOriginal") BETWEEN datetime('now','-1 months') AND datetime('now') ORDER BY "EXIF DateTimeOriginal" ASC LIMIT %s OFFSET %s"""%(limit,
+                                                                                                                                                                                                                                                          offset))]
             
         elif self.args.method == "recentpicsdb":#pictures added to database within x last days __OK
             picfanart = join(PIC_PATH,"fanart-date.png")
             #filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE DateAdded=(SELECT max(DateAdded) FROM files)""")]
             numberofdays = Addon.getSetting("recentnbdays")
-            filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE DateAdded IN (SELECT DISTINCT DateAdded FROM files WHERE DateAdded>=datetime('now','start of day','-%s days')) AND UseIt = 1  ORDER BY DateAdded ASC"""%numberofdays)]
+            filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE DateAdded IN (SELECT DISTINCT DateAdded FROM files WHERE DateAdded>=datetime('now','start of day','-%s days')) AND UseIt = 1  ORDER BY DateAdded ASC LIMIT %s OFFSET %s"""%(numberofdays,
+                                                                                                                                                                                                                                                                                limit,
+                                                                                                                                                                                                                                                                                offset))]
             #filelist = [row for row in MPDB.Request( """select strPath,strFilename from files where idFile in (select idFile from files  order by DateAdded desc limit 100) order by "EXIF DateTimeOriginal" asc""")]
             
         elif self.args.method =="lastpicsshooted":#X last pictures shooted __OK
@@ -951,7 +1046,7 @@ class Main:
 
         elif self.args.method =="videos":#show all videos __OK
             picfanart = join(PIC_PATH,"fanart-videos.png")
-            filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE "EXIF DateTimeOriginal" NOT NULL AND UseIt=1 AND ftype="video" ORDER BY "EXIF DateTimeOriginal" DESC""" )]
+            filelist = [row for row in MPDB.Request( """SELECT strPath,strFilename FROM files WHERE "EXIF DateTimeOriginal" NOT NULL AND UseIt=1 AND ftype="video" ORDER BY "EXIF DateTimeOriginal" DESC LIMIT %s OFFSET %s"""%(limit,offset) )]
             
         #on teste l'argumen 'viewmode'
             #si viewmode = view : on liste les images
@@ -1081,7 +1176,29 @@ class Main:
                                                                3000,join(home,"icon.png")) )
             dialog.browse(2, __language__(30188),"files" ,"", True, False, dstpath)#show the folder which contain pictures exported
             return
-        
+
+        #ajout des boutons de pagination
+        if len(filelist)>=limit:#alors on ajoute les paginations
+            #faire un menu contextuel afin de régler le nombre d'items par pages
+            if int(page)>1:#à partir de la page 2
+                #on affiche un bouton page précédente
+##                self.addDir(name      = "page precedente",
+##                            params    = [("do","rootclic"),("rootpath",path),("viewmode","view"),("exclude","1")],#paramètres
+##                            action    = "showpics",#action
+##                            iconimage = join(PIC_PATH,"settings.png"),#icone
+##                            fanart    = join(PIC_PATH,"fanart-setting.png"),
+##                            #menucontextuel
+##                            contextmenu   = [( __language__(30210),"Container.Update(\"%s?action='rootfolders'&do='delroot'&delpath='%s'&exclude='0'&viewmode='view'\",)"%(sys.argv[0],quote_plus(path)))
+##                                             ]
+##                            )
+                print "self.args"
+                print type(self.args.__dict__)
+                print list(self.args.__dict__.iteritems())
+                print "TODO : display a previous page item"
+            if (page*limit)<(len(filelist)):
+                print "TODO : display a next page item"
+                #on affiche un bouton page suivante
+                
         #alimentation de la liste
         for path,filename in filelist:
             #création du menu contextuel selon les situasions
@@ -1168,6 +1285,12 @@ if __name__=="__main__":
     # browse by supplementalcategory
     elif m.args.action=='showsupplementalcategory':
         m.show_supplementalcategory()
+    # browse by country
+    elif m.args.action=='showcountry':
+        m.show_country()
+    # browse by city
+    elif m.args.action=='showcity':
+        m.show_city()
     #   Affiche les images
     elif m.args.action=='showpics':
         m.show_pics()
