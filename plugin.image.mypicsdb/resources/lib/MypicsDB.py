@@ -92,7 +92,7 @@ def Make_new_base(DBpath,ecrase=True):
     cn=conn.cursor()
     if ecrase:
         #drop table
-        for table in ["files","keywords","folders","KeywordsInFiles","Collections","FilesInCollections","Periodes","Rootpaths","CategoriesInFiles","Categories","SupplementalCategoriesInFiles","SupplementalCategories"]:
+        for table in ["files","keywords","folders","KeywordsInFiles","Collections","FilesInCollections","Periodes","Rootpaths","CategoriesInFiles","Categories","SupplementalCategoriesInFiles","SupplementalCategories","CitiesInFile","Cities","CountriesInFiles","Countries"]:
             try:
                 cn.execute("""DROP TABLE %s"""%table)
             except Exception,msg:
@@ -101,96 +101,10 @@ def Make_new_base(DBpath,ecrase=True):
                 log( "~~~~" )
                 log( "" )
             
-##        try:
-##            cn.execute("""DROP TABLE files""")
-##        except Exception,msg:
-##            log( ">>> Make_new_base - DROP TABLE files" )
-##            log( "%s - %s"%(Exception,msg) )
-##            log( "~~~~" )
-##            log( "" )
-##        try:
-##            cn.execute("""DROP TABLE keywords""")
-##        except Exception,msg:
-##            log( ">>> Make_new_base - DROP TABLE keywords" )
-##            log( "%s - %s"%(Exception,msg) )
-##            log( "~~~~" )
-##            log( "" )
-##        try:
-##            cn.execute("""DROP TABLE folders""")
-##        except Exception,msg:
-##            log( ">>> Make_new_base - DROP TABLE folders" )
-##            log( "%s - %s"%(Exception,msg) )
-##            log( "~~~~" )
-##            log( "" )
-##        try:
-##            cn.execute("""DROP TABLE KeywordsInFiles""")
-##        except Exception,msg:
-##            log( ">>> Make_new_base - DROP TABLE KeywordsInFiles" )
-##            log( "%s - %s"%(Exception,msg) )
-##            log( "~~~~" )
-##            log( "" )
-##        try:
-##            cn.execute("""DROP TABLE Collections""")
-##        except Exception,msg:
-##            log( ">>> Make_new_base - DROP TABLE Collections" )
-##            log( "%s - %s"%(Exception,msg) )
-##            log( "~~~~" )
-##            log( "" )
-##        try:
-##            cn.execute("""DROP TABLE FilesInCollections""")
-##        except Exception,msg:
-##            log( ">>> Make_new_base - DROP TABLE FilesInCollections" )
-##            log( "%s - %s"%(Exception,msg) )
-##            log( "~~~~" )
-##            log( "" )
-##        try:
-##            cn.execute("""DROP TABLE Periodes""")
-##        except Exception,msg:
-##            log( ">>> Make_new_base - DROP TABLE Periodes" )
-##            log( "%s - %s"%(Exception,msg) )
-##            log( "~~~~" )
-##            log( "" )
-##        try:
-##            cn.execute("""DROP TABLE Rootpaths""")
-##        except Exception,msg:
-##            log( ">>> Make_new_base - DROP TABLE Rootpaths" )
-##            log( "%s - %s"%(Exception,msg) )
-##            log( "~~~~" )
-##            log( "" )
-##
-### MDB
-##        try:
-##            cn.execute("""DROP TABLE CategoriesInFiles""")
-##        except Exception,msg:
-##            log( ">>> Make_new_base - DROP TABLE CategoriesInFiles" )
-##            log( "%s - %s"%(Exception,msg) )
-##            log( "~~~~" )
-##            log( "" )
-##        try:
-##            cn.execute("""DROP TABLE Categories""")
-##        except Exception,msg:
-##            log( ">>> Make_new_base - DROP TABLE Categories" )
-##            log( "%s - %s"%(Exception,msg) )
-##            log( "~~~~" )
-##            log( "" )
-##        try:
-##            cn.execute("""DROP TABLE SupplementalCategoriesInFiles""")
-##        except Exception,msg:
-##            log( ">>> Make_new_base - DROP TABLE SupplementalCategoriesInFiles" )
-##            log( "%s - %s"%(Exception,msg) )
-##            log( "~~~~" )
-##            log( "" )
-##        try:
-##            cn.execute("""DROP TABLE SupplementalCategories""")
-##        except Exception,msg:
-##            log( ">>> Make_new_base - DROP TABLE SupplementalCategories" )
-##            log( "%s - %s"%(Exception,msg) )
-##            log( "~~~~" )
-##            log( "" )
 
     #table 'files'
     try:
-        cn.execute("""CREATE TABLE files ( idFile integer primary key, idFolder integer, strPath text, strFilename text, ftype text, DateAdded DATETIME, mtime text, UseIt integer , sha text, Thumb text,
+        cn.execute("""CREATE TABLE files ( idFile integer primary key, idFolder integer, strPath text, strFilename text, ftype text, DateAdded DATETIME, mtime text, UseIt integer , sha text, Thumb text,  "Image Rating" text,
                     CONSTRAINT UNI_FILE UNIQUE ("strPath","strFilename")
                                    )""")
     except Exception,msg:
@@ -271,6 +185,51 @@ def Make_new_base(DBpath,ecrase=True):
             pass
         else:
             log( ">>> Make_new_base - CREATE TABLE SupplementalCategoriesInFiles ..." )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+    #table 'Countries'
+    try:
+        cn.execute("""CREATE TABLE "Countries" ("idCountry" INTEGER NOT NULL primary key, "Country" TEXT UNIQUE);""")
+    except Exception,msg:
+        if msg.args[0].startswith("table 'Countries' already exists"):
+            pass
+        else:
+            log( ">>> Make_new_base - CREATE TABLE Countries ..." )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+    #table 'CountriesInFiles'
+    try:
+        cn.execute("""CREATE TABLE "CountriesInFiles" ("idCountry" INTEGER NOT NULL, "idFile" INTEGER NOT NULL);""")
+    except Exception,msg:
+        if msg.args[0].startswith("table 'CountriesInFiles' already exists"):
+            pass
+        else: 
+            log( ">>> Make_new_base - CREATE TABLE CountriesInFiles ..." )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+
+    #table 'Cities'
+    try:
+        cn.execute("""CREATE TABLE "Cities" ("idCity" INTEGER NOT NULL primary key, "City" TEXT UNIQUE);""")
+    except Exception,msg:
+        if msg.args[0].startswith("table 'Cities' already exists"):
+            pass
+        else:
+            log( ">>> Make_new_base - CREATE TABLE Cities ..." )
+            log( "%s - %s"%(Exception,msg) )
+            log( "~~~~" )
+            log( "" )
+    #table 'CitiesInFiles'
+    try:
+        cn.execute("""CREATE TABLE "CitiesInFiles" ("idCity" INTEGER NOT NULL, "idFile" INTEGER NOT NULL);""")
+    except Exception,msg:
+        if msg.args[0].startswith("table 'CitiesInFiles' already exists"):
+            pass
+        else: 
+            log( ">>> Make_new_base - CREATE TABLE CitiesInFiles ..." )
             log( "%s - %s"%(Exception,msg) )
             log( "~~~~" )
             log( "" )
@@ -528,6 +487,47 @@ def DB_file_insert(path,filename,dictionnary,update=False):
                 log("Error while adding CategoriesInFiles")
                 log("\t%s - %s"% (Exception,msg) )
 
+    # TRAITEMENT DES PAYS (base Country)
+    if dictionnary.has_key("country/primary location name"):
+        if dictionnary["country/primary location name"]: 
+            try:
+                cn.execute("""INSERT INTO Countries(Country) VALUES("%s")"""%dictionnary["country/primary location name"].encode("utf8"))
+            except Exception,msg:
+                if str(msg)=="column Country is not unique":
+                    pass
+                else:
+                    log( 'EXCEPTION >> Country' )
+                    log( "\t%s - %s"%(Exception,msg) )
+                    log( "~~~~" )
+                    log( "" )
+            try:
+                cn.execute("""INSERT INTO CountriesInFiles(idCountry,idFile) SELECT c.idCountry,f.idFile FROM Countries c, files f WHERE c.Country="%s" AND f.strPath="%s" AND f.strFilename="%s";"""%(dictionnary["country/primary location name"].encode("utf8"),
+                                                                                                                                                                                           path,
+                                                                                                                                                                                           filename))
+            except Exception,msg:
+                log("Error while adding CountriesInFiles")
+                log("\t%s - %s"% (Exception,msg) )
+
+    # TRAITEMENT DES VILLES ( base City)
+    if dictionnary.has_key("city"):
+        if dictionnary["city"]: 
+            try:
+                cn.execute("""INSERT INTO Cities(City) VALUES("%s")"""%dictionnary["city"].encode("utf8"))
+            except Exception,msg:
+                if str(msg)=="column City is not unique":
+                    pass
+                else:
+                    log( 'EXCEPTION >> Country' )
+                    log( "\%s - %s"%(Exception,msg) )
+                    log( "~~~~" )
+                    log( "" )
+            try:
+                cn.execute("""INSERT INTO CitiesInFiles(idCity,idFile) SELECT c.idCity,f.idFile FROM Cities c, files f WHERE c.City="%s" AND f.strPath="%s" AND f.strFilename="%s";"""%(dictionnary["city"].encode("utf8"),
+                                                                                                                                                                                           path,
+                                                                                                                                                                                           filename))
+            except Exception,msg:
+                log("Error while adding CountriesInFiles")
+                log("\t%s - %s"% (Exception,msg) )
 ##    # TRAITEMENT DES FOLDERS
 ##    try:
 ##        haspic = "1" if True else "0"
@@ -765,14 +765,15 @@ def getGPS(filepath,filename):
 
 def RootFolders():
     "return folders which are root for scanning pictures"
-    return [row for row in Request( """SELECT path,recursive,remove,exclude FROM Rootpaths""")]
-
+    return [row for row in Request( """SELECT path,recursive,remove,exclude FROM Rootpaths ORDER BY path""")]
+    
 def AddRoot(path,recursive,remove,exclude):
     "add the path root inside the database. Recursive is 0/1 for recursive scan, remove is 0/1 for removing files that are not physically in the place"
     Request( """INSERT INTO Rootpaths(path,recursive,remove,exclude) VALUES ("%s",%s,%s,%s)"""%(path,recursive,remove,exclude) )
-
+    
 def getRoot(path):
     return [row for row in Request( """SELECT path,recursive,remove,exclude FROM Rootpaths WHERE path='%s'"""%path )][0]
+    
 
 def RemoveRoot(path):
     "remove the given rootpath, remove pics from this path, ..."
@@ -917,7 +918,7 @@ def get_iptc(path,filename):
     except Exception,msg:
         if not type(msg.args[0])==type(int()):
             if msg.args[0].startswith("No IPTC data found."):
-                #print "No IPTC data found."
+                print "No IPTC data found."
                 return {}
             else:
                 log( "EXCEPTION >> get_iptc %s"%join(path,filename) )
@@ -941,33 +942,31 @@ def get_iptc(path,filename):
     for k in info.data.keys():
         if k in IPTC_FIELDS:
             if IPTC_FIELDS[k] in ["supplemental category","keywords","contact"]:
-                #Those 3 IPTC infos may need special work as they are lists
-                #print "|".join(info.data[k])
-                #unicode(info.data[k].encode("utf8").__str__(),"utf8")
                 pass
             elif IPTC_FIELDS[k] in ["date created","time created"]:
-                #ces champs sont au format date
-                #a voir si il faut les traiter différemment
                 pass
             addColumn("files",IPTC_FIELDS[k])
-            
+            print IPTC_FIELDS[k]
             if isinstance(info.data[k],unicode):
+                print "unicode"
                 try:
                     #iptc[IPTC_FIELDS[k]] = unicode(info.data[k].encode(sys_enc).__str__(),"utf8")
-                    iptc[IPTC_FIELDS[k]] = unicode(info.data[k].encode("utf8").__str__(),"utf8")
+                    iptc[IPTC_FIELDS[k]] = info.data[k]#unicode(info.data[k].encode(sys_enc).__str__(),sys_enc)
                 except UnicodeDecodeError:
-                    iptc[IPTC_FIELDS[k]] = unicode(info.data[k].encode(sys_enc).__str__(),sys_enc)
+                    iptc[IPTC_FIELDS[k]] = unicode(info.data[k].encode("utf8").__str__(),"utf8")
             elif isinstance(info.data[k],list):
-                #iptc[IPTC_FIELDS[k]] = info.data[k].__str__()
-                iptc[IPTC_FIELDS[k]] = lists_separator.join(info.data[k])
-                #print lists_separator.join(info.data[k])
+                print "list"
+                iptc[IPTC_FIELDS[k]] = lists_separator.join([i.decode(sys_enc) for i in info.data[k]])
             elif isinstance(info.data[k],str):
+                print "str"
                 iptc[IPTC_FIELDS[k]] = info.data[k].decode(sys_enc)
             else:
+                print "other"
                 log( "%s,%s"%(path,filename) )
                 log( "WARNING : type returned by iptc field is not handled :" )
                 log( repr(type(info.data[k])) )
                 log( "" )
+            print type(iptc[IPTC_FIELDS[k]])
         else:
             log("\nIPTC problem with file :")
             try:
@@ -1002,19 +1001,19 @@ def Request(SQLrequest):
     cn.close()
     return retour
 
-def search_keyword(kw=None):
+def search_keyword(kw=None,limit=-1,offset=-1):
     """Look for given keyword and return the list of pictures.
 If keyword is not given, pictures with no keywords are returned"""
     if kw is not None: #si le mot clé est fourni
-        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile in (SELECT idFile FROM KeywordsInFiles WHERE idKW =(SELECT idKW FROM keywords WHERE keyword="%s"))"""%kw.encode("utf8"))]
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile in (SELECT idFile FROM KeywordsInFiles WHERE idKW =(SELECT idKW FROM keywords WHERE keyword="%s")) LIMIT %s OFFSET %s"""%(kw.encode("utf8"),limit,offset))]
     else: #sinon, on retourne toutes les images qui ne sont pas associées à des mots clés
-        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile NOT IN (SELECT DISTINCT idFile FROM KeywordsInFiles)""" )]
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile NOT IN (SELECT DISTINCT idFile FROM KeywordsInFiles) LIMIT %s OFFSET %s"""%(limit,offset) )]
 
 def list_KW():
     """Return a list of all keywords in database"""
     return [row for (row,) in Request( """SELECT keyword FROM keywords ORDER BY LOWER(keyword) ASC""" )]
 
-def countKW(kw):
+def countKW(kw,limit=-1,offset=-1):
     if kw is not None:
         return Request("""SELECT count(*) FROM files WHERE idFile in (SELECT idFile FROM KeywordsInFiles WHERE idKW =(SELECT idKW FROM keywords WHERE keyword="%s"))"""%kw.encode("utf8"))[0][0]
     else:
@@ -1050,7 +1049,54 @@ def count_supplementalcategory(p_supplementalcategory):
         return Request("""SELECT count(*) FROM SupplementalCategoriesInFiles WHERE idSupplementalCategory =(SELECT idSupplementalCategory FROM SupplementalCategories WHERE SupplementalCategory="%s")"""%p_supplementalcategory.encode("utf8"))[0][0]
     else:
         return Request("""SELECT count(*) FROM files WHERE idFile not in (SELECT DISTINCT idFile FROM SupplementalCategoriesInFiles)""" )[0][0]
-### MDB
+
+def list_country_old(): #USELESS ?
+    return [row for (row,) in Request( """SELECT Country FROM Countries ORDER BY LOWER(Country) ASC""" )]
+
+def list_country(): 
+    return [row for row in Request( """SELECT ifnull("country/primary location name",""), count(*) FROM files  GROUP BY "country/primary location name"  ;""" )]
+
+def search_country(p_country=None):
+    if p_country is None: 
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile NOT IN (SELECT DISTINCT idFile FROM CountriesInFiles)""" )]
+    else: 
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile in (SELECT idFile FROM CountriesInFiles WHERE idCountry =(SELECT idCountry FROM Countries WHERE Country="%s"))"""%p_country.encode("utf8"))]
+
+def count_country(p_country): #USELESS ?
+    if p_country is None:
+        return Request("""SELECT count(*) FROM files WHERE idFile not in (SELECT DISTINCT idFile FROM CountriesInFiles)""" )[0][0]
+    else:
+        return Request("""SELECT count(*) FROM CountriesInFiles WHERE idCountry=(SELECT idCountry FROM Countries WHERE Country="%s")"""%p_country.encode("utf8"))[0][0]
+
+def list_city_old(): #USELESS ?
+    return [row for (row,) in Request( """SELECT City FROM Cities ORDER BY LOWER(City) ASC""" )]
+
+def list_city(country=None):
+    if not country:
+        return [row for row in Request( """SELECT ifnull(City,""), count(*) from files  GROUP BY city""" )]
+    else:
+        return [row for row in Request( """SELECT ifnull(City,""), count(*) from files where "country/primary location name" = "%s" GROUP BY city"""%country.encode("utf8") )]
+    
+def search_city4country(country,city=""):
+    #if not country and not city (shouldn't happen) : display all pics
+    #if not country but city (shouldn't happen)
+    #if not city but country : show all pics for this country
+    if city: citystmt = """ AND City = "%s" ORDER BY City ASC"""%city.encode("utf8")
+    else: citystmt = """ AND City is Null or City = "" """
+    return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE "country/primary location name" = "%s"%s"""%(country.encode("utf8"),citystmt))]
+
+def search_city(p_city=None):
+    if p_city is None: 
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile NOT IN (SELECT DISTINCT idFile FROM CitiesInFiles)""" )]
+    else: 
+        return [row for row in Request( """SELECT strPath,strFilename FROM files WHERE idFile in (SELECT idFile FROM CitiesInFiles WHERE idCity =(SELECT idCity FROM Cities WHERE City="%s"))"""%p_city.encode("utf8"))]
+
+def count_city(p_city):
+    if p_city is None:
+        return Request("""SELECT count(*) FROM files WHERE idFile not in (SELECT DISTINCT idFile FROM CitiesInFiles)""" )[0][0]
+    else:
+        return Request("""SELECT count(*) FROM CitiesInFiles WHERE idCity=(SELECT idCity FROM Cities WHERE City="%s")"""%p_city.encode("utf8"))[0][0]
+
     
 def countPicsFolder(folderid):
     log("TEST : tous les enfants de %s"%folderid)
