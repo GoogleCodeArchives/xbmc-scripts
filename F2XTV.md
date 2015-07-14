@@ -1,0 +1,125 @@
+Logo actuel de F2XTV (identique au logo du multiposte free):
+
+![http://xbmc-scripts.googlecode.com/svn/trunk/web/images/logo.gif](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/logo.gif)
+
+
+# Introduction #
+
+F2XTV est un script [Python](http://www.python.org) qui permet de regarder et d'enregistrer les chaînes de télévision [multipostes](http://adsl.free.fr/tv/multiposte/) Freebox sur la console de jeux [xbox](http://www.xbox.com) munie du programme [XBMC (XBox Media Center)](http://xbmc.org).
+
+Il est accessible via svn á l'addresse: http://xbmc-scripts.googlecode.com/svn/trunk/F2XTV/
+
+Une version stable est aussi présente à la page des [downloads](http://code.google.com/p/xbmc-scripts/downloads/list)
+
+
+# Pré-requis #
+
+Sachant que ce script est dédié aux chaines multipostes de la Freebox, il est donc obligatoire d'être abonné au FAI Free, avec service TV Freebox et multiposte actif et fonctionnel.
+
+Il est de même obligatoire de posséder une XBOX première du nom (à différencier de la XBOX 360) modifiée afin d'accepter l'application XBMC.
+
+L'application XBMC doit être installée et connectée en ethernet à la freebox (directement ou indirectement).
+
+# Installation #
+
+Chargez le dossier contenant le script F2XTV dans le dossier script de XBMC. Par FTP, ce dossier se trouve dans Q:\scripts. L'architecture du dossier doit être conservée et tous les fichiers doivent être transférés.
+
+# Utilisation #
+
+## Démarrage ##
+
+Dans XBMC, aller dans scripts puis sélectionner F2XTV.
+
+Vous devriez voir apparaître la fenêtre suivante:
+
+![![](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/accueil-small.jpg)](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/accueil.jpg)
+
+En haut vous aurez les actions possibles suivant le bouton appuyé, ainsi que l'espace libre disponible dans votre dossier de sauvegarde.
+
+## Regarder une chaîne ##
+
+Naviguer jusqu'à la chaine désirée et appuyez sur la touche ![http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_a.png](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_a.png) de votre manette
+
+## Enregistrer une chaîne ##
+
+### Enregistrer en direct ###
+
+Naviguer jusqu'à la chaîne désirée et appuyez sur la touche ![http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_b.png](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_b.png) pour lancer/arrêter l'enregistrement
+
+La fenêtre suivante va apparaître pour confirmer l'enregistrement:
+
+![![](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/confirmRec-small.jpg)](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/confirmRec.jpg)
+
+En haut de l'écran différents label vont se modifier:
+  * Le label indiquant l'espace libre donnera le nom de la chaine en cours d'enregistrement
+  * Les labels des boutons changeront pour donner les actions possibles.
+
+La fenêtre suivante donne l'exemple de l'enregistrement de France 2:
+
+![![](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/enregistreFrance2-small.jpg)](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/enregistreFrance2.jpg)
+
+Il suffira ensuite d'appuyer sur ![http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_b.png](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_b.png) pour arrêter l'enregistrement
+
+### Programmer un enregistrement ###
+
+Naviguer jusqu'à la chaîne désirée et appuyez sur la touche ![http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_x.png](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_x.png) pour programmer un enregistrement
+
+La fenêtre suivante va apparaître pour programmer le jour de l'enregistrement:
+
+![![](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/dateRec-small.jpg)](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/dateRec.jpg)
+
+Puis l'heure de début
+
+![![](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/heureDebRec-small.jpg)](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/heureDebRec.jpg)
+
+Et l'heure de fin
+
+![![](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/heureFinRec-small.jpg)](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/heureFinRec.jpg)
+
+Un message de confirmation cloturera la configuration
+
+Il est alors nécessaire d'avoir le script lancé au moment du début de l'enregistrement pour que l'enregistrement se lance automatiquement.
+
+## Gestion des enregistrements ##
+
+### Accéder aux enregistrements ###
+
+En cliquant sur le bouton à gauche de l'écran nommé "Enregistrement", vous accederez à la liste des enregistrements déja effectués. Le même bouton changera de label pour retourner à la liste des chaines.
+
+![![](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/enregistrements-small.jpg)](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/enregistrements.jpg)
+
+### Regarder un enregistrement ###
+
+Il suffit de sélectionner l'enregistrement en cliquant avec le bouton ![http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_a.png](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_a.png)
+
+### Supprimer un enregistrement ###
+
+Naviguer jusqu'à l'enregistrement désirée et appuyez sur la touche ![http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_b.png](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/Btn_b.png) pour le supprimer
+
+La fenêtre suivante va apparaître pour confirmer la suppression:
+
+![![](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/confirmSup-small.jpg)](http://xbmc-scripts.googlecode.com/svn/trunk/web/images/confirmSup.jpg)
+
+
+# FAQ #
+
+## Comment modifier le chemin de sauvegarde des videos? ##
+
+Par défaut, les chaînes enregistrées sont stockées sur le disque dur de la XBOX, dans le dossier E:\Videos. Ce dossier peut être modifié en éditant (avec notepad par exemple) le fichier F2XTV.ini à la racine du dossier F2XTV.
+
+Ce fichier comprends plusieurs lignes. La ligne qui vous intéresse est:
+```
+records = E:\Videos
+```
+
+Si vous souhaitez changé le dossier par F:\FreeboxTV, alors modifiez la ligne par:
+```
+records = F:\FreeboxTV
+```
+
+Sauvegardez le fichier, et transférez le dans le dossier de F2XTV sur la console (remplacez/écrasez l'ancien)
+
+
+## Comment obtenir plus d'informations? ##
+
+En allant sur le [forum](http://gueux-forum.net/index.php?showtopic=105465) et en posant la question.

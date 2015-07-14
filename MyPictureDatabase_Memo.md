@@ -1,0 +1,53 @@
+#This is a memo file for features and/or todo on mypicture Database addon.
+
+# Introduction #
+
+Need something more in this addon ? An idea for a new feature ? Please write it down here.
+
+
+# Documentation #
+
+Need to write some documentation for skinners or addon integrators.
+Documentation should cover the library (aka MyPicsDB.py) and the addon calls if a XBMC GUI skinner need to integrate it into their skin.
+
+# Feature Requests #
+
+  * Browsing pictures using geographical IPTC metas (Country, City and Sub-location).
+Need to think about how to browse those metas
+
+  * limit the number of pictures added to the container using sql syntax "LIMIT x OFFSET y" and adding a pagenumber parameter in the addon requests.
+This picture per page limit has to be configurable in the settings
+
+  * Exclude pictures that does not match some criteria such as minimal size, picture and/or folder names matching given patterns, ...
+
+  * Port the database to a possibly remote mySQL Database (as Dharma supports it and as it is then shareable within many XBMC in network)
+
+  * Multi criteria albums :
+Create smart albums that match different requests for different criterias
+
+# Known bugs #
+
+  * some pictures's IPTC are not retrieved. Bug known but don't know yet what is the reason.
+
+  * some pictures are a lot slower than others to scan. Don't know why
+
+  * ...
+
+# Todos #
+
+  * It is better to remove some dead code.
+
+  * remove the excessive commentary records, beginning with # or """
+
+  * have too many debug messages in the add-on
+
+  * use an code beatifier like http://quickhighlighter.com/
+
+  * write some kind of documentation for skinners and library integrator (see [MyPictureDatabase\_Memo#Documentation](MyPictureDatabase_Memo#Documentation.md) section
+
+  * Check the ordering of the picture (date asc with correct sign up or down inside XBMC)
+
+  * Checking the availability of all the root paths (a drive may be not mounted at running time, or usb harddrive not plugged in ... If the root path is not available, what to do ? Disable the pictures temporary, delete pictures from database ? ...
+
+  * Re-Think the contextual menu in the whole addon ( http://forum.xbmc.org/showpost.php?p=646669&postcount=143 )
+
